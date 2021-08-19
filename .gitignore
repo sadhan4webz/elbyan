@@ -1,0 +1,9 @@
+*.txt
+*.htacces
+wp-admin
+wp-includes
+wp-content/plugins/digits
+wp-content/*.log
+wp-content/*.php
+wp-content/themes/
+wp-content/uploads/
