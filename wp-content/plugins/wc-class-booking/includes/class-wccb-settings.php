@@ -7,7 +7,6 @@ class WCCB_Settings {
 	 */
 	public function init() {
 		$this->register_hooks();
-		self::set_location();
 	}
 
 	/**
@@ -45,7 +44,7 @@ class WCCB_Settings {
 
 		wp_enqueue_script(
 			"wccb-general-js",
-			WC_CLASS_BOOKING_PLUGIN_URL ."/assets/js/wccb-gneral.js",
+			WC_CLASS_BOOKING_PLUGIN_URL ."/assets/js/wccb-general.js",
 			array( 'jquery' ),
 			1,
 			1
@@ -61,8 +60,8 @@ class WCCB_Settings {
 
 		$script_config 	= array( );
 
-		$script_config["admin_ajax_url"]      = WC_CLASS_BOOKING_PLUGIN_URL.'/wstdl-admin-ajax.php';
-		$script_config["frontend_ajax_url"]   = WC_CLASS_BOOKING_PLUGIN_URL.'/wstdl-frontend-ajax.php';
+		$script_config["admin_ajax_url"]      = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-admin-ajax.php';
+		$script_config["frontend_ajax_url"]   = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-frontend-ajax.php';
 
 		wp_localize_script(
 			'wccb-script-js',

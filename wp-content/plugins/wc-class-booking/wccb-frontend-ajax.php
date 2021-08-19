@@ -23,7 +23,9 @@ $response 		= array( 'event' => null, 'msg' => null, 'content' => null );
 $action    		= esc_attr( trim( $_REQUEST['action'] ) );
 $html_error		= (bool)( isset( $_REQUEST['html_error'] ) ? $_REQUEST['html_error'] : true );
 switch ( $action ) {
-	
+	case 'variable':
+		# code...
+		break;
 		
 	// Default ajax response	
 	default:
