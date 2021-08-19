@@ -31,7 +31,7 @@ class WC_Class_Booking {
 
 		//Core
 		require_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-install.php';
-		//include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/functions.php';
+		//include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/functions.php'; //error ocurred when include functions.php
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-settings.php';
 
 		//Frontend
