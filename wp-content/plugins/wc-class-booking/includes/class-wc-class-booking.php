@@ -28,59 +28,32 @@ class WC_Class_Booking {
 	}
 	
 	public function includes(){
+
+		//Core
 		require_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-install.php';
-		//require_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/functions.php';
+		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/functions.php';
+		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-settings.php';
+
+		//Frontend
+		include_once WSTDL_DIR . '/includes/frontend/class-wccb-frontend.php';
+
+		// Admin
+		include_once WSTDL_DIR . '/includes/admin/class-wccb-admin.php';
 	}
 	
 	public function init_hooks(){
-		register_activation_hook( WC_CLASS_BOOKING_PLUGIN_FILE, array( 'WCCB_Install', 'install' ) );
-		register_deactivation_hook( WC_CLASS_BOOKING_PLUGIN_FILE, array( 'WCCB_Install', 'uninstall' ) );
 		
-		//Load text domain
-		add_action( 'plugins_loaded', array( $this, 'load_plugin_textdomain' ) );
-		
-		//Enqueue custom javasacript
-		add_action( 'wp_enqueue_scripts', array( $this, 'load_javascript' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'load_javascript' ) );
+		//Core
+		$settings = new WCCB_Settings();
+		$settings->init();
 
-		//Enqueue custom css
-		add_action( 'wp_enqueue_scripts', array($this ,  'load_css') );
-		add_action( 'admin_enqueue_scripts', array($this , 'load_css') );		
-		
-		// Shortcodes.
-	}
-	
-	/**
-	 * Loads textdomain for plugin.
-	 */
-	public function load_plugin_textdomain() {
-		load_plugin_textdomain( 'wccb', false, WC_CLASS_BOOKING_PLUGIN_FOLDER.'/languages/' );
-	}
-	
-	public function load_javascript(){
-		wp_enqueue_script(
-			"wccb-script-js",
-			WC_CLASS_BOOKING_PLUGIN_URL ."/assets/js/wccb-scripts.js",
-			array( 'jquery' ),
-			1,
-			1
-		);
+		//Frontend 
+		$frontend = new WCCB_Frontend();
+		$frontend->init();
 
-		$script_config 	= array( 
-			'ajax_url' => admin_url("admin-ajax.php") 
-		);
-		wp_localize_script(
-			'wccb-script-js',
-			'wccb_config',
-			$script_config
-		);
-
-	}
-
-	//Enqueue css
-	public function load_css()
-	{
-		wp_enqueue_style("wccb-styles",WSTDL_URL."/assets/css/wccb-styles.css",array(),1,"all");
+		//Admin
+		$admin_settings = new WCCB_Admin();
+		$admin_settings->init();
 	}
 	
 	public static function log($variable) {
