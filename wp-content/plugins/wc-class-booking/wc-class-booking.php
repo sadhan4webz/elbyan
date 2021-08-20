@@ -25,6 +25,8 @@ define( 'WC_CLASS_BOOKING_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 define( 'WC_CLASS_BOOKING_PLUGIN_FOLDER',  dirname( plugin_basename( __FILE__ ) ) );
 //define( 'WC_CLASS_BOOKING_PYMENT_METHODS_PLACEHOLDER', 877 );
 
+define('PLUGIN_TEXT_DOMAIN', 'wccb' );
+
 require_once dirname( __FILE__ ) . '/includes/class-wc-class-booking-dependency-checker.php';
 if ( ! WC_Class_Booking_Dependency_Checker::check_dependencies() ) {
 	return;
