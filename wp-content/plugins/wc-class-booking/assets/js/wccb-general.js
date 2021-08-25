@@ -1,30 +1,30 @@
-var WSTDL = WSTDL || {};
+var WCCB = WCCB || {};
 (function($){
-	WSTDL.sleep = function( ms ){
+	WCCB.sleep = function( ms ){
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
-	WSTDL.show_wpmbd_notice = function( html_element, $target, animate, ts ) {
+	WCCB.show_wpmbd_notice = function( html_element, $target, animate, ts ) {
 		if ( ! $target )
 			return;	
 		$target.html( html_element );
 		if( animate ){
-			WSTDL.animate_to_target( $target );
+			WCCB.animate_to_target( $target );
 		}
 		if( ts > 0 ){
-			WSTDL.sleep(ts).then(() => { 
+			WCCB.sleep(ts).then(() => { 
 				$target.children().fadeOut();
 			});
 		}	
 	}
-	WSTDL.error_msg_wrap_s	= '<p class="wpmbd-msg-entry wpmbd-msg-error">';
-	WSTDL.error_msg_wrap_e	= '</p>';
+	WCCB.error_msg_wrap_s	= '<p class="wpmbd-msg-entry wpmbd-msg-error">';
+	WCCB.error_msg_wrap_e	= '</p>';
 
-	WSTDL.wpmbd_ajax_error = function( jqXHR, textStatus, errorThrown, $target ){
+	WCCB.wpmbd_ajax_error = function( jqXHR, textStatus, errorThrown, $target ){
 		$target.html("");
-		WSTDL.show_wpmbd_notice( WSTDL.error_msg_wrap_s + textStatus + ' : ' + errorThrown + WSTDL.error_msg_wrap_e, $target, true, 0 );		
+		WCCB.show_wpmbd_notice( WCCB.error_msg_wrap_s + textStatus + ' : ' + errorThrown + WCCB.error_msg_wrap_e, $target, true, 0 );		
 	}
 
-	WSTDL.animate_to_target = function( $target ){
+	WCCB.animate_to_target = function( $target ){
 		if( !$target )
 			return;
 		var header_ht 		= $('header.site-header').height();
@@ -32,7 +32,7 @@ var WSTDL = WSTDL || {};
 		$( 'html,body' ).animate({ scrollTop: $target.offset().top - ( header_ht + wp_adminbar_ht ) }, 1000);
 	}
 	
-	WSTDL.show_spinner = function( params ){
+	WCCB.show_spinner = function( params ){
 		if( !params.target )
 			return;
 		if( !params.target.next().is('.wpmbd-spinner') ){
@@ -41,7 +41,7 @@ var WSTDL = WSTDL || {};
 		params.target.next('.wpmbd-spinner').addClass('is-active');	
 	}
 	
-	WSTDL.hide_spinner = function( params ){
+	WCCB.hide_spinner = function( params ){
 		if( !params.target )
 			return;
 		if( !params.target.next().is('.wpmbd-spinner') )
@@ -50,7 +50,7 @@ var WSTDL = WSTDL || {};
 		params.target.next('.wpmbd-spinner').remove();	
 	}
 	
-	WSTDL.show_loader = function( params ){
+	WCCB.show_loader = function( params ){
 		if( !params.target )
 			return;
 		if( !params.target.prev().is('.wpmbd-ajax-spinner') ){
@@ -60,7 +60,7 @@ var WSTDL = WSTDL || {};
 		params.target.prev('.wpmbd-ajax-spinner').show();	
 	}
 	
-	WSTDL.hide_loader = function( params ){
+	WCCB.hide_loader = function( params ){
 		if( !params.target )
 			return;
 		if( !params.target.prev().is('.wpmbd-ajax-spinner') )
@@ -69,20 +69,20 @@ var WSTDL = WSTDL || {};
 		params.target.prev('.wpmbd-ajax-spinner').remove();	
 	}
 	
-	WSTDL.reset = function( params ){
+	WCCB.reset = function( params ){
 		
 	}
 	
 	// Ajax Generic
-	WSTDL.ajax_callbacks	= {
+	WCCB.ajax_callbacks	= {
 		before_ajax : function( params ){
 						if( typeof params.before_ajax_callback == 'function' )
 							params.before_ajax_callback( params );
 						if( typeof params.loading_type != 'undefined' ){
 							if( params.loading_type == 'spinner' )
-								WSTDL.show_spinner({target:params.loading_target});
+								WCCB.show_spinner({target:params.loading_target});
 							else if( params.loading_type == 'loader' )	
-								WSTDL.show_loader({target:params.loading_target});
+								WCCB.show_loader({target:params.loading_target});
 						}
 					},
 		after_ajax : function( params ){
@@ -90,9 +90,9 @@ var WSTDL = WSTDL || {};
 							params.after_ajax_callback( params );
 						if( typeof params.loading_type != 'undefined' ){
 							if( params.loading_type == 'spinner' )
-								WSTDL.hide_spinner({target:params.loading_target});
+								WCCB.hide_spinner({target:params.loading_target});
 							else if( params.loading_type == 'loader' )	
-								WSTDL.hide_loader({target:params.loading_target});
+								WCCB.hide_loader({target:params.loading_target});
 						}
 					},
 		after_ajax_success_return 	: function( params, response ){
@@ -105,7 +105,7 @@ var WSTDL = WSTDL || {};
 											if( params.html_error == 0 )
 												alert(response.msg);
 											else	
-												WSTDL.show_wpmbd_notice( response.msg, params.response, true, 0 );											
+												WCCB.show_wpmbd_notice( response.msg, params.response, true, 0 );											
 										}
 									},
 		after_ajax_script_error		: function( params, err ){
@@ -115,7 +115,7 @@ var WSTDL = WSTDL || {};
 											if( params.html_error == 0 )
 												alert(err);
 											else	
-												WSTDL.show_wpmbd_notice( WSTDL.error_msg_wrap_s + err + WSTDL.error_msg_wrap_e, params.response, true, 0 );											
+												WCCB.show_wpmbd_notice( WCCB.error_msg_wrap_s + err + WCCB.error_msg_wrap_e, params.response, true, 0 );											
 										}
 									},
 		after_ajax_thrown_error		: function( params, jxobj ){
@@ -125,43 +125,43 @@ var WSTDL = WSTDL || {};
 											if( params.html_error == 0 )
 												alert( jxobj.textStatus + ' : ' + jxobj.errorThrown );
 											else	
-												WSTDL.wpmbd_ajax_error( jxobj.jqXHR, jxobj.textStatus, jxobj.errorThrown, params.response );											
+												WCCB.wpmbd_ajax_error( jxobj.jqXHR, jxobj.textStatus, jxobj.errorThrown, params.response );											
 										}
 									}, 							
 	};
 	
-	WSTDL.ajax_options	= {
+	WCCB.ajax_options	= {
 		type 		: 'POST',
 		dataType	: 'json',
 		url			: '',
 		data		: 'action=default',
-		success		: function( response ){ console.log( 'WSTDL Default success response: ' + response ); },
-		error		: function( jqXHR, textStatus, errorThrown ){ console.log( 'WSTDL Default error response: ' + textStatus + ' : ' + errorThrown );}
+		success		: function( response ){ console.log( 'WCCB Default success response: ' + response ); },
+		error		: function( jqXHR, textStatus, errorThrown ){ console.log( 'WCCB Default error response: ' + textStatus + ' : ' + errorThrown );}
 	};
 	
-	WSTDL.ajax	= function( ajax_params ){
-		let ajax_options 		= WSTDL.ajax_options;
-		WSTDL.ajax_callbacks.before_ajax( ajax_params );
+	WCCB.ajax	= function( ajax_params ){
+		let ajax_options 		= WCCB.ajax_options;
+		WCCB.ajax_callbacks.before_ajax( ajax_params );
 		
 		ajax_options['success']	= function(response){
 									try{
 										if( response.event == "success" ){
-											WSTDL.ajax_callbacks.after_ajax( ajax_params );
-											WSTDL.ajax_callbacks.after_ajax_success_return( ajax_params, response );											
+											WCCB.ajax_callbacks.after_ajax( ajax_params );
+											WCCB.ajax_callbacks.after_ajax_success_return( ajax_params, response );											
 										}else{
-											WSTDL.ajax_callbacks.after_ajax( ajax_params );
-											WSTDL.ajax_callbacks.after_ajax_error_return( ajax_params, response );
+											WCCB.ajax_callbacks.after_ajax( ajax_params );
+											WCCB.ajax_callbacks.after_ajax_error_return( ajax_params, response );
 										}						
 									}catch(err){
 										console.log("Error occured in success ajax call",err);
-										WSTDL.ajax_callbacks.after_ajax( ajax_params );
-										WSTDL.ajax_callbacks.after_ajax_script_error( ajax_params, err );
+										WCCB.ajax_callbacks.after_ajax( ajax_params );
+										WCCB.ajax_callbacks.after_ajax_script_error( ajax_params, err );
 									}	
 								};
 		ajax_options['error']		= function( jqXHR, textStatus, errorThrown ){
 									console.log("Error occured in ajax call");
-									WSTDL.ajax_callbacks.after_ajax( ajax_params );
-									WSTDL.ajax_callbacks.after_ajax_thrown_error( ajax_params, { jqXHR : jqXHR, textStatus : textStatus, errorThrown : errorThrown } );				
+									WCCB.ajax_callbacks.after_ajax( ajax_params );
+									WCCB.ajax_callbacks.after_ajax_thrown_error( ajax_params, { jqXHR : jqXHR, textStatus : textStatus, errorThrown : errorThrown } );				
 								};							
 		$.ajax(ajax_options);
 	}

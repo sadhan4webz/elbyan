@@ -23,8 +23,16 @@ $response 		= array( 'event' => null, 'msg' => null, 'content' => null );
 $action    		= esc_attr( trim( $_REQUEST['action'] ) );
 $html_error		= (bool)( isset( $_REQUEST['html_error'] ) ? $_REQUEST['html_error'] : true );
 switch ( $action ) {
-	case 'variable':
-		# code...
+	case 'get_tutor_availability':
+
+		$event   = 'success';
+		$content = WCCB_Frontend_View::get_tutor_availability( $_REQUEST['tutor_id'] , $_REQUEST['date'] , $_REQUEST['num_days'] );
+		$msg     = 'Work in progress message';
+
+		$response["event"] 	 = $event;
+		$response["msg"] 	 = $msg;
+		$response['content'] = $content;
+		echo json_encode( $response, JSON_HEX_QUOT | JSON_HEX_TAG );
 		break;
 		
 	// Default ajax response	

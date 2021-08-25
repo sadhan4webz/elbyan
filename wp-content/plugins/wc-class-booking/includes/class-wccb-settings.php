@@ -58,10 +58,11 @@ class WCCB_Settings {
 			1
 		);
 
-		$script_config 	= array( );
-
-		$script_config["admin_ajax_url"]      = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-admin-ajax.php';
-		$script_config["frontend_ajax_url"]   = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-frontend-ajax.php';
+		$script_config 	                      = array( );
+		$script_config['is_admin']            = is_admin();
+		$script_config['num_days_calendar']   = 2;
+		$script_config['admin_ajax_url']      = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-admin-ajax.php';
+		$script_config['frontend_ajax_url']   = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-frontend-ajax.php';
 
 		wp_localize_script(
 			'wccb-script-js',

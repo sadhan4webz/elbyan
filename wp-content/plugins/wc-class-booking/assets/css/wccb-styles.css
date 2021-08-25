@@ -1,0 +1,18 @@
+.tutor_profile_main_wrapper {
+	float: left;
+}
+.tutor_profile_main_wrapper img {
+	width: 100px;
+}
+.tutor_availability_main_wrapper {
+	float:left;
+	margin-top: 20px;
+}
+.previous_date {
+	cursor: pointer;
+	color: blue;
+}
+.next_date {
+	cursor: pointer;
+	color: blue;
+}

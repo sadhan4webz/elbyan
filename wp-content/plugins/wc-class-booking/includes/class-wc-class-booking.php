@@ -41,6 +41,7 @@ class WC_Class_Booking {
 
 		// Admin
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/admin/class-wccb-admin.php';
+		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/admin/views/class-wccb-admin-view.php';
 	}
 	
 	public function init_hooks(){
