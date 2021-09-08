@@ -35,38 +35,38 @@ var WCCB = WCCB || {};
 	WCCB.show_spinner = function( params ){
 		if( !params.target )
 			return;
-		if( !params.target.next().is('.wpmbd-spinner') ){
-			params.target.after('<span class="wpmbd-spinner"></span>');
+		if( !params.target.next().is('.wccb-spinner') ){
+			params.target.after('<span class="wccb-spinner"></span>');
 		}
-		params.target.next('.wpmbd-spinner').addClass('is-active');	
+		params.target.next('.wccb-spinner').addClass('is-active');	
 	}
 	
 	WCCB.hide_spinner = function( params ){
 		if( !params.target )
 			return;
-		if( !params.target.next().is('.wpmbd-spinner') )
+		if( !params.target.next().is('.wccb-spinner') )
 			return;
-		params.target.next('.wpmbd-spinner').removeClass('is-active');
-		params.target.next('.wpmbd-spinner').remove();	
+		params.target.next('.wccb-spinner').removeClass('is-active');
+		params.target.next('.wccb-spinner').remove();	
 	}
 	
 	WCCB.show_loader = function( params ){
 		if( !params.target )
 			return;
-		if( !params.target.prev().is('.wpmbd-ajax-spinner') ){
-			let loader_html = $("#wpmbd-global .wpmbd-ajax-spinner").clone();
+		if( !params.target.prev().is('.wccb-ajax-spinner') ){
+			let loader_html = $("#wccb-global .wccb-ajax-spinner").clone();
 			params.target.before(loader_html);			
 		}
-		params.target.prev('.wpmbd-ajax-spinner').show();	
+		params.target.prev('.wccb-ajax-spinner').show();	
 	}
 	
 	WCCB.hide_loader = function( params ){
 		if( !params.target )
 			return;
-		if( !params.target.prev().is('.wpmbd-ajax-spinner') )
+		if( !params.target.prev().is('.wccb-ajax-spinner') )
 			return;
-		params.target.prev('.wpmbd-ajax-spinner').hide();
-		params.target.prev('.wpmbd-ajax-spinner').remove();	
+		params.target.prev('.wccb-ajax-spinner').hide();
+		params.target.prev('.wccb-ajax-spinner').remove();	
 	}
 	
 	WCCB.reset = function( params ){

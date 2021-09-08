@@ -42,17 +42,27 @@ class WCCB_Settings {
 	//Enqueue javascript
 	public function load_javascript(){
 
+		if (!is_admin()) {
+			wp_enqueue_script(
+				'wccb-jquery-ui-js',
+				'https://code.jquery.com/ui/1.12.1/jquery-ui.js',
+				array( 'jquery' ),
+				1,
+				1
+			);
+		}
+
 		wp_enqueue_script(
-			"wccb-general-js",
-			WC_CLASS_BOOKING_PLUGIN_URL ."/assets/js/wccb-general.js",
+			'wccb-general-js',
+			WC_CLASS_BOOKING_PLUGIN_URL .'/assets/js/wccb-general.js',
 			array( 'jquery' ),
 			1,
 			1
 		);
 
 		wp_enqueue_script(
-			"wccb-script-js",
-			WC_CLASS_BOOKING_PLUGIN_URL ."/assets/js/wccb-scripts.js",
+			'wccb-script-js',
+			WC_CLASS_BOOKING_PLUGIN_URL .'/assets/js/wccb-scripts.js',
 			array( 'jquery' ),
 			1,
 			1
@@ -60,7 +70,8 @@ class WCCB_Settings {
 
 		$script_config 	                      = array( );
 		$script_config['is_admin']            = is_admin();
-		$script_config['num_days_calendar']   = 2;
+		$script_config['num_days_calendar']   = NUM_DAYS_CALENDAR;
+		$script_config['slot_picked_row']     = WCCB_Frontend_View::get_slot_picked_row_html();
 		$script_config['admin_ajax_url']      = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-admin-ajax.php';
 		$script_config['frontend_ajax_url']   = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-frontend-ajax.php';
 
@@ -81,6 +92,9 @@ class WCCB_Settings {
 	//Enqueue css
 	public function load_css()
 	{
-		wp_enqueue_style("wccb-styles",WC_CLASS_BOOKING_PLUGIN_URL."/assets/css/wccb-styles.css",array(),1,"all");
+		wp_enqueue_style('wccb-styles',WC_CLASS_BOOKING_PLUGIN_URL.'/assets/css/wccb-styles.css',array(),1,'all');
+		if (!is_admin()) {
+			wp_enqueue_style('wccb-styles-jquery-ui','//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css',array(),1,'all');
+		}
 	}
 }

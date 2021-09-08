@@ -25,7 +25,9 @@ define( 'WC_CLASS_BOOKING_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 define( 'WC_CLASS_BOOKING_PLUGIN_FOLDER',  dirname( plugin_basename( __FILE__ ) ) );
 //define( 'WC_CLASS_BOOKING_PYMENT_METHODS_PLACEHOLDER', 877 );
 
-define('PLUGIN_TEXT_DOMAIN', 'wccb' );
+define('PLUGIN_TEXT_DOMAIN' , 'wccb');
+define('NUM_DAYS_CALENDAR' , 7);
+define('HOUR_EXPIRE_DAYS' , 35);
 
 require_once dirname( __FILE__ ) . '/includes/class-wc-class-booking-dependency-checker.php';
 if ( ! WC_Class_Booking_Dependency_Checker::check_dependencies() ) {

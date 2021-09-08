@@ -23,10 +23,10 @@ $response 		= array( 'event' => null, 'msg' => null, 'content' => null );
 $action    		= esc_attr( trim( $_REQUEST['action'] ) );
 $html_error		= (bool)( isset( $_REQUEST['html_error'] ) ? $_REQUEST['html_error'] : true );
 switch ( $action ) {
-	case 'get_tutor_availability':
+	case 'get_tutor_availability_calendar':
 
 		$event   = 'success';
-		$content = WCCB_Frontend_View::get_tutor_availability( $_REQUEST['tutor_id'] , $_REQUEST['date'] , $_REQUEST['num_days'] );
+		$content = WCCB_Frontend_View::get_tutor_availability_calendar( $_REQUEST['tutor_id'] , $_REQUEST['date'] , $_REQUEST['num_days'] , $_POST['slot'] );
 		$msg     = 'Work in progress message';
 
 		$response["event"] 	 = $event;

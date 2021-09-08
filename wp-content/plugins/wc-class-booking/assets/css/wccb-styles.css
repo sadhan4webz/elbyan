@@ -1,3 +1,20 @@
+.wccb-spinner {
+	background: url(../img/spinner.gif) no-repeat;
+	background-size: 20px 20px;
+	display: inline-block;
+	visibility: hidden;
+	vertical-align: middle;
+	opacity: 0.7;
+	filter: alpha(opacity=70);
+	width: 20px;
+	height: 20px;
+	margin: 0px 10px 0;
+}
+
+.wccb-spinner.is-active {
+	visibility: visible;
+}
+
 .tutor_profile_main_wrapper {
 	float: left;
 }
@@ -15,4 +32,47 @@
 .next_date {
 	cursor: pointer;
 	color: blue;
+}
+.slot_selected_container {
+	float: left;
+}
+.slot {
+	cursor: pointer;
+}
+/*.slot_picked {
+	background: green;
+	color:white;
+}*/
+/*.slot_booked {
+	font-weight: bold;
+	background: #EEEEEE;
+}*/
+.radio_btn {
+	display: none;
+}
+.tutor_profile_wrapper {
+	cursor: pointer;
+}
+
+.profile_image_wrapper {
+	cursor: pointer;
+}
+
+.div-table {
+  display: table;         
+  width: auto;         
+  background-color: #eee;         
+  border: 1px solid #666666;         
+  border-spacing: 5px; /* cellspacing:poor IE support for  this */
+}
+.div-table-row {
+  display: table-row;
+  width: auto;
+  clear: both;
+  background-color: #ccc;  
+}
+.div-table-col {
+  float: left; /* fix for  buggy browsers */
+  display: table-column;         
+  width: 200px;
 }

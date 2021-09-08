@@ -6,8 +6,7 @@ class WCCB_Admin_View {
 		global $post;
 		$exist_tutor_ids = get_post_meta($post->ID , 'tutor_ids' , ture );
 		$args   = array(
-			'meta_key' => 'user_role',
-			'meta_value' => 'Tutor'
+			'role__in' => array('wccb_tutor')
 		);
 		$tutors = get_users( $args );
 		?>

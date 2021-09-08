@@ -23,6 +23,8 @@ class WCCB_Admin {
 		add_filter( 'product_type_selector', array( $this , 'add_custom_product_type') );
 		add_filter( 'woocommerce_product_data_tabs', array( $this , 'package_product_tab') );
 		add_filter( 'gettext', array( $this , 'change_backend_product_regular_price_label' ) , 100, 3 );
+		add_filter( 'woocommerce_order_item_display_meta_key', array( $this , 'change_order_item_meta_key') , 20, 3 );
+		add_filter( 'woocommerce_order_item_display_meta_value', array( $this , 'change_order_item_meta_value' ) , 20, 3 );
 	}
 
 	public function add_custom_product_type( $types ) {
@@ -67,8 +69,28 @@ class WCCB_Admin {
 	public function save_tutor_for_package( $post_id ) {
 		// save tutor field
 	    $tutor_ids = $_POST['tutor_ids'];
-	    if( !empty( $tutor_ids ) )
 	    update_post_meta( $post_id, 'tutor_ids', $tutor_ids );
+	}
+
+	public function change_order_item_meta_key( $display_key, $meta, $item ) {
+
+	    // Change display label for specific order item meta key
+	    if( is_admin() && $item->get_type() === 'line_item' && $meta->key === 'tutor_id' ) {
+	        $display_key = __( 'Selected Tutor' , PLUGIN_TEXT_DOMAIN );
+	    }
+
+	    return $display_key;
+	}
+
+	public function change_order_item_meta_value( $value , $meta , $item ) {
+		
+		//Change display value for specific order item meta key value
+    	if( is_admin() && $meta->key === 'tutor_id' && $item->get_type() === 'line_item' ) {
+    		$tutor = get_userdata($value);
+    		$value = __( $tutor->display_name , PLUGIN_TEXT_DOMAIN );
+    	}
+
+		return $value;
 	}
 
 }

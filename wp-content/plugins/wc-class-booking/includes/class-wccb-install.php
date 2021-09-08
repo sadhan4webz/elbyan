@@ -15,6 +15,7 @@ class WCCB_Install {
 		// If we made it till here nothing is running yet, lets set the transient now.
 		set_transient( 'wccb_installing', 'yes', MINUTE_IN_SECONDS * 10 );		
 		self::create_roles();
+		self::create_tables();
 		delete_transient( 'wccb_installing' );
 	}
 	public static function uninstall() {
@@ -52,6 +53,51 @@ class WCCB_Install {
 				'read' => true,
 			)
 		);	
+	}
+
+	public static function create_tables() {
+		global $wpdb;
+	    $collate = '';
+		if ( $wpdb->has_cap( 'collation' ) ) {
+			$collate = $wpdb->get_charset_collate();
+		}
+
+		$table_array = array(
+			array(
+				'table_name' => $wpdb->prefix.'hour_history',
+				'sql_query'  => "CREATE TABLE IF NOT EXISTS {table_name} (
+								  `ID` int(11) NOT NULL AUTO_INCREMENT,
+								  `user_id` varchar(100) NOT NULL,
+								  `order_id` varchar(100) NOT NULL,
+								  `purchased_hours` varchar(100) NOT NULL,
+								  `used_hours` varchar(100) NOT NULL,
+								  `expired_hours` varchar(100) NOT NULL,
+								  `date_purchased` datetime NOT NULL,
+								  PRIMARY KEY (ID)
+								) $collate"
+			),
+			array(
+				'table_name' => $wpdb->prefix.'booking_history',
+				'sql_query'  => "CREATE TABLE IF NOT EXISTS {table_name} (
+								  `ID` int(11) NOT NULL AUTO_INCREMENT,
+								  `user_id` varchar(100) NOT NULL,
+								  `tutor_id` varchar(100) NOT NULL,
+								  `hour_id` varchar(100) NOT NULL,
+								  `product_id` varchar(100) NOT NULL,
+								  `class_date` date NOT NULL,
+								  `class_time` varchar(100) NOT NULL,
+								  `booking_date` datetime NOT NULL,
+								  `status` varchar(100) NOT NULL,
+								  PRIMARY KEY (ID)
+								) $collate"
+			)
+
+			
+		);
+
+		foreach ($table_array as $key => $value) {
+			dbDelta(str_replace('{table_name}', $value['table_name'], $value['sql_query']));
+		}
 	}
 	
 	public static function remove_roles() {

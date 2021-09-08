@@ -27,7 +27,11 @@ class WC_Class_Booking {
 		$this->init_hooks();	
 	}
 	
-	public function includes(){
+	public function includes() {
+
+		//WP Core
+		require_once( ABSPATH . '/wp-admin/includes/upgrade.php' );
+
 
 		//Core
 		require_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-install.php';
@@ -37,7 +41,9 @@ class WC_Class_Booking {
 
 		//Frontend
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/frontend/class-wccb-frontend.php';
+		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/frontend/class-wccb-frontend-myaccount.php';
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/frontend/views/class-wccb-frontend-view.php';
+		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/frontend/views/class-wccb-frontend-myaccount-view.php';
 
 		// Admin
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/admin/class-wccb-admin.php';
@@ -54,6 +60,9 @@ class WC_Class_Booking {
 		$frontend = new WCCB_Frontend();
 		$frontend->init();
 
+		$myaccount = new WCCB_Frontend_Myaccount();
+		$myaccount->init();
+
 		//Admin
 		$admin_settings = new WCCB_Admin();
 		$admin_settings->init();
@@ -63,7 +72,7 @@ class WC_Class_Booking {
 		$upload_dir = wp_upload_dir();
 		$base_dir 	= $upload_dir['basedir'];
 		$base_url 	= $upload_dir['baseurl'];
-		$upload_dir = $base_dir . "/wccb/";
+		$upload_dir = $base_dir . "/wccb-log/";
 		if (! is_dir($upload_dir)) {
 			mkdir( $upload_dir, 0755 );
 		}
