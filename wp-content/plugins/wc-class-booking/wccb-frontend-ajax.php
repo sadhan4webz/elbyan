@@ -23,6 +23,19 @@ $response 		= array( 'event' => null, 'msg' => null, 'content' => null );
 $action    		= esc_attr( trim( $_REQUEST['action'] ) );
 $html_error		= (bool)( isset( $_REQUEST['html_error'] ) ? $_REQUEST['html_error'] : true );
 switch ( $action ) {
+
+	case 'get_tutor_profile':
+
+		$event   = 'success';
+		$content = WCCB_Frontend_View::show_tutor_profile( $_REQUEST['product_id']);
+		$msg     = 'Work in progress message';
+
+		$response["event"] 	 = $event;
+		$response["msg"] 	 = $msg;
+		$response['content'] = $content;
+		echo json_encode( $response, JSON_HEX_QUOT | JSON_HEX_TAG );
+		break;
+
 	case 'get_tutor_availability_calendar':
 
 		$event   = 'success';
@@ -34,7 +47,8 @@ switch ( $action ) {
 		$response['content'] = $content;
 		echo json_encode( $response, JSON_HEX_QUOT | JSON_HEX_TAG );
 		break;
-		
+	
+
 	// Default ajax response	
 	default:
 		$response["event"] 	= "error";

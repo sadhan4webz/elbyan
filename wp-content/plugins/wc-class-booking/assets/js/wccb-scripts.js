@@ -1,5 +1,12 @@
 jQuery(function($){
 
+	// On doc ready
+	$(document).ready(function(){
+		// init the basic tooltip
+
+		WCCB.showTip( '.wpiaf-tips', {attribute:"data-tip",fadeIn:50,fadeOut:50,delay:200,keepAlive:!0} );
+	});
+
 	var wcqi_refresh_quantity_increments = function () {
         $('div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)').addClass('buttons_added').append('<button type="button" class="plus fa fa-plus" ></button>').prepend('<button type="button" class="minus fa fa-minus" ></button>');
     }
@@ -154,7 +161,11 @@ jQuery(function($){
 	});
 
 	$(document).on('change', '.gender_select', function(e){
-		window.location.href='?gender='+$(this).val();
+		var url = '?gender='+$(this).val();
+		if($('#new_booking').length){
+			url += '&new_booking='+$('#new_booking').val()+'&product_id='+$('#product_id').val();
+		}
+		window.location.href=url;
 	});
 
 	$(document).on('click', '.delete_slot', function(e){ 
@@ -172,11 +183,51 @@ jQuery(function($){
 
 		var r   = confirm("Are you sure you want to cancel this class?");
 		if (r == true) {
-		  url = '?action_do=cancel_class&booking_id='+$booking_id+'&cancel_booking_url_nonce='+$cancel_booking_nonce;
+		  url = '?action_do=cancel_class&booking_id='+$booking_id+'&cancel_booking_url_nonce='+$cancel_booking_url_nonce;
 		  window.location.href = url;
 		} else {
 		  return false;
 		}
 	});
+
+	$(document).on('change', '.get_tutor_profile', function(e){ 
+		let product_id = $(this).val();
+
+		let	params    = { product_id : product_id , action : 'get_tutor_profile' , response_container : '.tutor_container', wrapper : $('.tutor_container')};
+
+		params['loading_type']			= 'loader',
+		params['loading_target'] 		= params.wrapper,
+		params['html_error'] 			= 0;
+
+		WCCB.ajax_options['url'] 		= wccb_config.frontend_ajax_url;
+		WCCB.ajax_options['data'] 		= 'action='+params.action+'&product_id='+params.product_id;
+		
+		WCCB.ajax_callbacks['after_ajax_success_return'] = function( params, response ){
+														$(params.response_container).html(response.content);
+
+													};
+		WCCB.ajax_callbacks['after_ajax_error_return'] = function( params, response ){
+														alert(response.msg);
+													};									
+		WCCB.ajax( params );
+	});
+
+	$(document).on('click', '.add_time_row', function(e){
+		e.preventDefault();
+		let $link      = $(this),
+			$lower_key = $link.data('lower_key'),
+			$html      = wccb_config.availability_time_row;
+			$html      = $html.replace(/{lower_key}/g, $lower_key );
+
+			//$(this).closest( 'tr' ).after( $html );
+			$($html).insertAfter($(this).closest('tr'));
+	});
+
+	$(document).on('click', '.delete_time_row', function(e){
+		e.preventDefault();
+		$(this).closest('.time_row').remove();
+	});
+
+
 
 });	

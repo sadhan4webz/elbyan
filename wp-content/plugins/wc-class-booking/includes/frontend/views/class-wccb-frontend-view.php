@@ -71,75 +71,137 @@ class WCCB_Frontend_View {
 			</select>
 		</p>
 
+		
+
 		<div class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide availability_container" style="display: <?php echo $_POST['user_role'] == 'wccb_tutor' ? 'block' : 'none';?>;">
 			
 			<label for="reg_password"><b><?php esc_html_e( 'Your Availability', PLUGIN_TEXT_DOMAIN ); ?></b>&nbsp;<span class="required">*</span></label>
-			<table>
-				<tr>
-					<th>
-						Day
-					</th>
-					<th>
-						Start Time
-					</th>
-					<th>
-						End Time
-					</th>
-					<th>
-						Is Unavailable?
-					</th>
-				</tr>
-				<?php
-				foreach (WCCB_Helper::get_weekdays_array() as $key => $value) {
-					$lower_key = strtolower($key);
-					?>
-					<tr>
-						<td>
-							<?php echo $key;?>
-						</td>
-						<td>
-							<select class="select" name="<?php echo $lower_key;?>_start_time" id="<?php echo $lower_key;?>_start_time">
-								<?php
-								for ($i=0; $i < 24 ; $i++) { 
-									?>
-									<option value="<?= $i; ?>" <?php selected($i , $_POST[$lower_key.'_start_time']);?>>
-										<?= $i % 12 ? $i % 12 : 12 ?>:00 <?= $i >= 12 ? 'pm' : 'am' ?>
-									</option>
-									<?php
-								}
-								?>					
-							</select>
-							
-						</td>
-						<td>
-							<select class="select" name="<?php echo $lower_key;?>_end_time" id="<?php echo $lower_key;?>_end_time">
-								<?php
-								for ($i=0; $i < 24 ; $i++) { 
-									?>
-									<option value="<?= $i; ?>" <?php selected($i , $_POST[$lower_key.'_end_time']);?>>
-										<?= $i % 12 ? $i % 12 : 12 ?>:00 <?= $i >= 12 ? 'pm' : 'am' ?>
-									</option>
-									<?php
-								}
-								?>				
-							</select>
-						</td>
-						<td>
-							<input type="checkbox" class="woocommerce-Input woocommerce-Input--cehckbox input-checkbox" name="<?php echo $lower_key;?>_is_unavailable" id="<?php echo $lower_key;?>_is_unavailable"  value="Yes" <?php echo ! empty( $_POST[$lower_key.'_is_unavailable'] ) ? 'checked="checked"' : ''; ?> />
-						</td>
-					</tr>
-					<?php
-				}
-				?>
-
-			</table>
+			<?php
+			$availability_times = WCCB_Frontend::get_avilability_times_from_post($_POST);
+			echo WCCB_Frontend_View::get_tutor_availability_time_fields($availability_times);
+			?>
 			
 		</div>
 		<?php
 
 	}
 
-	
+	public static function get_tutor_availability_time_fields( $field_array = '' ) {
+		ob_start();
+		?>
+		<table>
+			<tr>
+				<th>
+					Day
+				</th>
+				<th>
+					Start Time
+				</th>
+				<th>
+					End Time
+				</th>
+				<th>
+					Is Unavailable?
+				</th>
+				<th>&nbsp;</th>
+			</tr>
+			<?php
+			foreach (WCCB_Helper::get_weekdays_array() as $key => $value) {
+				$lower_key = strtolower($key);
+
+				if (!empty($field_array[$lower_key]['available_time'])) {
+
+					foreach ($field_array[$lower_key]['available_time'] as $key2 => $value2 ) {
+						$more = $key2 == 0 ? '' : 'yes';
+
+						echo WCCB_Frontend_View::get_availability_time_row_html( $more , $key , $value2['start_time'] , $value2['end_time'], $field_array[$lower_key]['is_unavailable'] );
+					}
+				}
+				else {
+					echo WCCB_Frontend_View::get_availability_time_row_html( '' , $key );
+				}
+			}
+			?>
+		</table>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function get_availability_time_row_html( $more = '' , $key = '' , $start_value = '' , $end_value = '' , $is_unavailable = '') {
+		ob_start();
+		
+		if (empty($key)) {
+			$start_field_name = '{lower_key}_start_time[]';
+			$end_field_name   = '{lower_key}_end_time[]';
+		}
+		else {
+			$lower_key        = strtolower($key);
+			$start_field_name = $lower_key.'_start_time[]';
+			$end_field_name   = $lower_key.'_end_time[]';
+			$row_id           = $lower_key.'_row';
+		}
+		?>
+		<tr class="time_row">
+			<td>
+				<?php echo $more == 'yes' ? '&nbsp;' : $key;?>
+			</td>
+			<td>
+				<select class="select" name="<?php echo $start_field_name;?>">
+					<?php
+					for ($i=0; $i < 24 ; $i++) { 
+						?>
+						<option value="<?= $i; ?>" <?php selected($i , $start_value);?>>
+							<?= $i % 12 ? $i % 12 : 12 ?>:00 <?= $i >= 12 ? 'pm' : 'am' ?>
+						</option>
+						<?php
+					}
+					?>					
+				</select>
+				
+			</td>
+			<td>
+				<select class="select" name="<?php echo $end_field_name;?>">
+					<?php
+					for ($i=1; $i < 24 ; $i++) { 
+						?>
+						<option value="<?= $i; ?>" <?php selected($i , $end_value);?>>
+							<?= $i % 12 ? $i % 12 : 12 ?>:00 <?= $i >= 12 ? 'pm' : 'am' ?>
+						</option>
+						<?php
+					}
+					?>				
+				</select>
+			</td>
+			<?php
+			if (empty($more)) {
+				?>
+				<td>
+					<input type="checkbox" class="woocommerce-Input woocommerce-Input--cehckbox input-checkbox" name="<?php echo $lower_key;?>_is_unavailable" id="<?php echo $lower_key;?>_is_unavailable"  value="Yes" <?php echo ! empty( $is_unavailable ) ? 'checked="checked"' : ''; ?> />
+				</td>
+				<td>
+					<a href="#" class="add_time_row" data-lower_key="<?php echo $lower_key;?>">Add Row</a>
+					
+				</td>
+				<?php
+			}
+			else {
+				?>
+				<td>
+					&nbsp;
+				</td>
+				<td>
+					<div class="link_group">
+						<a href="#" class="add_time_row" data-lower_key="{lower_key}">Add Row</a>
+						<a href="#" class="delete_time_row">Delete</a>
+					</div>
+				</td>
+				<?php
+			}
+			?>
+		</tr>
+		<?php
+		return ob_get_clean();
+	}
 
 	public static function product_detail_page_form_start() {
 		global $product;
@@ -236,10 +298,15 @@ class WCCB_Frontend_View {
 		<?php
 	}
 
-	public static function show_tutor_profile() {
-		global $product;
 
-		$tutor_ids = get_post_meta($product->get_id() , 'tutor_ids' , true );
+
+	public static function show_tutor_profile( $product_id = '' ) {
+		global $product;
+		if (empty($product_id)) {
+			$product_id = $product->get_id();
+		}
+
+		$tutor_ids = get_post_meta( $product_id , 'tutor_ids' , true );
 		$args = array(
 		        'role' => 'wccb_tutor'
 		);
@@ -250,14 +317,16 @@ class WCCB_Frontend_View {
 
 	    if (!empty($_REQUEST['gender'])) {
 	    	$args['meta_query'] = array(
-		            array( 
-		                'key'     => 'gender',
-		                'value'   => $_REQUEST['gender'],
-		            )
+	            array( 
+	                'key'     => 'gender',
+	                'value'   => $_REQUEST['gender'],
+	            )
 	        );
 	    }
 
 		$user_query = new WP_User_Query( $args);
+
+		ob_start();
 		?>
 		<div class="tutor_profile_main_wrapper">
 			<h2 class="wccb_title"><?php echo __('Our expert '.strtolower($_REQUEST['gender']).' tutors for this course' , PLUGIN_TEXT_DOMAIN);?></h2>
@@ -315,6 +384,8 @@ class WCCB_Frontend_View {
 			?>
 		</div>
 		<?php
+
+		return ob_get_clean();
 	}
 
 	public static function get_tutor_availability_calendar( $tutor_id , $date , $num_days , $slot_picked_array = array()  ) {
@@ -358,37 +429,43 @@ class WCCB_Frontend_View {
 
 							//Prepare slot table for each date
 							$lower_key  = strtolower(date('l', strtotime($date.' +'.$i.' days')));
-							if (empty($availability[$lower_key.'_is_unavailable'])) {
+							if (empty($availability[$lower_key]['is_unavailable'])) {
 
-								$start_time = explode(' ', $availability[$lower_key]['start_time']);
-								$end_time   = explode(' ' , $availability[$lower_key]['end_time']);
+								
 								$slot_table = '<table>';
-								for ($j=(int)$start_time[0]; $j <(int)$end_time[0] ; $j++) {
-									$from  = $j % 12 ? $j % 12 : '12:00';
-									$from .= $j >= 12 ? ' pm' : ' am';
 
-									$to  = ($j+1) % 12 ? ($j+1) % 12 : '12:00';
-									$to .= ($j+1) >= 12 ? ' pm' : ' am';
+								foreach ( $availability[$lower_key]['available_time'] as $key => $value) {
+									$start_time = $value['start_time'];
+									$end_time   = $value['end_time'];
 
-									$am_pm_date  = $value_date;
-									$am_pm       = $from.' - '.$to;
-									$am_pm_value = $am_pm_date.'|'.$am_pm;
-									$rand_id     = str_replace(' ', '', $am_pm_date.$am_pm);
-									if (WCCB_Frontend::date_wise_slot_availability_validation($tutor_id , $am_pm_date , $am_pm )) {
-										$slot_picked = in_array($am_pm_value, $slot_picked_array) ? 'slot_picked' : '';
-										$slot_table .= '<tr>
-															<td>
-																<span class="slot '.$slot_picked.'" data-slot_date="'.$display_date.'" data-slot_time="'.$am_pm.'" data-slot_date_time="'.$am_pm_value.'" data-slot_picked_row_id="slot_picked_row_'.$rand_id.'" id="slot_span_id_'.$rand_id.'" data-reschedule="'.$_REQUEST['reschedule'].'">'.$am_pm.'</span>
-															</td>
-														</tr>';
+									for ($j=(int)$start_time; $j <(int)$end_time ; $j++) {
+										$from  = $j % 12 ? $j % 12 : '12:00';
+										$from .= $j >= 12 ? ' pm' : ' am';
+
+										$to  = ($j+1) % 12 ? ($j+1) % 12 : '12:00';
+										$to .= ($j+1) >= 12 ? ' pm' : ' am';
+
+										$am_pm_date  = $value_date;
+										$am_pm       = $from.' - '.$to;
+										$am_pm_value = $am_pm_date.'|'.$am_pm;
+										$rand_id     = str_replace(' ', '', $am_pm_date.$am_pm);
+										if (WCCB_Frontend::date_wise_slot_availability_validation($tutor_id , $am_pm_date , $am_pm )) {
+											$slot_picked = in_array($am_pm_value, $slot_picked_array) ? 'slot_picked' : '';
+											$slot_table .= '<tr>
+																<td>
+																	<span class="slot '.$slot_picked.'" data-slot_date="'.$display_date.'" data-slot_time="'.$am_pm.'" data-slot_date_time="'.$am_pm_value.'" data-slot_picked_row_id="slot_picked_row_'.$rand_id.'" id="slot_span_id_'.$rand_id.'" data-reschedule="'.$_REQUEST['reschedule'].'">'.$am_pm.'</span>
+																</td>
+															</tr>';
+										}
+										else {
+											$slot_table .= '<tr>
+																<td class="slot_booked">'.$am_pm.' (Booked) </td>
+															</tr>';
+										}
+										
 									}
-									else {
-										$slot_table .= '<tr>
-															<td class="slot_booked">'.$am_pm.' (Booked) </td>
-														</tr>';
-									}
-									
 								}
+
 								$slot_table .= '</table>';
 
 								$slot_table_array[] = $slot_table;

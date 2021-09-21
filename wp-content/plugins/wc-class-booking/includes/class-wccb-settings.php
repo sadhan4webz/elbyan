@@ -32,6 +32,7 @@ class WCCB_Settings {
 
 	}
 
+
 	/**
 	 * Loads textdomain for plugin.
 	 */
@@ -68,12 +69,13 @@ class WCCB_Settings {
 			1
 		);
 
-		$script_config 	                      = array( );
-		$script_config['is_admin']            = is_admin();
-		$script_config['num_days_calendar']   = NUM_DAYS_CALENDAR;
-		$script_config['slot_picked_row']     = WCCB_Frontend_View::get_slot_picked_row_html();
-		$script_config['admin_ajax_url']      = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-admin-ajax.php';
-		$script_config['frontend_ajax_url']   = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-frontend-ajax.php';
+		$script_config 	                        = array( );
+		$script_config['is_admin']              = is_admin();
+		$script_config['num_days_calendar']     = NUM_DAYS_CALENDAR;
+		$script_config['availability_time_row'] = WCCB_Frontend_View::get_availability_time_row_html('yes');
+		$script_config['slot_picked_row']       = WCCB_Frontend_View::get_slot_picked_row_html();
+		$script_config['admin_ajax_url']        = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-admin-ajax.php';
+		$script_config['frontend_ajax_url']     = WC_CLASS_BOOKING_PLUGIN_URL.'/wccb-frontend-ajax.php';
 
 		wp_localize_script(
 			'wccb-script-js',
@@ -96,5 +98,20 @@ class WCCB_Settings {
 		if (!is_admin()) {
 			wp_enqueue_style('wccb-styles-jquery-ui','//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css',array(),1,'all');
 		}
+	}
+
+	public static function get_notification_cron_interval() {
+
+		return 'daily';
+	}
+
+	public static function get_reminder_cron_interval() {
+		
+		return 'wccb_five_minutes';
+	}
+
+	public static function get_completion_cron_interval() {
+		
+		return 'wccb_five_minutes';
 	}
 }

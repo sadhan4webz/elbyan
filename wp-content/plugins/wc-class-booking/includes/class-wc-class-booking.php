@@ -31,6 +31,9 @@ class WC_Class_Booking {
 
 		//WP Core
 		require_once( ABSPATH . '/wp-admin/includes/upgrade.php' );
+		require_once( ABSPATH . 'wp-admin/includes/image.php' );
+        require_once( ABSPATH . 'wp-admin/includes/file.php' );
+        require_once( ABSPATH . 'wp-admin/includes/media.php' );
 
 
 		//Core
@@ -38,6 +41,13 @@ class WC_Class_Booking {
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/functions.php';
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-helper.php';
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-settings.php';
+		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-scheduler.php';
+		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-email-content.php';
+		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-notification.php';
+
+		//include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-email-class-notification.php';
+		//include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-email-handler.php';
+		
 
 		//Frontend
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/frontend/class-wccb-frontend.php';
@@ -55,6 +65,14 @@ class WC_Class_Booking {
 		//Core
 		$settings = new WCCB_Settings();
 		$settings->init();
+
+		$scheduler = new WCCB_Scheduler();
+		$scheduler->init();
+
+		$notification = new WCCB_Notification();
+		$notification->init();
+
+		//$email_handler = new WCCB_Email_Handler();
 
 		//Frontend 
 		$frontend = new WCCB_Frontend();

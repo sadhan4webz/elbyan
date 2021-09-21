@@ -46,4 +46,33 @@ class WCCB_Helper {
 	public static function display_date( $date , $format = 'D M j, Y' ) {
 		return wp_date($format , strtotime($date));
 	}
+
+	public static function get_particular_date( $date_time , $days , $plus_minue = '+' ) {
+		return wp_date('Y-m-d h:i:s' , strtotime($plus_minue.$days.' days' , strtotime($date_time)));
+	}
+
+	public static function help_tip( $tip, $allow_html = false ) {
+		if ( $allow_html ) {
+			$tip = htmlspecialchars(
+				wp_kses(
+					html_entity_decode( $tip ),
+					array(
+						'br'     => array(),
+						'em'     => array(),
+						'strong' => array(),
+						'small'  => array(),
+						'span'   => array(),
+						'ul'     => array(),
+						'li'     => array(),
+						'ol'     => array(),
+						'p'      => array(),
+					)
+				)
+			);
+		} else {
+			$tip = esc_attr( $tip );
+		}
+
+		return '<span class="wpiaf-help-tip wpiaf-tips" data-tip="' . $tip . '"></span>';
+	}
 }

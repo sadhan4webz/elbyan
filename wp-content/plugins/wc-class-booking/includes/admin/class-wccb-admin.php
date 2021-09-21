@@ -75,7 +75,7 @@ class WCCB_Admin {
 	public function change_order_item_meta_key( $display_key, $meta, $item ) {
 
 	    // Change display label for specific order item meta key
-	    if( is_admin() && $item->get_type() === 'line_item' && $meta->key === 'tutor_id' ) {
+	    if( is_admin() && $item->get_type() === 'line_item' && $meta->key === '_tutor_id' ) {
 	        $display_key = __( 'Selected Tutor' , PLUGIN_TEXT_DOMAIN );
 	    }
 
@@ -85,7 +85,7 @@ class WCCB_Admin {
 	public function change_order_item_meta_value( $value , $meta , $item ) {
 		
 		//Change display value for specific order item meta key value
-    	if( is_admin() && $meta->key === 'tutor_id' && $item->get_type() === 'line_item' ) {
+    	if( is_admin() && $meta->key === '_tutor_id' && $item->get_type() === 'line_item' ) {
     		$tutor = get_userdata($value);
     		$value = __( $tutor->display_name , PLUGIN_TEXT_DOMAIN );
     	}

@@ -16,10 +16,12 @@ class WCCB_Install {
 		set_transient( 'wccb_installing', 'yes', MINUTE_IN_SECONDS * 10 );		
 		self::create_roles();
 		self::create_tables();
+		WCCB_Scheduler::activate_schedules();
 		delete_transient( 'wccb_installing' );
 	}
 	public static function uninstall() {
 		self::remove_roles();
+		WCCB_Scheduler::deactivate_schedules();
 	}
 	
 	public static function create_roles() {
@@ -84,14 +86,24 @@ class WCCB_Install {
 								  `tutor_id` varchar(100) NOT NULL,
 								  `hour_id` varchar(100) NOT NULL,
 								  `product_id` varchar(100) NOT NULL,
+								  `amount` varchar(100) NOT NULL,
 								  `class_date` date NOT NULL,
 								  `class_time` varchar(100) NOT NULL,
 								  `booking_date` datetime NOT NULL,
 								  `status` varchar(100) NOT NULL,
 								  PRIMARY KEY (ID)
 								) $collate"
+			),
+			array(
+				'table_name' => $wpdb->prefix.'booking_history_meta',
+				'sql_query'  => "CREATE TABLE IF NOT EXISTS {table_name} (
+								  `ID` int(11) NOT NULL AUTO_INCREMENT,
+								  `booking_id` varchar(100) NOT NULL,
+								  `meta_key` varchar(1000) NOT NULL,
+								  `meta_value` longtext NOT NULL
+								  PRIMARY KEY (ID)
+								) $collate"
 			)
-
 			
 		);
 

@@ -44,7 +44,7 @@ class WCCB_Frontend {
 		add_action( 'woocommerce_single_product_summary', array( 'WCCB_Frontend_View' , 'show_product_price' ), 10 );
 		add_action( 'woocommerce_single_product_summary', array( 'WCCB_Frontend_View' , 'wccb_package_add_to_cart' ), 60 );
 
-		add_action( 'woocommerce_after_single_product_summary', array( 'WCCB_Frontend_View' , 'show_tutor_profile' ), 20 );
+		add_action( 'woocommerce_after_single_product_summary', array( $this , 'get_tutor_profile' ), 20 );
 		add_action( 'woocommerce_after_single_product_summary', array( 'WCCB_Frontend_View' , 'render_tutor_availability_container'), 25 );
 
 		add_action( 'woocommerce_after_single_product' , function(){echo '</form>';} , 10 );
@@ -95,7 +95,7 @@ class WCCB_Frontend {
 		global $wpdb;
 		$table_name = $wpdb->prefix.'booking_history';
 
-		$query         = "SELECT * FROM $table_name WHERE tutor_id='".$_REQUEST['tutor_id']."' and class_date >= '".date('Y-m-d')."'";
+		$query         = "SELECT * FROM $table_name WHERE tutor_id='".$_REQUEST['tutor_id']."' and class_date >= '".date('Y-m-d')."' and status = 'Upcoming'";
 		$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 		foreach ($results as $key => $value) {
 			$slot_booked_array[] = $value['class_date'].'|'.$value['class_time'];
@@ -163,6 +163,47 @@ class WCCB_Frontend {
 		return $cart_item_data;
 	}
 
+	public static function get_avilability_times_from_post( $field_array ) {
+		$availability_times = array();
+
+		foreach (WCCB_Helper::get_weekdays_array() as $key => $value) {
+			$lower_key = strtolower($key);
+			$availability_times[$lower_key]['is_unavailable'] =  $field_array[$lower_key.'_is_unavailable'];
+
+			if (!empty($field_array[$lower_key.'_start_time'])) {
+				$temp_start_time = $field_array[$lower_key.'_start_time'];
+				$temp_end_time   = $field_array[$lower_key.'_end_time'];
+
+				foreach ($field_array[$lower_key.'_start_time'] as $key2 => $value2 ) {
+					if ($temp_start_time[$key2] < $temp_end_time[$key2] ) {
+						$time_flag = 1;
+
+						foreach ( $availability_times[$lower_key]['available_time'] as $key3 => $value3) {
+							if ($temp_start_time[$key2] == $value3['start_time'] && $temp_end_time[$key2] == $value3['end_time']) {
+								$time_flag = 0;
+							}
+							if ($temp_start_time[$key2] >= $value3['end_time']) {
+								$time_flag = 1;
+							}
+							else {
+								$time_flag = 0;
+							}
+						}
+
+						if ($time_flag) {
+							$availability_times[$lower_key]['available_time'][] = array(
+								'start_time' => $temp_start_time[$key2], 
+								'end_time'   => $temp_end_time[$key2]
+							);
+						}
+					}
+				}
+			}
+		}
+
+		return $availability_times;
+	}
+
 	public function validate_register_field( $username , $email , $errors ) {
 		if (empty($_POST['first_name'])) {
 			$errors->add( 'first_name_error' , __('First name is required field' , PLUGIN_TEXT_DOMAIN) );
@@ -178,18 +219,38 @@ class WCCB_Frontend {
 		}
 
 		if ($_POST['user_role'] == 'wccb_tutor' ) {
+			$field_array        = $_POST;
+			$availability_times = array();
 
 			foreach (WCCB_Helper::get_weekdays_array() as $key => $value) {
 				$lower_key = strtolower($key);
+				$availability_times[$lower_key]['is_unavailable'] =  $field_array[$lower_key.'_is_unavailable'];
 
-				if (empty($_POST[$lower_key.'_is_unavailable'])) {
+				if (!empty($field_array[$lower_key.'_start_time'])) {
+					$temp_start_time = $field_array[$lower_key.'_start_time'];
+					$temp_end_time   = $field_array[$lower_key.'_end_time'];
 
-					if (empty($_POST[$lower_key.'_start_time']) && $_POST[$lower_key.'_start_time'] != '0') {
-						$errors->add( $lower_key.'_start_time_error' , __( $key.' start time is required field' , PLUGIN_TEXT_DOMAIN ) );
-					}
+					foreach ($field_array[$lower_key.'_start_time'] as $key2 => $value2 ) {
+						if ($temp_start_time[$key2] < $temp_end_time[$key2] ) {
+							$time_flag = 1;
 
-					if (empty($_POST[$lower_key.'_end_time']) && $_POST[$lower_key.'_end_time'] != '0') {
-						$errors->add( $lower_key.'_end_time_error' , __( $key.' end time is required field' , PLUGIN_TEXT_DOMAIN ) );
+							foreach ( $availability_times[$lower_key]['available_time'] as $key3 => $value3) {
+								if ($temp_start_time[$key2] == $value3['start_time'] && $temp_end_time[$key2] == $value3['end_time']) {
+									$time_flag = 0;
+									$errors->add( 'availability_time_error' , __('Start time and end time is same for '.$lower_key , PLUGIN_TEXT_DOMAIN) );
+								}
+								if ($temp_start_time[$key2] >= $value3['end_time']) {
+									$time_flag = 1;
+								}
+								else {
+									$time_flag = 0;
+									$errors->add( 'availability_time_error' , __('Start time and end time is not properly set for '.$lower_key , PLUGIN_TEXT_DOMAIN) );
+								}
+							}
+						}
+						else {
+							$errors->add( 'availability_time_error' , __('Start time is greater than end time for '.$lower_key , PLUGIN_TEXT_DOMAIN) );
+						}
 					}
 				}
 			}
@@ -211,21 +272,13 @@ class WCCB_Frontend {
 		}
 
 		if ($_POST['user_role'] == 'wccb_tutor' ) {
-
-			$availability = array();
-			foreach (WCCB_Helper::get_weekdays_array() as $key => $value) {
-				$lower_key = strtolower($key);
-				$temp_day  = array(
-					'is_unavailable' => $_POST[$lower_key.'_is_unavailable'],
-					'start_time'     => $_POST[$lower_key.'_start_time'],
-					'end_time'       => $_POST[$lower_key.'_end_time']
-				);
-
-				$availability[$lower_key] = $temp_day;
-			}
-
-			update_user_meta( $customer_id , 'availability' , $availability );
+			$availability_times = WCCB_Frontend::get_avilability_times_from_post($_POST);
+			update_user_meta( $customer_id , 'availability' , $availability_times );
 		}
+	}
+
+	public static function get_tutor_profile() {
+		echo WCCB_Frontend_View::show_tutor_profile();
 	}
 
 	public static function get_date_wise_slots( $slots ) {
@@ -247,126 +300,12 @@ class WCCB_Frontend {
 		$table_name    = $wpdb->prefix.'booking_history';
 		$passed         = true;
 
-		$query = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date='".$slot_date."' and class_time='".$slot_time."'";
+		$query = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date='".$slot_date."' and class_time='".$slot_time."' and status = 'Upcoming'";
 		$results = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 
 		if (count($results)>0) {
 			$passed = false;
 		}
-
-		return $passed;
-	}
-
-	public function date_wise_slot_hour_validation( $date_wise_slot , $cart_quantity = 0 ) {
-		global $wpdb;
-		$table_name            = $wpdb->prefix.'hour_history';
-		$db_slot_hours  = array();
-		$passed                = true;
-		$total_available_hours = $cart_quantity;
-		$request_total_slots   = 0;
-
-		//Current user total hours for next 35 days
-		$query   = "SELECT * FROM $table_name WHERE user_id='".get_current_user_id()."'";
-		$results = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
-
-		foreach ($results as $key => $value) {
-			$days = WCCB_Helper::get_date_difference( $value['date_purchased'] , date('Y-m-d') );
-			if ($days < HOUR_EXPIRE_DAYS ) {
-				$total_available_hours += $value['purchased_hours'] - $value['used_hours'];
-			}
-		}
-		//////////////////////////
-
-
-		//Collect available hours based on date
-		foreach ($date_wise_slot  as $key => $value) {
-			$request_total_slots += count($value);
-			$query   = "SELECT * FROM $table_name WHERE user_id='".get_current_user_id()."'";
-			$results = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
-
-			foreach ($results as $key2 => $value2) {
-				$days = WCCB_Helper::get_date_difference( $value2['date_purchased'] , $key );
-				if ($days < HOUR_EXPIRE_DAYS ) {
-					if (empty($db_slot_hours[$key])) {
-						$db_slot_hours[$key] = $value2['purchased_hours'] - $value2['used_hours'];
-					}
-					else {
-						$db_slot_hours[$key] += $value2['purchased_hours'] - $value2['used_hours'];
-					}
-				}
-			}
-		}
-
-		//print_r($db_slot_hours);
-		//echo '<br><br>'.$total_available_hours;
-		//Print_r($date_wise_slot);
-		//////
-
-		//Check if total available hour is greater than request slots
-		if ($request_total_slots > $total_available_hours ) {
-			$passed = false;
-			wc_add_notice( __('You have added more slots than you have total available hours' , PLUGIN_TEXT_DOMAIN ) , 'error');
-		}
-
-		//Check hour is available for the slot
-		foreach ($date_wise_slot as $key => $value) {
-			if (!array_key_exists($key, $db_slot_hours)) {
-				$passed = false;
-				wc_add_notice( __('You don\'t have available hours to book slot for the date -'.wp_date('D M j, Y',strtotime($key)), PLUGIN_TEXT_DOMAIN ) , 'error');
-			}
-			else {
-
-				$available_hour = $db_slot_hours[$key]+$cart_quantity;
-				if ($available_hour < count($date_wise_slot[$key])) {
-					$passed = false;
-					wc_add_notice( __('You don\'t have enough hours to book slot for the date -'.wp_date('D M j, Y',strtotime($key)).'. Available hours: '.$db_slot_hours[$key], PLUGIN_TEXT_DOMAIN ) , 'error');
-				}
-			}
-		}
-		///////
-
-		return $passed;
-	}
-
-	public function date_wise_slot_hour_validation_v2( $slot_date , $slot_count , $cart_quantity = 0 ) {
-		global $wpdb;
-		$table_name     = $wpdb->prefix.'hour_history';
-		$db_slot_hours  = array();
-		$passed         = true;
-
-
-		$query   = "SELECT * FROM $table_name WHERE user_id='".get_current_user_id()."'";
-		$results = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
-		foreach ($results as $key => $value) {
-			$days = WCCB_Helper::get_date_difference( $value['date_purchased'] , $slot_date );
-			if ($days < HOUR_EXPIRE_DAYS ) {
-				if (empty($db_slot_hours[$slot_date])) {
-					$db_slot_hours[$slot_date] = $value['purchased_hours'] - $value['used_hours'];
-				}
-				else {
-					$db_slot_hours[$slot_date] += $value['purchased_hours'] - $value['used_hours'];
-				}
-			}
-		}
-
-		//print_r($db_slot_hours);
-		//echo '<br><br>';
-		//Print_r($date_wise_slot);
-		//////
-
-		//Check hour is available for the slot
-		if (!array_key_exists($slot_date, $db_slot_hours)) {
-			$passed = false;
-			wc_add_notice( __('You don\'t have available hours to book slot for the date -'.wp_date('D M j, Y',strtotime($slot_date)), PLUGIN_TEXT_DOMAIN ) , 'error');
-		}
-		else {
-			$available_hour = $db_slot_hours[$key]+$cart_quantity;
-			if ( $available_hour < $slot_count ) {
-				$passed = false;
-				wc_add_notice( __('You don\'t have enough hours to book slot for the date -'.wp_date('D M j, Y',strtotime($slot_date)).'. Available hours :'.$db_slot_hours[$key], PLUGIN_TEXT_DOMAIN ) , 'error');
-			}
-		}
-		///////
 
 		return $passed;
 	}
@@ -389,19 +328,8 @@ class WCCB_Frontend {
 					}
 					
 
-					//Validation for guest user
-
 					//Collecting slots date wise
 					$date_wise_slot = WCCB_Frontend::get_date_wise_slots( $slot );
-
-					/*if (!WC()->cart->is_empty()) {
-						// Loop over $cart items
-						foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-							if ($product_id == $cart_item['product_id']) {
-								$quantity += $cart_item['quantity'];
-							}
-						}
-					}*/
 
 					if ( $quantity < count($slot)) {
 						$passed        = false;
@@ -422,14 +350,6 @@ class WCCB_Frontend {
 							}
 						}
 					}
-					//Validation end for guest user
-
-					//Get available credit for logged in user for that particular slot date
-					/*if (get_current_user_id() && $availability_flag == 0 && $quantity_flag == 1) {
-
-						$passed        = $this->date_wise_slot_hour_validation( $date_wise_slot , $quantity );
-						$quantity_flag = 0;
-					}*/
 
 					if ($quantity_flag) {
 						wc_add_notice( __('You have added more slots than you have available hours' , PLUGIN_TEXT_DOMAIN ) , 'error');
@@ -495,7 +415,7 @@ class WCCB_Frontend {
 
 			//Store tutor id as order item meta
 			$item->add_meta_data(
-				__( "tutor_id", PLUGIN_TEXT_DOMAIN ),
+				__( "_tutor_id", PLUGIN_TEXT_DOMAIN ),
 				$values['tutor_id'],
 				true
 			);
@@ -513,9 +433,9 @@ class WCCB_Frontend {
 	}
 
 	public function order_item_name($product_name , $item ) {
-		if( !empty( $item['tutor_id'] ) ) {
-			$tutor_info    = get_userdata($item['tutor_id']);
-			$product_name .= sprintf('<ul><li>%s: %s</li></ul>', __( 'Tutor Name' , PLUGIN_TEXT_DOMAIN ), $tutor_info->display_name);
+		if( !empty( $item['_tutor_id'] ) ) {
+			$tutor_info    = get_userdata($item['_tutor_id']);
+			$product_name .= sprintf('<p>%s: %s</p>', __( 'Tutor Name' , PLUGIN_TEXT_DOMAIN ), $tutor_info->display_name);
 		}
 
 		return $product_name;
@@ -541,7 +461,7 @@ class WCCB_Frontend {
 		            $product = $item->get_product();
 		            if (!is_bool($product)) {
 						if($product->get_type() == "wccb_package") {
-							$tutor_id  = $item->get_meta('tutor_id');
+							$tutor_id  = $item->get_meta('_tutor_id');
 							$slots     = $item->get_meta('booking_slots');
 
 							if (!empty($slots)) {
@@ -573,6 +493,7 @@ class WCCB_Frontend {
 										$data = array(
 											'user_id'      => get_current_user_id(),
 											'product_id'   => $item->get_product_id(),
+											'amount'       => $product->get_regular_price(),
 											'tutor_id'     => $tutor_id,
 											'hour_id'      => $hour_id,
 											'class_date'   => $key,
@@ -582,6 +503,8 @@ class WCCB_Frontend {
 										);
 
 										$wpdb->insert($table_name , $data);
+
+										do_action('class_booking_notification' , $wpdb->insert_id);
 									}
 								}
 							}
