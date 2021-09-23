@@ -2,7 +2,8 @@
 *.htacces
 wp-admin
 wp-includes
-wp-content/plugins/digits
+wp-content/plugins/help-tip
+wp-content/plugins/oxygen-woocommerce.1.4.zip
 wp-content/*.log
 wp-content/*.php
 wp-content/themes/
