@@ -5,6 +5,11 @@ jQuery(function($){
 		// init the basic tooltip
 
 		WCCB.showTip( '.wpiaf-tips', {attribute:"data-tip",fadeIn:50,fadeOut:50,delay:200,keepAlive:!0} );
+
+		$( ".date_picker" ).datepicker({
+			dateFormat:'dd/mm/yy',
+			maxDate: 0
+		});
 	});
 
 	var wcqi_refresh_quantity_increments = function () {

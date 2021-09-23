@@ -127,7 +127,7 @@ class WCCB_Frontend_Myaccount {
 								else {
 									$time_flag = 0;
 									$validation_flag = 0;
-									wc_add_notice( __('Start time and end time is not properly set for '.$lower_key , PLUGIN_TEXT_DOMAIN) , 'error' );
+									wc_add_notice( __('Start time and end time ordering is not properly set for '.$lower_key , PLUGIN_TEXT_DOMAIN) , 'error' );
 								}
 							}
 
@@ -174,8 +174,10 @@ class WCCB_Frontend_Myaccount {
 			$datetime1       = new DateTime(date('Y-m-d h:i a'));
 			$datetime2       = new DateTime($class_date_time);
 			$interval        = $datetime1->diff($datetime2);
+			$days            = $interval->d;
 			$hour            = $interval->h;
-			if ( $hour > CANCEL_CLASS_BEFORE_HOURS  || $role_key != 'wccb_student' ) {
+
+			if ( ($days > 0 || $hour > CANCEL_CLASS_BEFORE_HOURS)  || $role_key != 'wccb_student' ) {
 				//Update hour for cancel booking
 				$hour_table  = $wpdb->prefix.'hour_history';
 				$query2      = "SELECT * FROM $hour_table WHERE ID='".$results[0]['hour_id']."'";
@@ -233,15 +235,20 @@ class WCCB_Frontend_Myaccount {
 		}
 	}
 
-	public static function get_student_total_available_hours( $student_id ) {
+	public static function get_student_total_available_hours( $student_id , $product_id = '' ) {
 		if (empty($student_id)) {
 			return;
 		}
 		global $wpdb;
 		$table_name = $wpdb->prefix.'hour_history';
 		$total_available_hours = 0;
-
-		$query   = "SELECT * FROM $table_name WHERE user_id='".$student_id."'";
+		if (empty($product_id)) {
+			$query   = "SELECT * FROM $table_name WHERE user_id='".$student_id."'";
+		}
+		else {
+			$query   = "SELECT * FROM $table_name WHERE user_id='".$student_id."' and product_id='".$product_id."'";
+		}
+		
 		$results = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 
 		foreach ($results as $key => $value) {
@@ -254,7 +261,7 @@ class WCCB_Frontend_Myaccount {
 		return $total_available_hours;
 	}
 
-	public static function get_student_date_wise_available_hours( $student_id ) {
+	public static function get_student_date_wise_available_hours( $student_id , $product_id = '' ) {
 		if (empty($student_id)) {
 			return;
 		}
@@ -262,7 +269,13 @@ class WCCB_Frontend_Myaccount {
 		$table_name = $wpdb->prefix.'hour_history';
 		$available_hours = array();
 
-		$query   = "SELECT * FROM $table_name WHERE user_id='".$student_id."' order by ID asc";
+		if (empty($product_id)) {
+			$query   = "SELECT * FROM $table_name WHERE user_id='".$student_id."' and product_id='".$product_id."' order by ID asc";
+		}
+		else {
+			$query   = "SELECT * FROM $table_name WHERE user_id='".$student_id."' order by ID asc";
+		}
+		
 		$results = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 
 		foreach ($results as $key => $value) {
@@ -282,8 +295,8 @@ class WCCB_Frontend_Myaccount {
 		$slots                     = $field_array['slot'];
 		$date_wise_slot            = WCCB_Frontend::get_date_wise_slots( $slots );
 		$total_requested_slot      = count($slots);
-		$total_available_hours     = WCCB_Frontend_Myaccount::get_student_total_available_hours($field_array['user_id']);
-		$date_wise_available_hours = WCCB_Frontend_Myaccount::get_student_date_wise_available_hours($field_array['user_id']);
+		$total_available_hours     = WCCB_Frontend_Myaccount::get_student_total_available_hours($field_array['user_id'] , $field_array['product_id']);
+		$date_wise_available_hours = WCCB_Frontend_Myaccount::get_student_date_wise_available_hours($field_array['user_id'] , $field_array['product_id'] );
 
 		if (!empty($date_wise_slot)) {
 			foreach ($date_wise_slot as $key => $value) {
@@ -399,8 +412,9 @@ class WCCB_Frontend_Myaccount {
 			$datetime1       = new DateTime(date('Y-m-d h:i a'));
 			$datetime2       = new DateTime($class_date_time);
 			$interval        = $datetime1->diff($datetime2);
+			$days            = $interval->h;
 			$hour            = $interval->h;
-			if ( $hour > RESCHEDULE_CLASS_BEFORE_HOURS || $role_key == 'administrator' ) {
+			if ( ($days > 0 || $hour > RESCHEDULE_CLASS_BEFORE_HOURS) || $role_key == 'administrator' ) {
 
 				$slot_date_time = explode('|', $slot[0]);
 

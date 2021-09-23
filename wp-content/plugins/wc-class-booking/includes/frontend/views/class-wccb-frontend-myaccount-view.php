@@ -310,7 +310,18 @@ class WCCB_Frontend_Myaccount_View {
 				
 				  </div>
 				  <div id="tabs-2">
-				  	<h3><?php echo __('List of Past Classes' , PLUGIN_TEXT_DOMAIN) ;?></h3>
+				  	<div class="date_filter_wrapper">
+				  		<div class="from_date_wrapper">
+				  			<label>From Date :</label>
+				  			<input type="text" name="start_date" id="start_date" readonly="readonly" class="date_picker" value="<?php echo !empty($_REQUEST['start_date']) ? $_REQUEST['start_date'] : '';?>">
+				  		</div>
+				  		<div class="from_date_wrapper">
+				  			<label>To Date :</label>
+				  			<input type="text" name="end_date" id="end_date" readonly="readonly" class="date_picker" value="<?php echo !empty($_REQUEST['end_date']) ? $_REQUEST['end_date'] : '';?>">
+				  		</div>
+				  		<button type="submit" name="search_booking">Search</button>
+				  	</div>
+				  	<h3><?php echo __('List of Past Classes of '.$tutor->display_name , PLUGIN_TEXT_DOMAIN) ;?></h3>
 				  	<table class="table table-bordered" width="100%" border="1">
 				  		<thead>
 				  			<tr>
@@ -331,7 +342,13 @@ class WCCB_Frontend_Myaccount_View {
 				  		</thead>
 						
 						<?php
-						$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date < '".date('Y-m-d')."'";
+						if (!empty($_REQUEST['start_date']) && !empty($_REQUEST['end_date'])) {
+							$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date between '".date('Y-m-d', strtotime($_REQUEST['start_date']))."' and '".date('Y-m-d', strtotime($_REQUEST['end_date']))."'";
+						}
+						else {
+							$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date < '".date('Y-m-d')."'";
+						}
+						
 						$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 						if (count($results)>0) {
 							foreach ($results as $key => $value) {
@@ -366,6 +383,17 @@ class WCCB_Frontend_Myaccount_View {
 								</tr>
 								<?php
 							}
+
+							?>
+							<tr>
+								<th colspan="3" align="right">
+									Total Class Completed 
+								</th>
+								<td>
+									<?php echo count($results);?>
+								</td>
+							</tr>
+							<?php
 						}
 						else {
 							?>
@@ -393,6 +421,7 @@ class WCCB_Frontend_Myaccount_View {
 	public static function render_my_account_classes_content() {
 		global $wpdb;
 		$table_name    = $wpdb->prefix.'booking_history';
+		$hour_table    = $wpdb->prefix.'hour_history';
 		$show_table    = true;
 
 		if ($_REQUEST['reschedule'] == 'yes' && !empty($_REQUEST['booking_id'])) {
@@ -464,25 +493,24 @@ class WCCB_Frontend_Myaccount_View {
 					<input type="hidden" name="user_id" value="<?php echo $_REQUEST['user_id'];?>">
 					<?php wp_nonce_field( 'save_booking', 'save_booking_nonce_field' ); ?>
 					<div class="field-group product_container">
+						<?php
+						$query      = "select * from $hour_table where user_id='".get_current_user_id()."' group by product_id";
+						$hours      = $wpdb->get_results( $query ); // db call ok. no cache ok
+						?>
 						<label><?php echo __('Class Name' , PLUGIN_TEXT_DOMAIN);?></label>
 						<select class="select get_tutor_profile" name="product_id" id="product_id">
 							<option value="">Select</option>
 							<?php
-							$args = array(
-							    'post_type'    => 'product'
-							);
-							$query = new WP_Query( $args );
-
-							if($query->have_posts()) {
-						      while($query->have_posts()) {
-						         $query->the_post();
-						         $product = wc_get_product(get_the_ID());
-						         if ($product->is_type( 'wccb_package' ) ) {
-						         	?>
-						         	<option value="<?php echo $product->get_id();?>" <?php if($_REQUEST['product_id'] == $product->get_id()){?> selected="selected" <?php }?>><?php echo $product->get_name().' - '.wc_price($product->get_regular_price()).'/ Hour';?></option>
-						         	<?php
-						         }
-						      }
+							if (count($hours)>0 ) {
+								foreach ($hours as $hour) {
+									$product    = wc_get_product($hour->product_id);
+									$available_hour = WCCB_Frontend_Myaccount::get_student_total_available_hours(get_current_user_id() , $product->get_id());
+									if ($available_hour > 0 ) {
+										?>
+										<option value="<?php echo $product->get_id();?>" <?php if($_REQUEST['product_id'] == $product->get_id()){?> selected="selected" <?php }?>><?php echo $product->get_name().' - (Available hours : '.$available_hour.')';?></option>
+										<?php
+									}
+								}
 							}
 							?>
 						</select>
@@ -494,10 +522,9 @@ class WCCB_Frontend_Myaccount_View {
 						}
 						?>
 					</div>
-					<div class="slot_selected_container"></div>
-					<div class="tutor_availability_main_wrapper">
-						
-					</div>
+					<?php
+					echo WCCB_Frontend_View::render_tutor_availability_container();
+					?>
 					<div class="field-group">
 						<button type="submit" name="save_reschedule" class="woocommerce-Button button">Save Booking</button>
 					</div>
@@ -808,6 +835,9 @@ class WCCB_Frontend_Myaccount_View {
 							<?php echo __('SI. NO.' , PLUGIN_TEXT_DOMAIN);?>
 						</th>
 						<th>
+							<?php echo __('Product' , PLUGIN_TEXT_DOMAIN);?>
+						</th>
+						<th>
 							<?php echo __('Purchased Hours' , PLUGIN_TEXT_DOMAIN);?>
 						</th>
 						<th>
@@ -842,6 +872,11 @@ class WCCB_Frontend_Myaccount_View {
 								<?php echo $key+1;?>
 							</td>
 							<td>
+								<a href="<?php echo get_permalink($value['product_id']);?>" target="_blank">
+									<?php echo get_the_title($value['product_id']);?>
+								</a>
+							</td>
+							<td>
 								<?php echo (int)$value['purchased_hours'];?>
 							</td>
 							<td>
@@ -863,7 +898,7 @@ class WCCB_Frontend_Myaccount_View {
 				else {
 					?>
 					<tr>
-						<td colspan="6">
+						<td colspan="7">
 							<?php echo __('No hours found.' , PLUGIN_TEXT_DOMAIN);?>
 						</td>
 					</tr>

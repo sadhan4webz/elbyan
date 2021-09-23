@@ -110,14 +110,15 @@ class WCCB_Scheduler {
 			foreach( $results as $row ) {
 				$class_time_exp = explode(' ' , $row->class_time);
 				$class_time     = $row->class_date.' '.$class_time_exp[0].':00 '.$class_time_exp[1];
-				$datetime1      = new DateTime(date('h:i a'));
+				$datetime1      = new DateTime(date('Y-m-d h:i a'));
 				$datetime2      = new DateTime($class_time);
 				$interval       = $datetime1->diff($datetime2);
+				$days           = $interval->d;
 				$hour           = $interval->h;
 				$minute         = $interval->i;
 				$total_minute   = ($hour * 60 + $minute);
 
-				if ( $total_minute < SEND_CLASS_REMINDER_BEFORE ) {
+				if ( $days == 0 && $total_minute < SEND_CLASS_REMINDER_BEFORE ) {
 					$user  = get_userdata($row->user_id);
 					$tutor = get_userdata($row->tutor_id);
 					//hook for notification of class

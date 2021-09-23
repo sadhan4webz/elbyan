@@ -434,8 +434,19 @@ class WCCB_Frontend {
 
 	public function order_item_name($product_name , $item ) {
 		if( !empty( $item['_tutor_id'] ) ) {
-			$tutor_info    = get_userdata($item['_tutor_id']);
-			$product_name .= sprintf('<p>%s: %s</p>', __( 'Tutor Name' , PLUGIN_TEXT_DOMAIN ), $tutor_info->display_name);
+			$tutor_info        = get_userdata($item['_tutor_id']);
+			if (!empty($tutor_info->display_name)) {
+				$product_name .= sprintf('<p>%s: %s</p>', __( 'Tutor Name' , PLUGIN_TEXT_DOMAIN ), $tutor_info->display_name);
+			}
+
+			$slots         = $item['booking_slots'];
+			if (!empty($slots)) {
+				$num_slots = 0;
+				foreach ($slots as $key => $value) {
+					$num_slots += count($value);
+				}
+				$product_name .= sprintf('<p>%s: %s</p>', __( 'Number of slots' , PLUGIN_TEXT_DOMAIN ), $num_slots);
+			}
 		}
 
 		return $product_name;
@@ -475,14 +486,17 @@ class WCCB_Frontend {
 							$table_name = $wpdb->prefix.'hour_history';
 							$data       = array(
 								'user_id'         => get_current_user_id(),
+								'product_id'      => $product->get_id(),
 								'order_id'        => $order->get_id(),
 								'purchased_hours' => $item->get_quantity(),
 								'date_purchased'  => wp_date('Y-m-d H:i:s'),
 								'used_hours'      => $used_hours
 
 							);
+
+							
 							$wpdb->insert($table_name , $data);
-							$hour_id   = $lastid = $wpdb->insert_id;
+							$hour_id  = $wpdb->insert_id;
 							//End hour history
 
 							//Insert slots into booking history

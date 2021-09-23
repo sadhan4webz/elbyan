@@ -71,9 +71,10 @@ class WCCB_Install {
 								  `ID` int(11) NOT NULL AUTO_INCREMENT,
 								  `user_id` varchar(100) NOT NULL,
 								  `order_id` varchar(100) NOT NULL,
+								  `product_id` varchar(100) NOT NULL,
 								  `purchased_hours` varchar(100) NOT NULL,
-								  `used_hours` varchar(100) NOT NULL,
-								  `expired_hours` varchar(100) NOT NULL,
+								  `used_hours` varchar(100)  NULL DEFAULT NULL,
+								  `expired_hours` varchar(100)  NULL DEFAULT NULL,
 								  `date_purchased` datetime NOT NULL,
 								  PRIMARY KEY (ID)
 								) $collate"

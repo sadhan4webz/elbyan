@@ -102,7 +102,7 @@ class WCCB_Settings {
 
 	public static function get_notification_cron_interval() {
 
-		return 'daily';
+		return 'hourly';
 	}
 
 	public static function get_reminder_cron_interval() {

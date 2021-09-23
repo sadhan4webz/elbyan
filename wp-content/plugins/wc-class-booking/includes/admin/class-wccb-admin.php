@@ -18,6 +18,8 @@ class WCCB_Admin {
 		add_action( 'woocommerce_product_data_panels' , array( 'WCCB_Admin_View' , 'wccb_package_tab_product_tab_content') );
 		add_action( 'woocommerce_process_product_meta' , array( $this , 'save_tutor_for_package' ) );
 
+		add_action( 'woocommerce_after_order_itemmeta', array( $this , 'display_admin_order_item_custom_button'), 10, 3 );
+
 		//Filters
 
 		add_filter( 'product_type_selector', array( $this , 'add_custom_product_type') );
@@ -91,6 +93,22 @@ class WCCB_Admin {
     	}
 
 		return $value;
+	}
+
+	function display_admin_order_item_custom_button( $item_id, $item, $product ){
+	    // Only "line" items and backend order pages
+	    if( ! ( is_admin() && $item->is_type('line_item') ) )
+	        return;
+
+	    $booking_slots = $item->get_meta('booking_slots'); // Get custom item meta data (array)
+
+	    if( ! empty($booking_slots) ) {
+	        $num_slots = 0;
+			foreach ($booking_slots as $key => $value) {
+				$num_slots += count($value);
+			}
+	        echo '<p><b>Number of slots :</b> '.$num_slots.'</p>';
+	    }
 	}
 
 }
