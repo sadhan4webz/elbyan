@@ -1,9 +1,9 @@
 <?php
 function register_product_type() {
-	class WC_Product_WCCB_Package extends WC_Product {
+	class WC_Product_WCCB_Course extends WC_Product {
 		
 		public function __construct( $product ) {
-			$this->product_type = 'wccb_package';
+			$this->product_type = 'wccb_course';
 			parent::__construct($product);
 		}
 

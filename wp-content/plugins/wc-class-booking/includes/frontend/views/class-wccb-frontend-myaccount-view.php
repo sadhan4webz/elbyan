@@ -276,9 +276,12 @@ class WCCB_Frontend_Myaccount_View {
 											<?php echo get_the_title( $value['product_id'] );;?>
 										</a>
 										<?php
-										if (!empty($notes[0]->meta_value)) {
+										/*if (!empty($notes[0]->meta_value)) {
 											echo WCCB_Helper::help_tip($notes[0]->meta_value);
 										}
+										else {
+											echo WCCB_Helper::help_tip('No notes found');
+										}*/
 										?>
 									</td>
 									<td>
@@ -289,7 +292,7 @@ class WCCB_Frontend_Myaccount_View {
 										<?php echo $user->display_name;?>
 									</td>
 									<td>
-										<a href="?show_notes=yes&booking_id=<?php echo $value['ID'];?>&notes_url_nonce=<?php echo wp_create_nonce('notes_url_nonce');?>">Notes</a> |
+										<!-- <a href="?show_notes=yes&booking_id=<?php echo $value['ID'];?>&notes_url_nonce=<?php echo wp_create_nonce('notes_url_nonce');?>">Notes</a> | -->
 										<a href="#" class="cancel_booking" data-booking_id="<?php echo $value['ID'];?>" data-cancel_booking_url_nonce="<?php echo wp_create_nonce('cancel_booking_url_nonce');?>"><?php echo __('Cancel', PLUGIN_TEXT_DOMAIN);?></a>
 									</td>
 								</tr>
@@ -367,9 +370,12 @@ class WCCB_Frontend_Myaccount_View {
 										</a>
 
 										<?php
-										if (!empty($notes[0]->meta_value)) {
+										/*if (!empty($notes[0]->meta_value)) {
 											echo WCCB_Helper::help_tip($notes[0]->meta_value);
 										}
+										else {
+											echo WCCB_Helper::help_tip('No notes found.');
+										}*/
 										?>
 									</td>
 									<td>
@@ -651,9 +657,13 @@ class WCCB_Frontend_Myaccount_View {
 										</a>
 
 										<?php
-										if (!empty($notes[0]->meta_value)) {
+										/*if (!empty($notes[0]->meta_value)) {
 											echo WCCB_Helper::help_tip($notes[0]->meta_value);
 										}
+										else {
+
+											echo WCCB_Helper::help_tip('No notes found.');
+										}*/
 										?>
 									</td>
 									<td>
@@ -726,9 +736,12 @@ class WCCB_Frontend_Myaccount_View {
 											<?php echo get_the_title( $value['product_id'] );?>
 										</a>
 										<?php
-										if (!empty($notes[0]->meta_value)) {
+										/*if (!empty($notes[0]->meta_value)) {
 											echo WCCB_Helper::help_tip($notes[0]->meta_value);
 										}
+										else {
+											echo WCCB_Helper::help_tip('No notes found.');
+										}*/
 										?>	
 										
 									</td>

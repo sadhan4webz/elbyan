@@ -213,7 +213,7 @@ class WCCB_Frontend_View {
 	public static function show_product_description() {
 		global $product;
 
-		if ($product->get_type() == 'wccb_package' ) {
+		if ($product->get_type() == 'wccb_course' ) {
 			?>
 			<div class="woocommerce-product-details__short-description">
 				<?php echo $product->get_description();?>
@@ -231,11 +231,11 @@ class WCCB_Frontend_View {
 		<?php
 	}
 
-	public static function wccb_package_add_to_cart () {
+	public static function wccb_course_add_to_cart () {
 	    global $product;
 
 	    // Make sure it's our custom product type
-	    if ( 'wccb_package' == $product->get_type() ) {
+	    if ( 'wccb_course' == $product->get_type() ) {
 	        ?>
 				<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
 
@@ -245,17 +245,26 @@ class WCCB_Frontend_View {
 				<div class="quantity_wrapper">
 					<label>Hours</label>
 					<?php
-					woocommerce_quantity_input(
-						array(
-							'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ),
-							'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
-							'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // WPCS: CSRF ok, input var ok.
-						)
-					);
+					$course_type = get_post_meta( $product->get_id() , 'course_type' , true );
+					if ($course_type == 'fixed') {
+						$course_quantity = get_post_meta( $product->get_id() , 'course_quantity' , true );
+						?>
+						<input type="hidden" name="quantity" id="quantity" value="<?php echo $course_quantity;?>">
+						<div class="quantity_label"><?php echo $course_quantity;?></div>
+						<?php
+					}
+					else {
+						woocommerce_quantity_input(
+							array(
+								'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ),
+								'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
+								'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // WPCS: CSRF ok, input var ok.
+							)
+						);
+					}
 					?>
 				</div>
 				<?php
-
 				do_action( 'woocommerce_after_add_to_cart_quantity' );
 				?>
 
@@ -573,13 +582,22 @@ class WCCB_Frontend_View {
 	}
 
 	public static function shop_page_add_to_cart_button( $button , $product , $args ) {
+
+		if ( $product->product_type == "wccb_course" ) {
+		    $simpleURL   = get_permalink();
+		    $simpleLabel = 'Book Your Package';
+		} else {
+		    $simpleURL =  $product->add_to_cart_url();  
+		    $simpleLabel = $product->add_to_cart_text();
+		};
+
 		$button = sprintf(
 			'<a href="%s" data-quantity="%s" class="%s" %s>%s</a>',
-			esc_url( $product->add_to_cart_url() ),
+			esc_url( $simpleURL ),
 			esc_attr( isset( $args['quantity'] ) ? $args['quantity'] : 1 ),
 			esc_attr( isset( $args['class'] ) ? $args['class'] : 'button' ),
 			isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
-			esc_html( 'Book Your Package' )
+			esc_html( $simpleLabel )
 		);
 
 		return $button;

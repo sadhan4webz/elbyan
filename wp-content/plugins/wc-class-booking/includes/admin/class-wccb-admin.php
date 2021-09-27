@@ -15,10 +15,11 @@ class WCCB_Admin {
 	private function register_hooks() {
 		
 		//Actions
-		add_action( 'woocommerce_product_data_panels' , array( 'WCCB_Admin_View' , 'wccb_package_tab_product_tab_content') );
-		add_action( 'woocommerce_process_product_meta' , array( $this , 'save_tutor_for_package' ) );
+		add_action( 'woocommerce_product_data_panels' , array( 'WCCB_Admin_View' , 'wccb_course_tab_product_tab_content') );
+		add_action( 'woocommerce_process_product_meta' , array( $this , 'save_custom_field_data' ) );
 
 		add_action( 'woocommerce_after_order_itemmeta', array( $this , 'display_admin_order_item_custom_button'), 10, 3 );
+		add_action( 'woocommerce_product_options_general_product_data', array( 'WCCB_Admin_View' , 'wccb_course_general_tab_custom_fields'));
 
 		//Filters
 
@@ -30,24 +31,24 @@ class WCCB_Admin {
 	}
 
 	public function add_custom_product_type( $types ) {
-	    $types[ 'wccb_package' ] = __( 'Package' , PLUGIN_TEXT_DOMAIN );
+	    $types[ 'wccb_course' ] = __( 'Course' , PLUGIN_TEXT_DOMAIN );
 	    return $types;
 	}
 
 	public function package_product_tab( $tabs) {
 
-	    $tabs['wccb_package'] = array(
-	      'label'	 => __( 'Package Options', PLUGIN_TEXT_DOMAIN ),
-	      'target' => 'wccb_package_options',
+	    $tabs['wccb_course'] = array(
+	      'label'	 => __( 'Course Options', PLUGIN_TEXT_DOMAIN ),
+	      'target' => 'wccb_course_options',
 	      'class'  => array('show_if_wccb_product', 'hide_if_simple', 'hide_if_grouped', 'hide_if_external' , 'hide_if_variable'),
 	     );
-	    //$tabs['general']['class']          = 'show_if_wccb_package';
-	    $tabs['inventory']['class'][]      = 'hide_if_wccb_package';
-	    $tabs['shipping']['class'][]       = 'hide_if_wccb_package';
-	    $tabs['linked_product']['class'][] = 'hide_if_wccb_package';
-	    $tabs['attribute']['class'][]      = 'hide_if_wccb_package';
-	    $tabs['variations']['class'][]     = 'hide_if_wccb_package';
-	    $tabs['advanced']['class'][]       = 'hide_if_wccb_package';
+	    //$tabs['general']['class']          = 'show_if_wccb_course';
+	    $tabs['inventory']['class'][]      = 'hide_if_wccb_course';
+	    $tabs['shipping']['class'][]       = 'hide_if_wccb_course';
+	    $tabs['linked_product']['class'][] = 'hide_if_wccb_course';
+	    $tabs['attribute']['class'][]      = 'hide_if_wccb_course';
+	    $tabs['variations']['class'][]     = 'hide_if_wccb_course';
+	    $tabs['advanced']['class'][]       = 'hide_if_wccb_course';
 
 
 	    //echo '<pre>';
@@ -68,10 +69,21 @@ class WCCB_Admin {
 	    return $translated_text;
 	}
 
-	public function save_tutor_for_package( $post_id ) {
+	public function save_custom_field_data( $post_id ) {
+		$product = wc_get_product($post_id);
+
 		// save tutor field
-	    $tutor_ids = $_POST['tutor_ids'];
-	    update_post_meta( $post_id, 'tutor_ids', $tutor_ids );
+	    $product->update_meta_data('tutor_ids', sanitize_text_field($_POST['tutor_ids']));
+
+	    // save course type
+	    $product->update_meta_data('course_type', sanitize_text_field($_POST['course_type']));
+
+	    // save course quantity
+	    if (!empty($_POST['course_quantity'])) {
+	    	$product->update_meta_data('course_quantity', sanitize_text_field($_POST['course_quantity']));
+	    }
+
+	    $product->save();
 	}
 
 	public function change_order_item_meta_key( $display_key, $meta, $item ) {

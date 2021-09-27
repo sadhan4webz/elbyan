@@ -81,6 +81,16 @@ jQuery(function($){
 		WCCB.ajax( params );
 	}
 
+	$(document).on('change', '#course_type', function(e){
+		e.preventDefault();
+		if ($(this).val() == 'fixed' ) {
+			$('#course_quantity_wrapper').show();
+		}
+		else {
+			$('#course_quantity_wrapper').hide();
+		}
+	});
+
 	$(document).on('change', '#user_role', function(e){
 		e.preventDefault();
 		if ($(this).val() == 'wccb_tutor' ) {
@@ -99,13 +109,13 @@ jQuery(function($){
 	}
 	
 	$(document).on('change', '#product-type', function(e){
-		if ($(this).val() == 'wccb_package') {
+		if ($(this).val() == 'wccb_course') {
 			jQuery('.product_data_tabs .general_tab').addClass('show_if_wcc_package').show();
             jQuery('#general_product_data .pricing').addClass('show_if_wcc_package').show();
 		}
 	});
 
-	if ($('#product-type').val() == 'wccb_package') {
+	if ($('#product-type').val() == 'wccb_course') {
 		jQuery('.product_data_tabs .general_tab').addClass('show_if_wcc_package').show();
         jQuery('#general_product_data .pricing').addClass('show_if_wcc_package').show();
 	}

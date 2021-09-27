@@ -42,7 +42,7 @@ class WCCB_Frontend {
 		add_action( 'woocommerce_before_single_product_summary', function(){echo '</div>';}, 30 );
 
 		add_action( 'woocommerce_single_product_summary', array( 'WCCB_Frontend_View' , 'show_product_price' ), 10 );
-		add_action( 'woocommerce_single_product_summary', array( 'WCCB_Frontend_View' , 'wccb_package_add_to_cart' ), 60 );
+		add_action( 'woocommerce_single_product_summary', array( 'WCCB_Frontend_View' , 'wccb_course_add_to_cart' ), 60 );
 
 		add_action( 'woocommerce_after_single_product_summary', array( $this , 'get_tutor_profile' ), 20 );
 		add_action( 'woocommerce_after_single_product_summary', array( 'WCCB_Frontend_View' , 'render_tutor_availability_container'), 25 );
@@ -318,7 +318,7 @@ class WCCB_Frontend {
 		$date_wise_slot = array();
 
 		if (!is_bool($product)) {
-			if($product->is_type( 'wccb_package' )) {
+			if($product->is_type( 'wccb_course' )) {
 				if (!empty($_POST['tutor_id'] )) {
 
 					if (empty($slot)) {
@@ -366,7 +366,7 @@ class WCCB_Frontend {
 		$temp_product = wc_get_product($product_id);
 
 		if (!is_bool($temp_product)) {
-			if($temp_product->is_type( 'wccb_package' )) {
+			if($temp_product->is_type( 'wccb_course' )) {
 				$cart_item_data['tutor_id']         = !empty($_POST['tutor_id']) ? $_POST['tutor_id'] : get_post_meta($temp_product->get_id() , 'tutor_ids' , true );
 				$cart_item_data['booking_slots']    = WCCB_Frontend::get_date_wise_slots($_POST['slot']);
 			}
@@ -379,7 +379,7 @@ class WCCB_Frontend {
 		$temp_product = wc_get_product($cart_item_data["product_id"]);
 
 		if (!is_bool($temp_product)) {
-			if($temp_product->get_type() == "wccb_package") {
+			if($temp_product->get_type() == "wccb_course") {
 				if (!empty($cart_item_data['tutor_id']) && !is_array($cart_item_data['tutor_id'])) {
 					$tutor_info = get_userdata($cart_item_data['tutor_id']);
 
@@ -471,7 +471,7 @@ class WCCB_Frontend {
 		            // Get the product object
 		            $product = $item->get_product();
 		            if (!is_bool($product)) {
-						if($product->get_type() == "wccb_package") {
+						if($product->get_type() == "wccb_course") {
 							$tutor_id  = $item->get_meta('_tutor_id');
 							$slots     = $item->get_meta('booking_slots');
 

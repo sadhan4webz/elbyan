@@ -105,17 +105,28 @@ do_action( 'woocommerce_before_cart' ); ?>
 						if ( $_product->is_sold_individually() ) {
 							$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
 						} else {
-							$product_quantity = woocommerce_quantity_input(
-								array(
-									'input_name'   => "cart[{$cart_item_key}][qty]",
-									'input_value'  => $cart_item['quantity'],
-									'max_value'    => $_product->get_max_purchase_quantity(),
-									'min_value'    => $cart_item['quantity'],
-									'product_name' => $_product->get_name(),
-								),
-								$_product,
-								false
-							);
+							$course_type = get_post_meta( $_product->get_id() , 'course_type' , true );
+							if ($course_type == 'fixed') {
+								$course_quantity = get_post_meta( $_product->get_id() , 'course_quantity' , true );
+								?>
+								<input type="hidden" name="quantity" id="quantity" value="<?php echo $course_quantity;?>">
+								<div class="quantity_label"><?php echo $course_quantity;?></div>
+								<?php
+							}
+							else {
+								$product_quantity = woocommerce_quantity_input(
+									array(
+										'input_name'   => "cart[{$cart_item_key}][qty]",
+										'input_value'  => $cart_item['quantity'],
+										'max_value'    => $_product->get_max_purchase_quantity(),
+										'min_value'    => $cart_item['quantity'],
+										'product_name' => $_product->get_name(),
+									),
+									$_product,
+									false
+								);
+							}
+							
 						}
 
 						echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key, $cart_item ); // PHPCS: XSS ok.
