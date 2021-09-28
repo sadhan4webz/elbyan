@@ -595,7 +595,7 @@ class WCCB_Frontend_Myaccount {
 	}
 
 	public function save_edit_profile( $user_id ) {
-		if ( isset( $_FILES['profile_image'] ) ) {
+		if ( !empty( $_FILES['profile_image']['name'] ) ) {
 
 	        $attachment_id = media_handle_upload( 'profile_image', 0 );
 	        if ( is_wp_error( $attachment_id ) ) {
@@ -606,5 +606,4 @@ class WCCB_Frontend_Myaccount {
 	        }
 	   }
 	}
-
 }
