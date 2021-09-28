@@ -15,13 +15,13 @@ class WCCB_Email_Content {
 			<table>
 				<?php
 				if ($type == 'student') {
-					$welcome_text = __( 'Dear '.$student->display_name.', you have successfully booked the class. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$student->display_name.', you have successfully booked the class. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'tutor') {
-					$welcome_text = __( 'Dear '.$tutor->display_name.', one student have successfully booked the class with you. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$tutor->display_name.', one student have successfully booked the class with you. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'admin') {
-					$welcome_text = __( 'Dear Admin, one student successfully booked the class. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear Admin, one student successfully booked the class. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				?>
 				<tr>
@@ -112,13 +112,13 @@ class WCCB_Email_Content {
 			<table>
 				<?php
 				if ($type == 'student') {
-					$welcome_text = __( 'Dear '.$student->display_name.', you have successfully rescheduled the class. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$student->display_name.', you have successfully rescheduled the class. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'tutor') {
-					$welcome_text = __( 'Dear '.$tutor->display_name.', one student have successfully rescheduled the class with you. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$tutor->display_name.', one student have successfully rescheduled the class with you. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'admin') {
-					$welcome_text = __( 'Dear Admin, one student successfully rescheduled the class. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear Admin, one student successfully rescheduled the class. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				?>
 				<tr>
@@ -209,13 +209,13 @@ class WCCB_Email_Content {
 			<table>
 				<?php
 				if ($type == 'student') {
-					$welcome_text = __( 'Dear '.$student->display_name.', you have cancelled the class. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$student->display_name.', you have cancelled the class. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'tutor') {
-					$welcome_text = __( 'Dear '.$tutor->display_name.', one student have cancelled the class associated with you. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$tutor->display_name.', one student have cancelled the class associated with you. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'admin') {
-					$welcome_text = __( 'Dear Admin, one student cancelled the class. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear Admin, one student cancelled the class. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				?>
 				<tr>
@@ -307,13 +307,13 @@ class WCCB_Email_Content {
 
 				<?php
 				if ($type == 'student') {
-					$welcome_text = __( 'Dear '.$student->display_name.', you have one class scheduled today. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$student->display_name.', you have one class scheduled today. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'tutor') {
-					$welcome_text = __( 'Dear '.$tutor->display_name.', you have one class scheduled today. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$tutor->display_name.', you have one class scheduled today. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'admin') {
-					$welcome_text = __( 'Dear Admin, one student has scheduled class today. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear Admin, one student has scheduled class today. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				?>
 				<tr>
@@ -405,13 +405,13 @@ class WCCB_Email_Content {
 
 				<?php
 				if ($type == 'student') {
-					$welcome_text = __( 'Dear '.$student->display_name.', you have one class scheduled today. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$student->display_name.', you have one class scheduled today. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'tutor') {
-					$welcome_text = __( 'Dear '.$tutor->display_name.', you have one class scheduled today. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$tutor->display_name.', you have one class scheduled today. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'admin') {
-					$welcome_text = __( 'Dear Admin, one student has scheduled class today. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear Admin, one student has scheduled class today. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				?>
 				<tr>
@@ -502,13 +502,13 @@ class WCCB_Email_Content {
 			<table>
 				<?php
 				if ($type == 'student') {
-					$welcome_text = __( 'Dear '.$student->display_name.', you have successfully completed your class today. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$student->display_name.', you have successfully completed your class today. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'tutor') {
-					$welcome_text = __( 'Dear '.$tutor->display_name.', you have successfully completed your class today. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear '.$tutor->display_name.', you have successfully completed your class today. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				if ($type == 'admin') {
-					$welcome_text = __( 'Dear Admin, one student has completed his/her class today. Below are the class detail' , PLUGIN_TEXT_DOMAIN);
+					$welcome_text = __( 'Dear Admin, one student has completed his/her class today. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 				}
 				?>
 				<tr>

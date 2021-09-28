@@ -31,14 +31,14 @@ class WCCB_Admin {
 	}
 
 	public function add_custom_product_type( $types ) {
-	    $types[ 'wccb_course' ] = __( 'Course' , PLUGIN_TEXT_DOMAIN );
+	    $types[ 'wccb_course' ] = __( 'Course' , WC_CLASS_BOOKING_TEXT_DOMAIN );
 	    return $types;
 	}
 
 	public function package_product_tab( $tabs) {
 
 	    $tabs['wccb_course'] = array(
-	      'label'	 => __( 'Course Options', PLUGIN_TEXT_DOMAIN ),
+	      'label'	 => __( 'Course Options', WC_CLASS_BOOKING_TEXT_DOMAIN ),
 	      'target' => 'wccb_course_options',
 	      'class'  => array('show_if_wccb_product', 'hide_if_simple', 'hide_if_grouped', 'hide_if_external' , 'hide_if_variable'),
 	     );
@@ -90,7 +90,7 @@ class WCCB_Admin {
 
 	    // Change display label for specific order item meta key
 	    if( is_admin() && $item->get_type() === 'line_item' && $meta->key === '_tutor_id' ) {
-	        $display_key = __( 'Selected Tutor' , PLUGIN_TEXT_DOMAIN );
+	        $display_key = __( 'Selected Tutor' , WC_CLASS_BOOKING_TEXT_DOMAIN );
 	    }
 
 	    return $display_key;
@@ -101,7 +101,7 @@ class WCCB_Admin {
 		//Change display value for specific order item meta key value
     	if( is_admin() && $meta->key === '_tutor_id' && $item->get_type() === 'line_item' ) {
     		$tutor = get_userdata($value);
-    		$value = __( $tutor->display_name , PLUGIN_TEXT_DOMAIN );
+    		$value = __( $tutor->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN );
     	}
 
 		return $value;

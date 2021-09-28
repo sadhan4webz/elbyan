@@ -38,17 +38,17 @@ class WCCB_Frontend_View {
 	public static function render_register_form_fields( $user_id = 0 ) {
 		?>
 		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-			<label for="reg_username"><?php esc_html_e( 'First Name', PLUGIN_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
+			<label for="reg_username"><?php esc_html_e( 'First Name', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
 			<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="first_name" id="first_name" autocomplete="first_name" value="<?php echo ( ! empty( $_POST['first_name'] ) ) ? esc_attr( wp_unslash( $_POST['first_name'] ) ) : ''; ?>" /><?php // @codingStandardsIgnoreLine ?>
 		</p>
 
 		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-			<label for="reg_username"><?php esc_html_e( 'Last Name', PLUGIN_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
+			<label for="reg_username"><?php esc_html_e( 'Last Name', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
 			<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="last_name" id="last_name" autocomplete="last_name" value="<?php echo ( ! empty( $_POST['last_name'] ) ) ? esc_attr( wp_unslash( $_POST['last_name'] ) ) : ''; ?>" /><?php // @codingStandardsIgnoreLine ?>
 		</p>
 
 		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-			<label for="reg_username"><?php esc_html_e( 'Gender', PLUGIN_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
+			<label for="reg_username"><?php esc_html_e( 'Gender', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
 			<select name="gender" id="gender" class="select">
 				<option value="">Select</option>
 				<option value="Male" <?php selected($_POST['gender'],'Male');?>>Male</option>
@@ -56,7 +56,7 @@ class WCCB_Frontend_View {
 			</select>
 		</p>
 		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-			<label for="reg_username"><?php esc_html_e( 'Registration Type', PLUGIN_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
+			<label for="reg_username"><?php esc_html_e( 'Registration Type', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
 			<select name="user_role" id="user_role" class="select">
 				<option value="">Select</option>
 				<?php
@@ -75,7 +75,7 @@ class WCCB_Frontend_View {
 
 		<div class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide availability_container" style="display: <?php echo $_POST['user_role'] == 'wccb_tutor' ? 'block' : 'none';?>;">
 			
-			<label for="reg_password"><b><?php esc_html_e( 'Your Availability', PLUGIN_TEXT_DOMAIN ); ?></b>&nbsp;<span class="required">*</span></label>
+			<label for="reg_password"><b><?php esc_html_e( 'Your Availability', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?></b>&nbsp;<span class="required">*</span></label>
 			<?php
 			$availability_times = WCCB_Frontend::get_avilability_times_from_post($_POST);
 			echo WCCB_Frontend_View::get_tutor_availability_time_fields($availability_times);
@@ -174,26 +174,25 @@ class WCCB_Frontend_View {
 			</td>
 			<?php
 			if (empty($more)) {
-				?>
+				?>				
 				<td>
-					<input type="checkbox" class="woocommerce-Input woocommerce-Input--cehckbox input-checkbox" name="<?php echo $lower_key;?>_is_unavailable" id="<?php echo $lower_key;?>_is_unavailable"  value="Yes" <?php echo ! empty( $is_unavailable ) ? 'checked="checked"' : ''; ?> />
+					<a href="#" class="add_time_row" data-lower_key="<?php echo $lower_key;?>">Add Row</a>					
 				</td>
 				<td>
-					<a href="#" class="add_time_row" data-lower_key="<?php echo $lower_key;?>">Add Row</a>
-					
+					<input type="checkbox" class="woocommerce-Input woocommerce-Input--cehckbox input-checkbox" name="<?php echo $lower_key;?>_is_unavailable" id="<?php echo $lower_key;?>_is_unavailable"  value="Yes" <?php echo ! empty( $is_unavailable ) ? 'checked="checked"' : ''; ?> />
 				</td>
 				<?php
 			}
 			else {
 				?>
 				<td>
-					&nbsp;
-				</td>
-				<td>
 					<div class="link_group">
 						<a href="#" class="add_time_row" data-lower_key="{lower_key}">Add Row</a>
 						<a href="#" class="delete_time_row">Delete</a>
 					</div>
+				</td>				
+				<td>
+					&nbsp;
 				</td>
 				<?php
 			}
@@ -297,10 +296,10 @@ class WCCB_Frontend_View {
 		<div class="tutor_availability_main_wrapper">
 			<?php
 			if (!empty($_REQUEST['tutor_id'])) {
-				echo WCCB_Frontend_View::get_tutor_availability_calendar( $_REQUEST['tutor_id'] , date('Y-m-d') , NUM_DAYS_CALENDAR , $_POST['slot'] );
+				echo WCCB_Frontend_View::get_tutor_availability_calendar( $_REQUEST['tutor_id'] , date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR , $_POST['slot'] );
 			}
 			else {
-				echo __('Tutor availability will show here' , PLUGIN_TEXT_DOMAIN );
+				echo __('Tutor availability will show here' , WC_CLASS_BOOKING_TEXT_DOMAIN );
 			}
 			?>
 		</div>
@@ -338,11 +337,11 @@ class WCCB_Frontend_View {
 		ob_start();
 		?>
 		<div class="tutor_profile_main_wrapper">
-			<h2 class="wccb_title"><?php echo __('Our expert '.strtolower($_REQUEST['gender']).' tutors for this course' , PLUGIN_TEXT_DOMAIN);?></h2>
+			<h2 class="wccb_title"><?php echo __('Our expert '.strtolower($_REQUEST['gender']).' tutors for this course' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h2>
 			<div class="filter_wrapper">
-				<p class="filter_heading"><?php echo __('Filter tutor by' , PLUGIN_TEXT_DOMAIN);?></p>
+				<p class="filter_heading"><?php echo __('Filter tutor by' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></p>
 				<div class="gender_selection_wrapper">
-					<label><?php echo __('Gender' ,PLUGIN_TEXT_DOMAIN);?></label>
+					<label><?php echo __('Gender' ,WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 					<select name="gender" id="gender" class="gender_select">
 						<option value="">All</option>
 						<option value="Male" <?php selected($_REQUEST['gender'] , 'Male');?>>Male</option>
@@ -350,7 +349,7 @@ class WCCB_Frontend_View {
 					</select>
 				</div>
 			</div>
-			<p><?php echo __('Select any one tuotor from your choice and proceed' , PLUGIN_TEXT_DOMAIN);?></p>
+			<p><?php echo __('Select any one tuotor from your choice and proceed' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></p>
 			<?php
 			if ( ! empty( $user_query->get_results() ) ) {
 				?>
@@ -388,7 +387,7 @@ class WCCB_Frontend_View {
 				
 			} 
 			else {
-				echo __('No tutor found.' , PLUGIN_TEXT_DOMAIN);
+				echo __('No tutor found.' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 			}
 			?>
 		</div>
@@ -402,7 +401,7 @@ class WCCB_Frontend_View {
 			return;
 		}
 		
-		$calendar_stop_date = wp_date( 'Y-m-d' , strtotime('+'.HOUR_EXPIRE_DAYS.' days'));
+		$calendar_stop_date = wp_date( 'Y-m-d' , strtotime('+'.WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS.' days'));
 		$tutor_info         = get_userdata($tutor_id);
 		$availability       = get_user_meta($tutor_id , 'availability' , true );
 
@@ -411,7 +410,7 @@ class WCCB_Frontend_View {
 
 		ob_start();
 		?>
-		<h2 class="wccb_title"><?php echo __('Choose slots from availability of '.$tutor_info->display_name , PLUGIN_TEXT_DOMAIN);?></h2>
+		<h2 class="wccb_title"><?php echo __('Choose slots from availability of '.$tutor_info->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h2>
 		<div style="overflow-x:auto;">
 			<table class="table table-bordered">
 				<thead>
@@ -576,7 +575,7 @@ class WCCB_Frontend_View {
 		$product = wc_get_product(get_the_ID());
 		?>
 		<div class="price-hour">
-			<?php echo $product->get_price_html(); ?> / <?php echo __('Hour' , PLUGIN_TEXT_DOMAIN);?>
+			<?php echo $product->get_price_html(); ?> / <?php echo __('Hour' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 		</div>
 		<?php
 	}

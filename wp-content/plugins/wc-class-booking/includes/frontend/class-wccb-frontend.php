@@ -206,16 +206,16 @@ class WCCB_Frontend {
 
 	public function validate_register_field( $username , $email , $errors ) {
 		if (empty($_POST['first_name'])) {
-			$errors->add( 'first_name_error' , __('First name is required field' , PLUGIN_TEXT_DOMAIN) );
+			$errors->add( 'first_name_error' , __('First name is required field' , WC_CLASS_BOOKING_TEXT_DOMAIN) );
 		}
 		if (empty($_POST['last_name'])) {
-			$errors->add( 'last_name_error' , __('Last name is required field',PLUGIN_TEXT_DOMAIN) );
+			$errors->add( 'last_name_error' , __('Last name is required field',WC_CLASS_BOOKING_TEXT_DOMAIN) );
 		}
 		if (empty($_POST['gender'])) {
-			$errors->add( 'gender_error' , __('Gender is required field' , PLUGIN_TEXT_DOMAIN) );
+			$errors->add( 'gender_error' , __('Gender is required field' , WC_CLASS_BOOKING_TEXT_DOMAIN) );
 		}
 		if (empty($_POST['user_role'])) {
-			$errors->add( 'user_role_error' , __('Registration type is required field' , PLUGIN_TEXT_DOMAIN) );
+			$errors->add( 'user_role_error' , __('Registration type is required field' , WC_CLASS_BOOKING_TEXT_DOMAIN) );
 		}
 
 		if ($_POST['user_role'] == 'wccb_tutor' ) {
@@ -237,19 +237,19 @@ class WCCB_Frontend {
 							foreach ( $availability_times[$lower_key]['available_time'] as $key3 => $value3) {
 								if ($temp_start_time[$key2] == $value3['start_time'] && $temp_end_time[$key2] == $value3['end_time']) {
 									$time_flag = 0;
-									$errors->add( 'availability_time_error' , __('Start time and end time is same for '.$lower_key , PLUGIN_TEXT_DOMAIN) );
+									$errors->add( 'availability_time_error' , __('Start time and end time is same for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) );
 								}
 								if ($temp_start_time[$key2] >= $value3['end_time']) {
 									$time_flag = 1;
 								}
 								else {
 									$time_flag = 0;
-									$errors->add( 'availability_time_error' , __('Start time and end time is not properly set for '.$lower_key , PLUGIN_TEXT_DOMAIN) );
+									$errors->add( 'availability_time_error' , __('Start time and end time is not properly set for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) );
 								}
 							}
 						}
 						else {
-							$errors->add( 'availability_time_error' , __('Start time is greater than end time for '.$lower_key , PLUGIN_TEXT_DOMAIN) );
+							$errors->add( 'availability_time_error' , __('Start time is greater than end time for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) );
 						}
 					}
 				}
@@ -323,7 +323,7 @@ class WCCB_Frontend {
 
 					if (empty($slot)) {
 						$passed = false;
-						wc_add_notice( __( 'Please select slot form tutor availability' , PLUGIN_TEXT_DOMAIN) , 'error');
+						wc_add_notice( __( 'Please select slot form tutor availability' , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error');
 						return $passed;
 					}
 					
@@ -345,14 +345,14 @@ class WCCB_Frontend {
 								$passed = WCCB_Frontend::date_wise_slot_availability_validation( $_POST['tutor_id'] , $key , $value2 );
 								if (!$passed) {
 									$availability_flag = 1;
-									wc_add_notice( __( 'The slot '.wp_date('D M j, Y',strtotime($key)).', '.$value2.' already booked. Try other slots.' , PLUGIN_TEXT_DOMAIN ) , 'error');
+									wc_add_notice( __( 'The slot '.wp_date('D M j, Y',strtotime($key)).', '.$value2.' already booked. Try other slots.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 								}
 							}
 						}
 					}
 
 					if ($quantity_flag) {
-						wc_add_notice( __('You have added more slots than you have available hours' , PLUGIN_TEXT_DOMAIN ) , 'error');
+						wc_add_notice( __('You have added more slots than you have available hours' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 					}
 				}
 			}
@@ -384,7 +384,7 @@ class WCCB_Frontend {
 					$tutor_info = get_userdata($cart_item_data['tutor_id']);
 
 					$item_data[] = array(
-						'key' => __( 'Selected Tutor', PLUGIN_TEXT_DOMAIN ),
+						'key' => __( 'Selected Tutor', WC_CLASS_BOOKING_TEXT_DOMAIN ),
 						'value' => wc_clean( $tutor_info->display_name)
 					);
 				}
@@ -396,7 +396,7 @@ class WCCB_Frontend {
 					}
 
 					$item_data[] = array(
-						'key' => __( 'Number of slots', PLUGIN_TEXT_DOMAIN ),
+						'key' => __( 'Number of slots', WC_CLASS_BOOKING_TEXT_DOMAIN ),
 						'value' => wc_clean($num_slots)
 					);
 				}
@@ -415,7 +415,7 @@ class WCCB_Frontend {
 
 			//Store tutor id as order item meta
 			$item->add_meta_data(
-				__( "_tutor_id", PLUGIN_TEXT_DOMAIN ),
+				__( "_tutor_id", WC_CLASS_BOOKING_TEXT_DOMAIN ),
 				$values['tutor_id'],
 				true
 			);
@@ -425,7 +425,7 @@ class WCCB_Frontend {
 
 			//Store slots as order item meta
 			$item->add_meta_data(
-				__( "booking_slots", PLUGIN_TEXT_DOMAIN ),
+				__( "booking_slots", WC_CLASS_BOOKING_TEXT_DOMAIN ),
 				$values['booking_slots'],
 				true
 			);
@@ -436,7 +436,7 @@ class WCCB_Frontend {
 		if( !empty( $item['_tutor_id'] ) ) {
 			$tutor_info        = get_userdata($item['_tutor_id']);
 			if (!empty($tutor_info->display_name)) {
-				$product_name .= sprintf('<p>%s: %s</p>', __( 'Tutor Name' , PLUGIN_TEXT_DOMAIN ), $tutor_info->display_name);
+				$product_name .= sprintf('<p>%s: %s</p>', __( 'Tutor Name' , WC_CLASS_BOOKING_TEXT_DOMAIN ), $tutor_info->display_name);
 			}
 
 			$slots         = $item['booking_slots'];
@@ -445,7 +445,7 @@ class WCCB_Frontend {
 				foreach ($slots as $key => $value) {
 					$num_slots += count($value);
 				}
-				$product_name .= sprintf('<p>%s: %s</p>', __( 'Number of slots' , PLUGIN_TEXT_DOMAIN ), $num_slots);
+				$product_name .= sprintf('<p>%s: %s</p>', __( 'Number of slots' , WC_CLASS_BOOKING_TEXT_DOMAIN ), $num_slots);
 			}
 		}
 

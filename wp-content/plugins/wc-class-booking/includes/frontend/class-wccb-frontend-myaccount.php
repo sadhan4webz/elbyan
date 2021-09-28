@@ -18,7 +18,7 @@ class WCCB_Frontend_Myaccount {
 		add_action ( 'init', array( $this , 'add_myaccount_endpoint') );
 		add_action ( 'template_redirect' , array( $this , 'save_tutor_availability' ) );
 		add_action ( 'template_redirect' , array( $this , 'action_handler' ) );
-		add_action ( 'woocommerce_before_account_navigation' , array( 'WCCB_Frontend_Myaccount_View' , 'show_welcome_text' ) );
+		//add_action ( 'woocommerce_before_account_navigation' , array( 'WCCB_Frontend_Myaccount_View' , 'show_welcome_text' ) );
 		add_action ( 'woocommerce_account_dashboard' , array( 'WCCB_Frontend_Myaccount_View' , 'show_dashboard_content' ) );
 		add_action ( 'woocommerce_edit_account_form' , array( 'WCCB_Frontend_Myaccount_View' , 'show_edit_profile_content' ) );
 		add_action ( 'woocommerce_save_account_details', array( $this , 'save_edit_profile') , 10, 1 );
@@ -83,7 +83,7 @@ class WCCB_Frontend_Myaccount {
 		else if(array_key_exists('administrator' , get_user_meta(get_current_user_id() , 'wp_capabilities' , true ) )) {
 			unset($links['orders']);
 			unset($links['edit-account']);
-			unset($links['customer-logout']);
+			//unset($links['customer-logout']);
 			$links = array_slice( $links, 0, 1, true ) + $this->get_myaccount_menu() + array_slice( $links, 1, NULL, true );
 		}
 		else {
@@ -118,7 +118,7 @@ class WCCB_Frontend_Myaccount {
 								if ($temp_start_time[$key2] == $value3['start_time'] && $temp_end_time[$key2] == $value3['end_time']) {
 									$time_flag = 0;
 									$validation_flag = 0;
-									wc_add_notice( __('Start time and end time is same for '.$lower_key , PLUGIN_TEXT_DOMAIN) , 'error' );
+									wc_add_notice( __('Start time and end time is same for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error' );
 								}
 								
 								if ($temp_start_time[$key2] >= $value3['end_time']) {
@@ -127,7 +127,7 @@ class WCCB_Frontend_Myaccount {
 								else {
 									$time_flag = 0;
 									$validation_flag = 0;
-									wc_add_notice( __('Start time and end time ordering is not properly set for '.$lower_key , PLUGIN_TEXT_DOMAIN) , 'error' );
+									wc_add_notice( __('Start time and end time ordering is not properly set for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error' );
 								}
 							}
 
@@ -139,7 +139,7 @@ class WCCB_Frontend_Myaccount {
 							}
 						}
 						else {
-							wc_add_notice( __('Start time is greater than end time for '.$lower_key , PLUGIN_TEXT_DOMAIN) , 'error' );
+							wc_add_notice( __('Start time is greater than end time for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error' );
 							$validation_flag = 0;
 						}
 					}
@@ -150,7 +150,7 @@ class WCCB_Frontend_Myaccount {
 				$availability_times = WCCB_Frontend::get_avilability_times_from_post($_POST);
 				update_user_meta( $customer_id , 'availability' , $availability_times );
 
-				wc_add_notice( __( 'Availability saved successfully', PLUGIN_TEXT_DOMAIN ), 'success' );
+				wc_add_notice( __( 'Availability saved successfully', WC_CLASS_BOOKING_TEXT_DOMAIN ), 'success' );
 			}
 		}
 	}
@@ -177,7 +177,7 @@ class WCCB_Frontend_Myaccount {
 			$days            = $interval->d;
 			$hour            = $interval->h;
 
-			if ( ($days > 0 || $hour > CANCEL_CLASS_BEFORE_HOURS)  || $role_key != 'wccb_student' ) {
+			if ( ($days > 0 || $hour > WC_CLASS_BOOKING_CANCEL_CLASS_BEFORE_HOURS)  || $role_key != 'wccb_student' ) {
 				//Update hour for cancel booking
 				$hour_table  = $wpdb->prefix.'hour_history';
 				$query2      = "SELECT * FROM $hour_table WHERE ID='".$results[0]['hour_id']."'";
@@ -225,12 +225,12 @@ class WCCB_Frontend_Myaccount {
 				return true;
 			}
 			else {
-				wc_add_notice( __('Your class is not eligible to cancel now. You have to cancel the class before '.CANCEL_CLASS_BEFORE_HOURS.' hours remaining.' , PLUGIN_TEXT_DOMAIN ) , 'error' );
+				wc_add_notice( __('Your class is not eligible to cancel now. You have to cancel the class before '.WC_CLASS_BOOKING_CANCEL_CLASS_BEFORE_HOURS.' hours remaining.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 				return false;
 			}
 		}
 		else {
-			wc_add_notice( __( 'The booking ID not exist for cancellation' , PLUGIN_TEXT_DOMAIN ) , 'error' );
+			wc_add_notice( __( 'The booking ID not exist for cancellation' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 			return false;
 		}
 	}
@@ -253,7 +253,7 @@ class WCCB_Frontend_Myaccount {
 
 		foreach ($results as $key => $value) {
 			$days = WCCB_Helper::get_date_difference( $value['date_purchased'] , date('Y-m-d') );
-			if ($days < HOUR_EXPIRE_DAYS ) {
+			if ($days < WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS ) {
 				$total_available_hours += $value['purchased_hours'] - $value['used_hours'];
 			}
 		}
@@ -281,8 +281,8 @@ class WCCB_Frontend_Myaccount {
 		foreach ($results as $key => $value) {
 			$days           = WCCB_Helper::get_date_difference( $value['date_purchased'] , date('Y-m-d') );
 			$remaining_hour = $value['purchased_hours'] - $value['used_hours'];
-			if ($days < HOUR_EXPIRE_DAYS && $remaining_hour > 0 ) {
-				$available_hours[WCCB_Helper::get_particular_date($value['date_purchased'] , HOUR_EXPIRE_DAYS)] = $remaining_hour;
+			if ($days < WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS && $remaining_hour > 0 ) {
+				$available_hours[WCCB_Helper::get_particular_date($value['date_purchased'] , WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS)] = $remaining_hour;
 			}
 		}
 		
@@ -304,7 +304,7 @@ class WCCB_Frontend_Myaccount {
 					//Check if tutor is booked for slot by other student
 					$passed = WCCB_Frontend::date_wise_slot_availability_validation( $field_array['tutor_id'] , $key , $value2 );
 					if (!$passed) {
-						wc_add_notice( __( 'The slot '.wp_date('D M j, Y',strtotime($key)).', '.$value2.' already booked. Try other slots.' , PLUGIN_TEXT_DOMAIN ) , 'error');
+						wc_add_notice( __( 'The slot '.wp_date('D M j, Y',strtotime($key)).', '.$value2.' already booked. Try other slots.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 					}
 				}
 			}
@@ -313,7 +313,7 @@ class WCCB_Frontend_Myaccount {
 		if ($passed) {
 			if ($total_requested_slot > $total_available_hours ) {
 				$passed = false;
-				wc_add_notice( __('You have added more slots than you have total available hours. Total available hours : '.$total_available_hours , PLUGIN_TEXT_DOMAIN ) , 'error');
+				wc_add_notice( __('You have added more slots than you have total available hours. Total available hours : '.$total_available_hours , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 			}
 		}
 
@@ -338,7 +338,7 @@ class WCCB_Frontend_Myaccount {
 
 				if (!$used_flag) {
 					$passed = false;
-					wc_add_notice( __('You don\'t have available hours to book slot for the date : '.WCCB_Helper::display_date($temp_date_time, 'D M j, Y h:i a'), PLUGIN_TEXT_DOMAIN ) , 'error');
+					wc_add_notice( __('You don\'t have available hours to book slot for the date : '.WCCB_Helper::display_date($temp_date_time, 'D M j, Y h:i a'), WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 				}
 			}
 		}
@@ -351,7 +351,7 @@ class WCCB_Frontend_Myaccount {
 					foreach ($value as $key2 => $value2) {
 
 						//Get hour ID from purchased date
-						$purchased_date = WCCB_Helper::get_particular_date($key , HOUR_EXPIRE_DAYS , '-' );
+						$purchased_date = WCCB_Helper::get_particular_date($key , WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS , '-' );
 						$hour_table  = $wpdb->prefix.'hour_history';
 						$query2      = "SELECT * FROM $hour_table WHERE date_purchased='".$purchased_date."'";
 						$results2    = $wpdb->get_results( $query2, ARRAY_A ); // db call ok. no cache ok.
@@ -414,7 +414,7 @@ class WCCB_Frontend_Myaccount {
 			$interval        = $datetime1->diff($datetime2);
 			$days            = $interval->h;
 			$hour            = $interval->h;
-			if ( ($days > 0 || $hour > RESCHEDULE_CLASS_BEFORE_HOURS) || $role_key == 'administrator' ) {
+			if ( ($days > 0 || $hour > WC_CLASS_BOOKING_RESCHEDULE_CLASS_BEFORE_HOURS) || $role_key == 'administrator' ) {
 
 				$slot_date_time = explode('|', $slot[0]);
 
@@ -476,12 +476,12 @@ class WCCB_Frontend_Myaccount {
 				return true;
 			}
 			else {
-				wc_add_notice( __('Your class is not eligible to reschedule now. You have to reschedule class before '.RESCHEDULE_CLASS_BEFORE_HOURS.' hours remaining.' , PLUGIN_TEXT_DOMAIN ) , 'error' );
+				wc_add_notice( __('Your class is not eligible to reschedule now. You have to reschedule class before '.WC_CLASS_BOOKING_RESCHEDULE_CLASS_BEFORE_HOURS.' hours remaining.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 				return false;
 			}
 		}
 		else {
-			wc_add_notice( __( 'The booking ID not exist for reschedule' , PLUGIN_TEXT_DOMAIN ) , 'error' );
+			wc_add_notice( __( 'The booking ID not exist for reschedule' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 			return false;
 		}
 
@@ -526,24 +526,24 @@ class WCCB_Frontend_Myaccount {
 					if ( !isset( $_POST['save_booking_nonce_field'] ) && !wp_verify_nonce( $_POST['save_booking_nonce_field'], 'save_booking' ) 
 						){
 						$error_flag = 1;
-						wc_add_notice( __( 'You are not authorize to book the class' , PLUGIN_TEXT_DOMAIN ) , 'error' );
+						wc_add_notice( __( 'You are not authorize to book the class' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 					}
 					if (empty($_REQUEST['product_id'])) {
 						$error_flag = 1;
-						wc_add_notice( __( 'Please select class for booking slot' , PLUGIN_TEXT_DOMAIN ) , 'error' );
+						wc_add_notice( __( 'Please select class for booking slot' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 					}
 					if (empty($_REQUEST['tutor_id'])) {
 						$error_flag = 1;
-						wc_add_notice( __( 'Please select tutor for booking slot' , PLUGIN_TEXT_DOMAIN ) , 'error' );
+						wc_add_notice( __( 'Please select tutor for booking slot' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 					}
 					if (count($_REQUEST['slot']) == 0) {
 						$error_flag = 1;
-						wc_add_notice( __( 'Please select available slot to book class' , PLUGIN_TEXT_DOMAIN ) , 'error' );
+						wc_add_notice( __( 'Please select available slot to book class' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 					}
 
 					if (!$error_flag) {
 						if(WCCB_Frontend_Myaccount::save_booking_class($_POST)) {
-							wc_add_notice( __( 'The class has been booked successfully.' , PLUGIN_TEXT_DOMAIN ) , 'success' );
+							wc_add_notice( __( 'The class has been booked successfully.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'success' );
 						}
 					}
 					
@@ -554,16 +554,16 @@ class WCCB_Frontend_Myaccount {
 					if ( !isset( $_POST['save_notes_nonce_field'] ) && !wp_verify_nonce( $_POST['save_notes_nonce_field'], 'save_notes' ) 
 						){
 						$error_flag = 1;
-						wc_add_notice( __( 'You are not authorize to the notes' , PLUGIN_TEXT_DOMAIN ) , 'error' );
+						wc_add_notice( __( 'You are not authorize to the notes' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 					}
 					if (empty($_REQUEST['notes'])) {
 						$error_flag = 1;
-						wc_add_notice( __( 'Please enter notes' , PLUGIN_TEXT_DOMAIN ) , 'error' );
+						wc_add_notice( __( 'Please enter notes' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 					}
 
 					if (!$error_flag) {
 						if(WCCB_Frontend_Myaccount::save_class_notes($_POST)) {
-							wc_add_notice( __( 'The notes has been saved successfully.' , PLUGIN_TEXT_DOMAIN ) , 'success' );
+							wc_add_notice( __( 'The notes has been saved successfully.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'success' );
 						}
 					}
 					
@@ -574,11 +574,11 @@ class WCCB_Frontend_Myaccount {
 						if ( isset( $_POST['save_reschedule_nonce_field'] ) && wp_verify_nonce( $_POST['save_reschedule_nonce_field'], 'save_reschedule' ) 
 						) {
 							if(WCCB_Frontend_Myaccount::reschedule_booking_class($_REQUEST['booking_id'] , $_POST['slot'])) {
-								wc_add_notice( __( 'The class has been reschedule successfully.' , PLUGIN_TEXT_DOMAIN ) , 'success' );
+								wc_add_notice( __( 'The class has been reschedule successfully.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'success' );
 							}
 						}
 						else {
-						   wc_add_notice( __( 'You are not authorize to reschedule the class' , PLUGIN_TEXT_DOMAIN ) , 'error' );
+						   wc_add_notice( __( 'You are not authorize to reschedule the class' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 						}
 					}
 				break;
@@ -586,7 +586,7 @@ class WCCB_Frontend_Myaccount {
 				case 'cancel_class':
 					if (!empty($_REQUEST['booking_id'])) {
 						if(WCCB_Frontend_Myaccount::cancel_booking_class($_REQUEST['booking_id'])) {
-							wc_add_notice( __( 'The booking has been cancelled and hour has been credit back to your account' , PLUGIN_TEXT_DOMAIN ) , 'success' );
+							wc_add_notice( __( 'The booking has been cancelled and hour has been credit back to your account' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'success' );
 						}
 					}
 				break;

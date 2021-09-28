@@ -22,13 +22,13 @@ class WCCB_Email_Class_Notification extends WC_Email {
 	function __construct() {
     	// Email slug we can use to filter other data.
 		$this->id          = 'wccb_email_class_notification';
-		$this->title       = __( 'Email notification for upcoming class', PLUGIN_TEXT_DOMAIN );
-		$this->description = __( 'An email sent to the student and tutor for upcoming class on the same day.', PLUGIN_TEXT_DOMAIN );
+		$this->title       = __( 'Email notification for upcoming class', WC_CLASS_BOOKING_TEXT_DOMAIN );
+		$this->description = __( 'An email sent to the student and tutor for upcoming class on the same day.', WC_CLASS_BOOKING_TEXT_DOMAIN );
     	// For admin area to let the user know we are sending this email to customers.
 		$this->customer_email = true;
-		$this->heading     = __( 'Class Notification', PLUGIN_TEXT_DOMAIN );
+		$this->heading     = __( 'Class Notification', WC_CLASS_BOOKING_TEXT_DOMAIN );
 		// translators: placeholder is {blogname}, a variable that will be substituted when email is sent out
-		$this->subject     = sprintf( _x( '[%s] Upcoming class', 'you have scheduled upcoming class today', PLUGIN_TEXT_DOMAIN ), '{blogname}' );
+		$this->subject     = sprintf( _x( '[%s] Upcoming class', 'you have scheduled upcoming class today', WC_CLASS_BOOKING_TEXT_DOMAIN ), '{blogname}' );
     
     	// Template paths.
 		$this->template_html  = 'emails/wccb-class-notification.php';

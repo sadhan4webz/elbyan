@@ -118,7 +118,7 @@ class WCCB_Scheduler {
 				$minute         = $interval->i;
 				$total_minute   = ($hour * 60 + $minute);
 
-				if ( $days == 0 && $total_minute < SEND_CLASS_REMINDER_BEFORE ) {
+				if ( $days == 0 && $total_minute < WC_CLASS_BOOKING_SEND_CLASS_REMINDER_BEFORE ) {
 					$user  = get_userdata($row->user_id);
 					$tutor = get_userdata($row->tutor_id);
 					//hook for notification of class

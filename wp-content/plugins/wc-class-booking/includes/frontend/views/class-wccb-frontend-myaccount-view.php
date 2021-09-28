@@ -19,10 +19,10 @@ class WCCB_Frontend_Myaccount_View {
 				$role_name = 'Administrator';
 				break;
 		}
-		$welcome_text = 'Hello '.$user->display_name.' ('.$role_name.')';
+		$welcome_text = 'Hello '.wccb_user_get_display_name( $user ).' ('.$role_name.')';
 		?>
 		<div class="welcome_text_wrapper">
-			<?php echo __($welcome_text , PLUGIN_TEXT_DOMAIN);?>
+			<?php echo __($welcome_text , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 		</div>  
 		<?php
 	}
@@ -31,26 +31,18 @@ class WCCB_Frontend_Myaccount_View {
 		$user = get_userdata( get_current_user_id() );
 
 		if (in_array('administrator', $user->roles)) {
-			$args        = array(
-							'role__in' => array('wccb_tutor')
-			);
-			$tutor       = get_users( $args );
-			$num_tutor   = count($tutor);
-
-			$args        = array(
-							'role__in' => array('wccb_student')
-			);
-			$student     = get_users( $args );
-			$num_student = count($student);
+			$total_users = count_users();
+			$num_tutor   = $total_users['avail_roles']['wccb_tutor'];
+			$num_student = $total_users['avail_roles']['wccb_student'];
 			?>
 			<div class="user_count_wrapper">
 				<h3>User Statistics</h3>
 				<div class="tutor_count_wrapper">
-					<label><?php echo __('Total Tutor :' , PLUGIN_TEXT_DOMAIN);?></label>
+					<label><?php echo __('Total Tutor :' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 					<span><?php echo $num_tutor;?></span>
 				</div>
 				<div class="student_count_wrapper">
-					<label><?php echo __('Total Student' , PLUGIN_TEXT_DOMAIN );?></label>
+					<label><?php echo __('Total Student' , WC_CLASS_BOOKING_TEXT_DOMAIN );?></label>
 					<span><?php echo $num_student;?></span>
 				</div>
 			</div>
@@ -71,7 +63,7 @@ class WCCB_Frontend_Myaccount_View {
 	    }
 		?>		
 		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-			<label for="profile_image"><?php esc_html_e( 'Profile Image (JPEG / PNG)', PLUGIN_TEXT_DOMAIN ); ?></label>
+			<label for="profile_image"><?php esc_html_e( 'Profile Image (JPEG / PNG)', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?></label>
 			<input type="file" name="profile_image" accept="image/x-png,image/gif,image/jpeg">
 		</p>
 		<?php
@@ -83,7 +75,7 @@ class WCCB_Frontend_Myaccount_View {
 		<form class="woocommerce-EditAccountForm edit-account" action="" method="post" >
 			<div class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide availability_container">
 				
-				<label><b><?php esc_html_e( 'Availability Settings', PLUGIN_TEXT_DOMAIN ); ?></b>&nbsp;<span class="required">*</span></label>
+				<label><b><?php esc_html_e( 'Availability Settings', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?></b>&nbsp;<span class="required">*</span></label>
 				<?php echo WCCB_Frontend_View::get_tutor_availability_time_fields($availability);?>
 				
 				
@@ -91,7 +83,7 @@ class WCCB_Frontend_Myaccount_View {
 
 			<p>
 				<?php wp_nonce_field( 'save_tutor_availability', 'save-tutor-availability-nonce' ); ?>
-				<button type="submit" class="woocommerce-Button button" name="save_availability" value="<?php esc_attr_e( 'Save changes', PLUGIN_TEXT_DOMAIN ); ?>"><?php esc_html_e( 'Save changes', PLUGIN_TEXT_DOMAIN ); ?></button>
+				<button type="submit" class="woocommerce-Button button" name="save_availability" value="<?php esc_attr_e( 'Save changes', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>"><?php esc_html_e( 'Save changes', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?></button>
 				<input type="hidden" name="action" value="save_availability" />
 			</p>
 
@@ -123,7 +115,7 @@ class WCCB_Frontend_Myaccount_View {
 						?>
 						<div class="my_classes_main_wrapper">
 							<div class="title_wrapper">
-								<h2><?php echo __('Notes for Class' , PLUGIN_TEXT_DOMAIN );?></h2>
+								<h2><?php echo __('Notes for Class' , WC_CLASS_BOOKING_TEXT_DOMAIN );?></h2>
 							</div>
 							
 							<form id="my_notes_form" class="wccb_form" method="post">
@@ -132,24 +124,24 @@ class WCCB_Frontend_Myaccount_View {
 								<input type="hidden" name="action_do" value="save_notes">
 								<?php wp_nonce_field( 'save_notes', 'save_notes_nonce_field' ); ?>
 								<div class="field-group">
-									<label><?php echo __('Class Name' , PLUGIN_TEXT_DOMAIN);?> :</label>
+									<label><?php echo __('Class Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?> :</label>
 									<span><?php echo get_the_title($booking[0]->product_id);?></span>
 								</div>
 								<div class="field-group">
-									<label><?php echo __('Class Date & Time' , PLUGIN_TEXT_DOMAIN);?> :</label>
+									<label><?php echo __('Class Date & Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?> :</label>
 									<span><?php echo WCCB_Helper::display_date( $booking[0]->class_date).', '.$booking[0]->class_time;?></span>
 								</div>
 								<div class="field-group">
-									<label><?php echo __('Student Name' , PLUGIN_TEXT_DOMAIN);?> :</label>
+									<label><?php echo __('Student Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?> :</label>
 									<span><?php echo $student->display_name;?></span>
 								</div>
 								<div class="field-group">
-									<label><?php echo __('Tutor Name' , PLUGIN_TEXT_DOMAIN);?> :</label>
+									<label><?php echo __('Tutor Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?> :</label>
 									<span><?php echo $tutor->display_name;?></span>
 								</div>
 								<div class="slot_selected_container"></div>
 								<div class="tutor_availability_main_wrapper">
-									<label><?php echo __('Notes' , PLUGIN_TEXT_DOMAIN);?></label>
+									<label><?php echo __('Notes' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 									<textarea name="notes" rows="5" cols="20"><?php echo $notes[0]->meta_value;?></textarea>
 								</div>
 								<div class="field-group">
@@ -160,17 +152,17 @@ class WCCB_Frontend_Myaccount_View {
 						<?php
 					}
 					else {
-						 wc_add_notice( __( 'Unauthorize access' , PLUGIN_TEXT_DOMAIN ) , 'error');
+						 wc_add_notice( __( 'Unauthorize access' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 					}
 					
 				}
 				else {
-					wc_add_notice(__( 'Booking ID not exist' , PLUGIN_TEXT_DOMAIN ) , 'error');
+					wc_add_notice(__( 'Booking ID not exist' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 				}
 				
 			}
 			else {
-				wc_add_notice(__( 'Unauthorize access' , PLUGIN_TEXT_DOMAIN ) , 'error');
+				wc_add_notice(__( 'Unauthorize access' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 			}
 		}
 		if ($show_table) {
@@ -185,7 +177,7 @@ class WCCB_Frontend_Myaccount_View {
 						$tutor = get_users( $args );
 						?>
 						<div class="field-group">
-							<label><?php echo __('Select Tutor', PLUGIN_TEXT_DOMAIN);?></label>
+							<label><?php echo __('Select Tutor', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 							<select class="select" name="tutor_id" onchange="this.form.submit();">
 								<option value="">Select</option>
 								<?php
@@ -222,7 +214,7 @@ class WCCB_Frontend_Myaccount_View {
 			<?php
 			if (empty($tutor_id)) {
 				?>
-				<h3><?php echo __('Select tutor to view his/her bookings' , PLUGIN_TEXT_DOMAIN); ?></h3>
+				<h3><?php echo __('Select tutor to view his/her bookings' , WC_CLASS_BOOKING_TEXT_DOMAIN); ?></h3>
 				<?php
 			}
 			else {
@@ -230,29 +222,29 @@ class WCCB_Frontend_Myaccount_View {
 				?>
 				<div id="tabs">
 				  <ul>
-				    <li><a href="#tabs-1"><?php echo __('Upcoming Clases' , PLUGIN_TEXT_DOMAIN);?></a></li>
-				    <li><a href="#tabs-2"><?php echo __('Past Classes' , PLUGIN_TEXT_DOMAIN);?></a></li>
+				    <li><a href="#tabs-1"><?php echo __('Upcoming Clases' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></a></li>
+				    <li><a href="#tabs-2"><?php echo __('Past Classes' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></a></li>
 				  </ul>
 				  <div id="tabs-1">
-				    <h3><?php echo __('List of Upcoming Classes of '.$tutor->display_name , PLUGIN_TEXT_DOMAIN);?></h3>
+				    <h3><?php echo __('List of Upcoming Classes of '.$tutor->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
 				
 					<table class="table table-bordered" width="100%" border="1">
 						<thead>
 							<tr>
 								<th>
-									<?php echo __('SI. NO.' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('SI. NO.' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Class' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Class' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Slot Time' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Slot Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Student Name' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Student Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Actions' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Actions' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 							</tr>
 						</thead>
@@ -293,7 +285,7 @@ class WCCB_Frontend_Myaccount_View {
 									</td>
 									<td>
 										<!-- <a href="?show_notes=yes&booking_id=<?php echo $value['ID'];?>&notes_url_nonce=<?php echo wp_create_nonce('notes_url_nonce');?>">Notes</a> | -->
-										<a href="#" class="cancel_booking" data-booking_id="<?php echo $value['ID'];?>" data-cancel_booking_url_nonce="<?php echo wp_create_nonce('cancel_booking_url_nonce');?>"><?php echo __('Cancel', PLUGIN_TEXT_DOMAIN);?></a>
+										<a href="#" class="cancel_booking" data-booking_id="<?php echo $value['ID'];?>" data-cancel_booking_url_nonce="<?php echo wp_create_nonce('cancel_booking_url_nonce');?>"><?php echo __('Cancel', WC_CLASS_BOOKING_TEXT_DOMAIN);?></a>
 									</td>
 								</tr>
 								<?php
@@ -303,7 +295,7 @@ class WCCB_Frontend_Myaccount_View {
 							?>
 							<tr>
 								<td colspan="6">
-									<?php echo __('No class found.',PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('No class found.',WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</td>
 							</tr>
 							<?php
@@ -324,21 +316,21 @@ class WCCB_Frontend_Myaccount_View {
 				  		</div>
 				  		<button type="submit" name="search_booking">Search</button>
 				  	</div>
-				  	<h3><?php echo __('List of Past Classes of '.$tutor->display_name , PLUGIN_TEXT_DOMAIN) ;?></h3>
+				  	<h3><?php echo __('List of Past Classes of '.$tutor->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN) ;?></h3>
 				  	<table class="table table-bordered" width="100%" border="1">
 				  		<thead>
 				  			<tr>
 								<th>
-									<?php echo __('SI. NO.' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('SI. NO.' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Class' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Class' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Slot Time' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Slot Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Student Name' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Student Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								
 							</tr>
@@ -405,7 +397,7 @@ class WCCB_Frontend_Myaccount_View {
 							?>
 							<tr>
 								<td colspan="6">
-									<?php echo __('No class found.',PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('No class found.',WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</td>
 							</tr>
 							<?php
@@ -441,7 +433,7 @@ class WCCB_Frontend_Myaccount_View {
 						?>
 						<div class="my_classes_main_wrapper">
 							<div class="title_wrapper">
-								<h2><?php echo __('Reschedule Class' , PLUGIN_TEXT_DOMAIN );?></h2>
+								<h2><?php echo __('Reschedule Class' , WC_CLASS_BOOKING_TEXT_DOMAIN );?></h2>
 							</div>
 							
 							<form id="my_classes_form" class="wccb_form" method="post">
@@ -450,17 +442,17 @@ class WCCB_Frontend_Myaccount_View {
 								<input type="hidden" name="action_do" value="reschedule">
 								<?php wp_nonce_field( 'save_reschedule', 'save_reschedule_nonce_field' ); ?>
 								<div class="field-group">
-									<label><?php echo __('Class Name' , PLUGIN_TEXT_DOMAIN);?></label>
+									<label><?php echo __('Class Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 									<span><?php echo get_the_title($booking[0]['product_id']);?></span>
 								</div>
 								<div class="field-group">
-									<label><?php echo __('Class Date & Time' , PLUGIN_TEXT_DOMAIN);?></label>
+									<label><?php echo __('Class Date & Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 									<span><?php echo WCCB_Helper::display_date( $booking[0]['class_date']).', '.$booking[0]['class_time'];?></span>
 								</div>
 								<div class="slot_selected_container"></div>
 								<div class="tutor_availability_main_wrapper">
 									<?php 
-									echo WCCB_Frontend_View::get_tutor_availability_calendar( $booking[0]['tutor_id'] , date('Y-m-d') , NUM_DAYS_CALENDAR );
+									echo WCCB_Frontend_View::get_tutor_availability_calendar( $booking[0]['tutor_id'] , date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR );
 									?>
 								</div>
 								<div class="field-group">
@@ -471,17 +463,17 @@ class WCCB_Frontend_Myaccount_View {
 						<?php
 					}
 					else {
-						wc_add_notice( __( '<p style="color:red;">Unauthorize access</p>' , PLUGIN_TEXT_DOMAIN ) , 'error');
+						wc_add_notice( __( '<p style="color:red;">Unauthorize access</p>' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 					}
 					
 				}
 				else {
-					wc_add_notice( __( '<p style="color:red;">Booking ID not exist</p>' , PLUGIN_TEXT_DOMAIN ) , 'error');
+					wc_add_notice( __( '<p style="color:red;">Booking ID not exist</p>' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 				}
 				
 			}
 			else {
-				wc_add_notice( __( '<p style="color:red;">Unauthorize access</p>' , PLUGIN_TEXT_DOMAIN ) , 'error');
+				wc_add_notice( __( '<p style="color:red;">Unauthorize access</p>' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 			}
 		}
 
@@ -490,7 +482,7 @@ class WCCB_Frontend_Myaccount_View {
 			?>
 			<div class="my_classes_main_wrapper">
 				<div class="title_wrapper">
-					<h2><?php echo __('Book New Class' , PLUGIN_TEXT_DOMAIN );?></h2>
+					<h2><?php echo __('Book New Class' , WC_CLASS_BOOKING_TEXT_DOMAIN );?></h2>
 				</div>
 				
 				<form id="new_class_form" class="wccb_form" method="post">
@@ -503,7 +495,7 @@ class WCCB_Frontend_Myaccount_View {
 						$query      = "select * from $hour_table where user_id='".get_current_user_id()."' group by product_id";
 						$hours      = $wpdb->get_results( $query ); // db call ok. no cache ok
 						?>
-						<label><?php echo __('Class Name' , PLUGIN_TEXT_DOMAIN);?></label>
+						<label><?php echo __('Class Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 						<select class="select get_tutor_profile" name="product_id" id="product_id">
 							<option value="">Select</option>
 							<?php
@@ -566,7 +558,7 @@ class WCCB_Frontend_Myaccount_View {
 						$student = get_users( $args );
 						?>
 						<div class="field-group">
-							<label><?php echo __('Select Student', PLUGIN_TEXT_DOMAIN);?></label>
+							<label><?php echo __('Select Student', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 							<select class="select" name="user_id" onchange="this.form.submit();">
 								<option value="">Select</option>
 								<?php
@@ -600,7 +592,7 @@ class WCCB_Frontend_Myaccount_View {
 			<?php
 			if (empty($user_id)) {
 				?>
-				<h3><?php echo __('Select student to view his/her class list' , PLUGIN_TEXT_DOMAIN);?></h3>
+				<h3><?php echo __('Select student to view his/her class list' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
 				<?php
 			}
 			else {
@@ -609,29 +601,29 @@ class WCCB_Frontend_Myaccount_View {
 
 				<div id="tabs">
 				  <ul>
-				    <li><a href="#tabs-1"><?php echo __('Upcoming Clases' , PLUGIN_TEXT_DOMAIN);?></a></li>
-				    <li><a href="#tabs-2"><?php echo __('Past Classes',PLUGIN_TEXT_DOMAIN);?></a></li>
+				    <li><a href="#tabs-1"><?php echo __('Upcoming Clases' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></a></li>
+				    <li><a href="#tabs-2"><?php echo __('Past Classes',WC_CLASS_BOOKING_TEXT_DOMAIN);?></a></li>
 				  </ul>
 				  <div id="tabs-1">
-				    <h3><?php echo __('List of Upcoming Classes of '.$user->display_name , PLUGIN_TEXT_DOMAIN);?></h3>
+				    <h3><?php echo __('List of Upcoming Classes of '.$user->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
 				
 					<table class="table table-bordered" width="100%" border="1">
 						<thead>
 							<tr>
 								<th>
-									<?php echo __('SI. NO.' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('SI. NO.' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Class' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Class' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Slot Time' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Slot Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Tutor Name' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Tutor Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Actions', PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Actions', WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								
 							</tr>
@@ -686,7 +678,7 @@ class WCCB_Frontend_Myaccount_View {
 							?>
 							<tr>
 								<td colspan="6">
-									<?php echo __('No class found.',PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('No class found.',WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</td>
 							</tr>
 							<?php
@@ -696,21 +688,21 @@ class WCCB_Frontend_Myaccount_View {
 				
 				  </div>
 				  <div id="tabs-2">
-				  	<h3><?php echo __('List of Past Classes of '.$user->display_name , PLUGIN_TEXT_DOMAIN);?></h3>
+				  	<h3><?php echo __('List of Past Classes of '.$user->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
 				  	<table class="table table-bordered" width="100%" border="1">
 				  		<thead>
 				  			<tr>
 								<th>
-									<?php echo __('SI. NO.' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('SI. NO.' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Class' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Class' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Slot Time' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Slot Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								<th>
-									<?php echo __('Tutor Name' , PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('Tutor Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</th>
 								
 								
@@ -762,7 +754,7 @@ class WCCB_Frontend_Myaccount_View {
 							?>
 							<tr>
 								<td colspan="6">
-									<?php echo __('No class found.',PLUGIN_TEXT_DOMAIN);?>
+									<?php echo __('No class found.',WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 								</td>
 							</tr>
 							<?php
@@ -795,7 +787,7 @@ class WCCB_Frontend_Myaccount_View {
 					$student = get_users( $args );
 					?>
 					<div class="field-group">
-						<label><?php echo __('Select Student', PLUGIN_TEXT_DOMAIN);?></label>
+						<label><?php echo __('Select Student', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 						<select class="select" name="user_id" onchange="this.form.submit();">
 							<option value="">Select</option>
 							<?php
@@ -828,7 +820,7 @@ class WCCB_Frontend_Myaccount_View {
 
 		if (empty($user_id)) {
 			?>
-			<h3><?php echo __('Select student to view his/her hour list', PLUGIN_TEXT_DOMAIN);?></h3>
+			<h3><?php echo __('Select student to view his/her hour list', WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
 			<?php
 		}
 		else {
@@ -840,30 +832,30 @@ class WCCB_Frontend_Myaccount_View {
 				</h3>
 			</div>
 			
-			<h3><?php echo __('List of Purchased Hours of '.$user->display_name , PLUGIN_TEXT_DOMAIN);?></h3>
+			<h3><?php echo __('List of Purchased Hours of '.$user->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
 		  	<table class="table table-bordered" width="100%" border="1">
 		  		<thead>
 		  			<tr>
 						<th>
-							<?php echo __('SI. NO.' , PLUGIN_TEXT_DOMAIN);?>
+							<?php echo __('SI. NO.' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 						</th>
 						<th>
-							<?php echo __('Product' , PLUGIN_TEXT_DOMAIN);?>
+							<?php echo __('Product' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 						</th>
 						<th>
-							<?php echo __('Purchased Hours' , PLUGIN_TEXT_DOMAIN);?>
+							<?php echo __('Purchased Hours' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 						</th>
 						<th>
-							<?php echo __('Used Hours' , PLUGIN_TEXT_DOMAIN);?>
+							<?php echo __('Used Hours' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 						</th>
 						<th>
-							<?php echo __('Expired Hours', PLUGIN_TEXT_DOMAIN);?>
+							<?php echo __('Expired Hours', WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 						</th>
 						<th>
-							<?php echo __('Date Purchased' , PLUGIN_TEXT_DOMAIN);?>
+							<?php echo __('Date Purchased' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 						</th>
 						<th>
-							<?php echo __('Expiry Date', PLUGIN_TEXT_DOMAIN);?>
+							<?php echo __('Expiry Date', WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 						</th>
 						
 					</tr>
@@ -877,7 +869,7 @@ class WCCB_Frontend_Myaccount_View {
 						$expiry_date     = '';
 						$remaining_hour  = $value['purchased_hours'] - $value['used_hours'];
 						if ($remaining_hour > 0) {
-							$expiry_date = WCCB_Helper::get_particular_date($value['date_purchased'] , HOUR_EXPIRE_DAYS);
+							$expiry_date = WCCB_Helper::get_particular_date($value['date_purchased'] , WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS);
 						}
 						?>
 						<tr>
@@ -912,7 +904,7 @@ class WCCB_Frontend_Myaccount_View {
 					?>
 					<tr>
 						<td colspan="7">
-							<?php echo __('No hours found.' , PLUGIN_TEXT_DOMAIN);?>
+							<?php echo __('No hours found.' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 						</td>
 					</tr>
 					<?php
