@@ -19,7 +19,7 @@ class WCCB_Frontend_Myaccount_View {
 				$role_name = 'Administrator';
 				break;
 		}
-		$welcome_text = 'Hello '.wccb_user_get_display_name( $user ).' ('.$role_name.')';
+		$welcome_text = __('Hello' , WC_CLASS_BOOKING_TEXT_DOMAIN ).' '.wccb_user_get_display_name( $user ).' ('.$role_name.')';
 		?>
 		<div class="welcome_text_wrapper">
 			<?php echo __($welcome_text , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
@@ -133,11 +133,11 @@ class WCCB_Frontend_Myaccount_View {
 								</div>
 								<div class="field-group">
 									<label><?php echo __('Student Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?> :</label>
-									<span><?php echo $student->display_name;?></span>
+									<span><?php echo wccb_user_get_display_name($student);?></span>
 								</div>
 								<div class="field-group">
 									<label><?php echo __('Tutor Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?> :</label>
-									<span><?php echo $tutor->display_name;?></span>
+									<span><?php echo wccb_user_get_display_name($tutor);?></span>
 								</div>
 								<div class="slot_selected_container"></div>
 								<div class="tutor_availability_main_wrapper">
@@ -186,7 +186,7 @@ class WCCB_Frontend_Myaccount_View {
 								<?php
 					        	foreach ($tutor as $row) {
 					        		?>
-					        		<option value="<?php echo $row->ID;?>" <?php if($_REQUEST['tutor_id'] == $row->ID){ $tutor_id = $_REQUEST['tutor_id'];?> selected="selected" <?php }?>><?php echo $row->display_name;?></option>
+					        		<option value="<?php echo $row->ID;?>" <?php if($_REQUEST['tutor_id'] == $row->ID){ $tutor_id = $_REQUEST['tutor_id'];?> selected="selected" <?php }?>><?php echo wccb_user_get_display_name($row);?></option>
 					        		<?php
 					        	}
 					        	?>
@@ -228,18 +228,18 @@ class WCCB_Frontend_Myaccount_View {
 
 			  	<div class="date_filter_wrapper">
 			  		<div class="from_date_wrapper">
-			  			<label>From Date :</label>
+			  			<label><?php echo __('From Date', WC_CLASS_BOOKING_TEXT_DOMAIN);?> :</label>
 			  			<input type="text" name="start_date" id="start_date" readonly="readonly" class="date_picker" value="<?php echo !empty($_REQUEST['start_date']) ? $_REQUEST['start_date'] : '';?>">
 			  		</div>
 			  		<div class="from_date_wrapper">
-			  			<label>To Date :</label>
+			  			<label><?php echo __('To Date' , WC_CLASS_BOOKING_TEXT_DOMAIN);?> :</label>
 			  			<input type="text" name="end_date" id="end_date" readonly="readonly" class="date_picker" value="<?php echo !empty($_REQUEST['end_date']) ? $_REQUEST['end_date'] : '';?>">
 			  		</div>
-			  		<button type="submit" name="search_booking">Search</button>
-			  		<button type="reset" name="reset_search">Reset</button>
+			  		<button type="submit" name="search_booking"><?php echo __('Search' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></button>
+			  		<button type="button" id="reset_search"><?php echo __('Reset', WC_CLASS_BOOKING_TEXT_DOMAIN ) ;?></button>
 			  	</div>
 
-			    <h3><?php echo __('List of Past Classes of '.$tutor->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
+			    <h3><?php echo __('List of Past Classes of '.wccb_user_get_display_name($tutor), WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
 
 
 				<table class="table table-bordered" width="100%" border="1">
@@ -253,6 +253,7 @@ class WCCB_Frontend_Myaccount_View {
 							</th>
 							<th>
 								<?php echo __('Slot Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+								<?php echo WCCB_Helper::help_tip(WC_CLASS_BOOKING_TIMEZONE_MSG);?>
 							</th>
 							<th>
 								<?php echo __('Student Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
@@ -263,10 +264,10 @@ class WCCB_Frontend_Myaccount_View {
 					
 					<?php
 					if (!empty($_REQUEST['start_date']) && !empty($_REQUEST['end_date'])) {
-						$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date between '".date('Y-m-d', strtotime($_REQUEST['start_date']))."' and '".date('Y-m-d', strtotime($_REQUEST['end_date']))."'";
+						$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date between '".wp_date('Y-m-d', strtotime($_REQUEST['start_date']))."' and '".wp_date('Y-m-d', strtotime($_REQUEST['end_date']))."' and status!='Cancelled'";
 					}
 					else {
-						$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date < '".date('Y-m-d')."'";
+						$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date < '".wp_date('Y-m-d')."' and status!='Cancelled'";
 					}
 					
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
@@ -300,7 +301,7 @@ class WCCB_Frontend_Myaccount_View {
 									
 								</td>
 								<td>
-									<?php echo $user->display_name;?>
+									<?php echo wccb_user_get_display_name($user);?>
 								</td>
 								
 							</tr>
@@ -334,7 +335,7 @@ class WCCB_Frontend_Myaccount_View {
 			  </div>
 			  <div id="tabs-2">
 
-			  	<h3><?php echo __('List of Upcoming Classes of '.$tutor->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN) ;?></h3>
+			  	<h3><?php echo __('List of Upcoming Classes of '.wccb_user_get_display_name($tutor) , WC_CLASS_BOOKING_TEXT_DOMAIN) ;?></h3>
 
 			  	<table class="table table-bordered" width="100%" border="1">
 					<thead>
@@ -347,6 +348,7 @@ class WCCB_Frontend_Myaccount_View {
 							</th>
 							<th>
 								<?php echo __('Slot Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+								<?php echo WCCB_Helper::help_tip(WC_CLASS_BOOKING_TIMEZONE_MSG);?>
 							</th>
 							<th>
 								<?php echo __('Student Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
@@ -358,7 +360,7 @@ class WCCB_Frontend_Myaccount_View {
 					</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date >= '".date('Y-m-d')."' and status != 'Cancelled'";
+					$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date >= '".wp_date('Y-m-d')."' and status != 'Cancelled'";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {
@@ -389,10 +391,10 @@ class WCCB_Frontend_Myaccount_View {
 									
 								</td>
 								<td>
-									<?php echo $user->display_name;?>
+									<?php echo wccb_user_get_display_name($user);?>
 								</td>
 								<td>
-									 <a href="?show_notes=yes&booking_id=<?php echo $value['ID'];?>&notes_url_nonce=<?php echo wp_create_nonce('notes_url_nonce');?>">Notes</a>
+									 <a href="?show_notes=yes&booking_id=<?php echo $value['ID'];?>&notes_url_nonce=<?php echo wp_create_nonce('notes_url_nonce');?>"><?php echo __('Notes' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></a>
 									<a href="#" class="cancel_booking" data-booking_id="<?php echo $value['ID'];?>" data-cancel_booking_url_nonce="<?php echo wp_create_nonce('cancel_booking_url_nonce');?>"><?php echo __('Cancel', WC_CLASS_BOOKING_TEXT_DOMAIN);?></a>
 								</td>
 							</tr>
@@ -436,7 +438,7 @@ class WCCB_Frontend_Myaccount_View {
 						?>
 						<div class="my_classes_main_wrapper">
 							
-							<form id="my_reschedule_form" class="woocommerce-EditAccountForm my_reschedule_form" method="post">
+							<form id="my_reschedule_form" class="woocommerce-EditAccountForm wccb_form my_reschedule_form" method="post">
 								<input type="hidden" name="booking_id" value="<?php echo $booking[0]['ID'];?>">
 								<input type="hidden" name="tutor_id" value="<?php echo $booking[0]['tutor_id'];?>">
 								<input type="hidden" name="action_do" value="reschedule">
@@ -456,11 +458,11 @@ class WCCB_Frontend_Myaccount_View {
 								<div class="slot_selected_container"></div>
 								<div class="tutor_availability_main_wrapper">
 									<?php 
-									echo WCCB_Frontend_View::get_tutor_availability_calendar( $booking[0]['tutor_id'] , date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR );
+									echo WCCB_Frontend_View::get_tutor_availability_calendar( $booking[0]['tutor_id'] , wp_date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR );
 									?>
 								</div>
 								<div class="field-group">
-									<button type="submit" name="save_reschedule" class="woocommerce-Button button">Save Changes</button>
+									<button type="submit" name="save_reschedule" class="woocommerce-Button button"><?php echo __('Save Changes' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></button>
 								</div>
 							</form>
 						</div>
@@ -481,34 +483,38 @@ class WCCB_Frontend_Myaccount_View {
 			}
 		}
 
-		if ($_REQUEST['new_booking'] == 'yes') {
+		if ($_REQUEST['new_booking'] == 'yes' && !empty($_REQUEST['user_id'])) {
 			$show_table = false;
 			?>
 			<div class="my_classes_main_wrapper">
 				
-				<form id="new_class_form" class="woocommerce-EditAccountForm new_class_form" method="post">
+				<form id="new_class_form" class="woocommerce-EditAccountForm wccb_form new_class_form " method="post">
 					<input type="hidden" name="new_booking" id="new_booking" value="<?php echo $_REQUEST['new_booking'];?>">
 					<input type="hidden" name="action_do" value="save_booking">
 					<input type="hidden" name="user_id" value="<?php echo $_REQUEST['user_id'];?>">
 					<?php wp_nonce_field( 'save_booking', 'save_booking_nonce_field' ); ?>
-
+					<div class="back_link_wrapper">
+						<a href="?user_id=<?php echo $_REQUEST['user_id'];?>">
+						<?php echo __('Back to List' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+					</a>
+					</div>
 					<div class="title_wrapper">
 						<h2><?php echo __('Book New Class' , WC_CLASS_BOOKING_TEXT_DOMAIN );?></h2>
 					</div>
 
 					<div class="field-group product_container">
 						<?php
-						$query      = "select * from $hour_table where user_id='".get_current_user_id()."' group by product_id";
+						$query      = "select * from $hour_table where user_id='".$_REQUEST['user_id']."' group by product_id";
 						$hours      = $wpdb->get_results( $query ); // db call ok. no cache ok
 						?>
 						<label><?php echo __('Class Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 						<select class="select get_tutor_profile" name="product_id" id="product_id">
-							<option value="">Select</option>
+							<option value=""><?php echo __('Select' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
 							<?php
 							if (count($hours)>0 ) {
 								foreach ($hours as $hour) {
 									$product    = wc_get_product($hour->product_id);
-									$available_hour = WCCB_Frontend_Myaccount::get_student_total_available_hours(get_current_user_id() , $product->get_id());
+									$available_hour = WCCB_Frontend_Myaccount::get_student_total_available_hours($_REQUEST['user_id'] , $product->get_id());
 									if ($available_hour > 0 ) {
 										?>
 										<option value="<?php echo $product->get_id();?>" <?php if($_REQUEST['product_id'] == $product->get_id()){?> selected="selected" <?php }?>><?php echo $product->get_name().' - (Available hours : '.$available_hour.')';?></option>
@@ -526,11 +532,16 @@ class WCCB_Frontend_Myaccount_View {
 						}
 						?>
 					</div>
-					<?php
-					echo WCCB_Frontend_View::render_tutor_availability_container();
-					?>
-					<div class="field-group">
-						<button type="submit" name="save_reschedule" class="woocommerce-Button button">Save Booking</button>
+					<div class="calendar_container">
+						<?php
+						echo WCCB_Frontend_View::render_tutor_availability_container();
+						?>
+					</div>
+					<div class="field-group button_wrapper" style="display: <?php echo !empty($_REQUEST['product_id']) ? 'block' : 'none';?>;">
+						<button type="submit" name="save_reschedule" class="woocommerce-Button button">
+							<?php echo __('Save Booking' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+						</button>
+						
 					</div>
 				</form>
 			</div>
@@ -568,7 +579,7 @@ class WCCB_Frontend_Myaccount_View {
 						<div class="field-group">
 							<label><?php echo __('Select Student', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 							<select class="select" name="user_id" onchange="this.form.submit();">
-								<option value="">Select</option>
+								<option value=""><?php echo __('Select' , WC_CLASS_BOOKING_TEXT_DOMAIN );?></option>
 								<?php
 					        	foreach ($student as $row) {
 					        		?>
@@ -613,7 +624,7 @@ class WCCB_Frontend_Myaccount_View {
 			    <li><a href="#tabs-2"><?php echo __('Upcoming Classes',WC_CLASS_BOOKING_TEXT_DOMAIN);?></a></li>
 			  </ul>
 			  <div id="tabs-1">
-			    <h3><?php echo __('List of Past Classes of '.$user->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
+			    <h3><?php echo __('List of Past Classes of '.wccb_user_get_display_name($user) , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
 			
 				<table class="table table-bordered" width="100%" border="1">
 					<thead>
@@ -626,19 +637,19 @@ class WCCB_Frontend_Myaccount_View {
 							</th>
 							<th>
 								<?php echo __('Slot Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+
+								<?php echo WCCB_Helper::help_tip(WC_CLASS_BOOKING_TIMEZONE_MSG);?>
 							</th>
 							<th>
 								<?php echo __('Tutor Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 							</th>
-							<th>
-								<?php echo __('Actions', WC_CLASS_BOOKING_TEXT_DOMAIN);?>
-							</th>
+							
 							
 						</tr>
 					</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date < '".date('Y-m-d')."' and status != 'Cancelled' order by class_date asc ";
+					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date < '".wp_date('Y-m-d')."' and status != 'Cancelled' order by class_date asc ";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {
@@ -671,13 +682,10 @@ class WCCB_Frontend_Myaccount_View {
 									
 								</td>
 								<td>
-									<?php echo $tutor->display_name;?>
+									<?php echo wccb_user_get_display_name($tutor);?>
 								</td>
 								
-								<td>
-									<a href="?reschedule=yes&booking_id=<?php echo $value['ID'];?>&reschedule_booking_url_nonce=<?php echo wp_create_nonce('reschedule_booking_url_nonce');?>">Reshedule</a> |
-									<a href="#" class="cancel_booking" data-booking_id="<?php echo $value['ID'];?>" data-cancel_booking_url_nonce="<?php echo wp_create_nonce('cancel_booking_url_nonce');?>">Cancel</a>
-								</td>
+								
 							</tr>
 							<?php
 						}
@@ -696,7 +704,7 @@ class WCCB_Frontend_Myaccount_View {
 			
 			  </div>
 			  <div id="tabs-2">
-			  	<h3><?php echo __('List of Upcoming Classes of '.$user->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
+			  	<h3><?php echo __('List of Upcoming Classes of '.wccb_user_get_display_name($user) , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
 			  	<table class="table table-bordered" width="100%" border="1">
 			  		<thead>
 			  			<tr>
@@ -708,17 +716,20 @@ class WCCB_Frontend_Myaccount_View {
 							</th>
 							<th>
 								<?php echo __('Slot Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+								<?php echo WCCB_Helper::help_tip(WC_CLASS_BOOKING_TIMEZONE_MSG);?>
 							</th>
 							<th>
 								<?php echo __('Tutor Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 							</th>
-							
+							<th>
+								<?php echo __('Actions', WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+							</th>
 							
 						</tr>
 			  		</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date >= '".date('Y-m-d')."' and status != 'Cancelled' order by class_date asc";
+					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date >= '".wp_date('Y-m-d')."' and status != 'Cancelled' order by class_date asc";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {
@@ -750,9 +761,12 @@ class WCCB_Frontend_Myaccount_View {
 									
 								</td>
 								<td>
-									<?php echo $tutor->display_name;?>
+									<?php echo wccb_user_get_display_name($tutor);?>
 								</td>
-								
+								<td>
+									<a href="?reschedule=yes&booking_id=<?php echo $value['ID'];?>&reschedule_booking_url_nonce=<?php echo wp_create_nonce('reschedule_booking_url_nonce');?>">Reshedule</a> |
+									<a href="#" class="cancel_booking" data-booking_id="<?php echo $value['ID'];?>" data-cancel_booking_url_nonce="<?php echo wp_create_nonce('cancel_booking_url_nonce');?>">Cancel</a>
+								</td>
 								
 							</tr>
 							<?php
@@ -796,11 +810,11 @@ class WCCB_Frontend_Myaccount_View {
 					<div class="field-group">
 						<label><?php echo __('Select Student', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 						<select class="select" name="user_id" onchange="this.form.submit();">
-							<option value="">Select</option>
+							<option value=""><?php echo __('Select' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
 							<?php
 				        	foreach ($student as $row) {
 				        		?>
-				        		<option value="<?php echo $row->ID;?>" <?php if($_REQUEST['user_id'] == $row->ID){ $user_id = $_REQUEST['user_id'];?> selected="selected" <?php }?>><?php echo $row->display_name;?></option>
+				        		<option value="<?php echo $row->ID;?>" <?php if($_REQUEST['user_id'] == $row->ID){ $user_id = $_REQUEST['user_id'];?> selected="selected" <?php }?>><?php echo wccb_user_get_display_name($row);?></option>
 				        		<?php
 				        	}
 				        	?>
@@ -838,7 +852,7 @@ class WCCB_Frontend_Myaccount_View {
 				</h3>
 			</div>
 			
-			<h3><?php echo __('List of Purchased Hours of '.$user->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
+			<h3><?php echo __('List of Purchased Hours of '.wccb_user_get_display_name($user) , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h3>
 		  	<table class="table table-bordered" width="100%" border="1">
 		  		<thead>
 		  			<tr>

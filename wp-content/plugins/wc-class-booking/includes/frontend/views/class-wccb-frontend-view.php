@@ -27,9 +27,9 @@ class WCCB_Frontend_View {
 				
     		), $atts
 		);
-		$login_link_label = !get_current_user_id() ? 'Login' : 'My Account';
+		$login_link_label = !get_current_user_id() ? __('Login' , WC_CLASS_BOOKING_TEXT_DOMAIN) : __('My Account' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 		?>
-		<a href="<?php echo WCCB_Frontend::get_price_page_link();?>" class="header-btn">Quran Classes</a>
+		<a href="<?php echo WCCB_Frontend::get_price_page_link();?>" class="header-btn"><?php echo __('Quran Classes' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></a>
 		<a href="<?php echo WCCB_Frontend::get_myaccount_page_link();?>" class="header-btn"><?php echo $login_link_label;?></a>
 		<?php
 		return ob_get_clean();
@@ -50,9 +50,9 @@ class WCCB_Frontend_View {
 		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
 			<label for="reg_username"><?php esc_html_e( 'Gender', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
 			<select name="gender" id="gender" class="select">
-				<option value="">Select</option>
-				<option value="Male" <?php selected($_POST['gender'],'Male');?>>Male</option>
-				<option value="Female" <?php selected($_POST['gender'],'Female');?>>Female</option>
+				<option value=""><?php echo __('Select' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
+				<option value="Male" <?php selected($_POST['gender'],'Male');?>><?php echo __('Male', WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
+				<option value="Female" <?php selected($_POST['gender'],'Female');?>><?php echo __('Female' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
 			</select>
 		</p>
 		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
@@ -92,16 +92,16 @@ class WCCB_Frontend_View {
 		<table>
 			<tr>
 				<th>
-					Day
+					<?php echo __( 'Day' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 				</th>
 				<th>
-					Start Time
+					<?php echo __( 'Start Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 				</th>
 				<th>
-					End Time
+					<?php echo __( 'End Time' , WC_CLASS_BOOKING_TEXT_DOMAIN );?>
 				</th>
 				<th>
-					Is Unavailable?
+					<?php echo __('Is Unavailable?' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 				</th>
 				<th>&nbsp;</th>
 			</tr>
@@ -176,7 +176,7 @@ class WCCB_Frontend_View {
 			if (empty($more)) {
 				?>				
 				<td>
-					<a href="#" class="add_time_row" data-lower_key="<?php echo $lower_key;?>">Add Row</a>					
+					<a href="#" class="add_time_row" data-lower_key="<?php echo $lower_key;?>"><?php echo __('Add Row' , WC_CLASS_BOOKING_TEXT_DOMAIN );?></a>					
 				</td>
 				<td>
 					<input type="checkbox" class="woocommerce-Input woocommerce-Input--cehckbox input-checkbox" name="<?php echo $lower_key;?>_is_unavailable" id="<?php echo $lower_key;?>_is_unavailable"  value="Yes" <?php echo ! empty( $is_unavailable ) ? 'checked="checked"' : ''; ?> />
@@ -187,8 +187,8 @@ class WCCB_Frontend_View {
 				?>
 				<td>
 					<div class="link_group">
-						<a href="#" class="add_time_row" data-lower_key="{lower_key}">Add Row</a>
-						<a href="#" class="delete_time_row">Delete</a>
+						<a href="#" class="add_time_row" data-lower_key="{lower_key}"><?php echo __('Add Row' , WC_CLASS_BOOKING_TEXT_DOMAIN );?></a>
+						<a href="#" class="delete_time_row"><?php echo __('Delete' , WC_CLASS_BOOKING_TEXT_DOMAIN );?></a>
 					</div>
 				</td>				
 				<td>
@@ -299,7 +299,7 @@ class WCCB_Frontend_View {
 				echo WCCB_Frontend_View::get_tutor_availability_calendar( $_REQUEST['tutor_id'] , date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR , $_POST['slot'] );
 			}
 			else {
-				echo __('Tutor availability will show here' , WC_CLASS_BOOKING_TEXT_DOMAIN );
+				//echo __('Tutor availability will show here' , WC_CLASS_BOOKING_TEXT_DOMAIN );
 			}
 			?>
 		</div>
@@ -343,9 +343,9 @@ class WCCB_Frontend_View {
 				<div class="gender_selection_wrapper">
 					<label><?php echo __('Gender' ,WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 					<select name="gender" id="gender" class="gender_select">
-						<option value="">All</option>
-						<option value="Male" <?php selected($_REQUEST['gender'] , 'Male');?>>Male</option>
-						<option value="Female" <?php selected($_REQUEST['gender'] , 'Female');?>>Female</option>
+						<option value=""><?php echo __('All' , WC_CLASS_BOOKING_TEXT_DOMAIN );?></option>
+						<option value="Male" <?php selected($_REQUEST['gender'] , 'Male');?>><?php echo __('Male' ,WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
+						<option value="Female" <?php selected($_REQUEST['gender'] , 'Female');?>><?php echo __('Female' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
 					</select>
 				</div>
 			</div>
@@ -367,7 +367,7 @@ class WCCB_Frontend_View {
 										echo wp_get_attachment_image($attachment_id , 'thumbnail' , array('class' => 'ct-image oxel_reviewbox__image_wrapper__image') );
 									}
 									else {
-										echo get_avatar( $user->ID, 96 , '' , $user->display_name , array('class' => 'ct-image oxel_reviewbox__image_wrapper__image'));
+										echo get_avatar( $user->ID, 96 , '' , wccb_user_get_display_name($user) , array('class' => 'ct-image oxel_reviewbox__image_wrapper__image'));
 									}
 									?>
 								</div>
@@ -375,7 +375,7 @@ class WCCB_Frontend_View {
 								
 								<div class="tutor_meta_wrapper">
 									<input type="radio" name="tutor_id" id="tutor_<?php echo $user->ID;?>" value="<?php echo $user->ID;?>" class="get_tutor_availability_calendar radio_btn" data-action="get_tutor_availability_calendar" data-tutor_id="<?php echo $user->ID;?>" data-date="<?php echo date('Y-m-d');?>" data-response_container=".tutor_availability_main_wrapper" data-reset_picked="yes" <?php if($_REQUEST['tutor_id'] == $user->ID){?> checked="checked" <?php }?>>
-									<?php echo $user->display_name;?>
+									<?php echo wccb_user_get_display_name($user);?>
 								</div>
 							</div>
 						</label>
@@ -410,7 +410,10 @@ class WCCB_Frontend_View {
 
 		ob_start();
 		?>
-		<h2 class="wccb_title"><?php echo __('Choose slots from availability of '.$tutor_info->display_name , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h2>
+		<h2 class="wccb_title">
+			<?php echo __('Choose slots from availability of '.wccb_user_get_display_name($tutor_info) , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+			<?php echo WCCB_Helper::help_tip(WC_CLASS_BOOKING_TIMEZONE_MSG);?>	
+		</h2>
 		<div style="overflow-x:auto;">
 			<table class="table table-bordered">
 				<thead>
@@ -503,7 +506,7 @@ class WCCB_Frontend_View {
 							continue;
 						}
 						?>
-						<th>Slot</th>
+						<th><?php echo __('Slot' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></th>
 						<?php
 					}
 					?>
@@ -548,7 +551,7 @@ class WCCB_Frontend_View {
 			<span class="slot_picked_date_time">
 				{slot_date} , {slot_time}
 			</span>
-			<a href="#" class="delete_slot" data-slot_span_id="{slot_span_id}">Delete</a>
+			<a href="#" class="delete_slot" data-slot_span_id="{slot_span_id}"><?php echo __('Delete' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></a>
 		</div>
 		<?php
 
@@ -584,7 +587,7 @@ class WCCB_Frontend_View {
 
 		if ( $product->product_type == "wccb_course" ) {
 		    $simpleURL   = get_permalink();
-		    $simpleLabel = 'Book Your Package';
+		    $simpleLabel = __('Book Your Package', WC_CLASS_BOOKING_TEXT_DOMAIN);
 		} else {
 		    $simpleURL =  $product->add_to_cart_url();  
 		    $simpleLabel = $product->add_to_cart_text();

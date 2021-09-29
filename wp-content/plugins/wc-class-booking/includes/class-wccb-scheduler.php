@@ -22,7 +22,6 @@ class WCCB_Scheduler {
 		add_action( "wccb_schedule_class_notification", array( 'WCCB_Scheduler', 'check_class_notification' ), 10 );
 		add_action( "wccb_schedule_class_reminder", array( 'WCCB_Scheduler', 'check_class_reminder' ), 10 );
 		add_action( "wccb_schedule_class_completion", array( 'WCCB_Scheduler', 'check_class_completion' ), 10 );
-
 		//Filters
 		add_filter( "cron_schedules", array( 'WCCB_Scheduler', 'add_cron_interval' ) );
 	}
@@ -84,7 +83,7 @@ class WCCB_Scheduler {
 	public static function check_class_notification() {
 		global $wpdb;
 		$table_name = $wpdb->prefix.'booking_history';
-		$query      = "select * from $table_name where class_date='".date('Y-m-d')."' and status = 'Upcoming'";
+		$query      = "select * from $table_name where class_date='".wp_date('Y-m-d')."' and status = 'Upcoming'";
 		$results    = $wpdb->get_results( $query ); // db call ok. no cache ok.
 		
 		//print_r($results).'<br><br><br>';
@@ -102,7 +101,7 @@ class WCCB_Scheduler {
 	public static function check_class_reminder() {
 		global $wpdb;
 		$table_name = $wpdb->prefix.'booking_history';
-		$query      = "select * from $table_name where class_date='".date('Y-m-d')."' and status = 'Upcoming'";
+		$query      = "select * from $table_name where class_date='".wp_date('Y-m-d')."' and status = 'Upcoming'";
 
 
 		$results    = $wpdb->get_results( $query ); // db call ok. no cache ok.
@@ -110,7 +109,7 @@ class WCCB_Scheduler {
 			foreach( $results as $row ) {
 				$class_time_exp = explode(' ' , $row->class_time);
 				$class_time     = $row->class_date.' '.$class_time_exp[0].':00 '.$class_time_exp[1];
-				$datetime1      = new DateTime(date('Y-m-d h:i a'));
+				$datetime1      = new DateTime(wp_date('Y-m-d h:i a'));
 				$datetime2      = new DateTime($class_time);
 				$interval       = $datetime1->diff($datetime2);
 				$days           = $interval->d;
@@ -131,13 +130,14 @@ class WCCB_Scheduler {
 	public static function check_class_completion() {
 		global $wpdb;
 		$table_name = $wpdb->prefix.'booking_history';
-		$query      = "select * from $table_name where class_date='".date('Y-m-d')."' and status = 'Upcoming'";
+		$query      = "select * from $table_name where class_date<='".wp_date('Y-m-d')."' and status = 'Upcoming'";
 		$results    = $wpdb->get_results( $query ); // db call ok. no cache ok.
 		if (count($results)) {
 			foreach( $results as $row ) {
 				$class_time_exp = explode(' ' , $row->class_time);
 				$class_time     = $row->class_date.' '.$class_time_exp[3].':00 '.$class_time_exp[4];
-				if (new DateTime() > new DateTime($class_time)) {
+				$time_diff      = strtotime(wp_date('Y-m-d H:i:s')) - strtotime(wp_date('Y-m-d H:i:s', strtotime($class_time)));
+				if ( $time_diff > 0 ) {
 
 					//Update class status
 					$wpdb->update(

@@ -61,7 +61,7 @@ jQuery(function($){
     }
 
 	var get_tutor_availability_calendar = function( params ) {
-
+		
 		params['loading_type']			= 'loader',
 		params['loading_target'] 		= params.wrapper,
 		params['html_error'] 			= 0;
@@ -73,7 +73,7 @@ jQuery(function($){
 		
 		WCCB.ajax_callbacks['after_ajax_success_return'] = function( params, response ){
 														$(params.response_container).html(response.content);
-
+														WCCB.showTip( '.wpiaf-tips', {attribute:"data-tip",fadeIn:50,fadeOut:50,delay:200,keepAlive:!0} );
 													};
 		WCCB.ajax_callbacks['after_ajax_error_return'] = function( params, response ){
 														alert(response.msg);
@@ -207,12 +207,19 @@ jQuery(function($){
 
 	$(document).on('change', '.get_tutor_profile', function(e){ 
 		let product_id = $(this).val();
-
 		let	params    = { product_id : product_id , action : 'get_tutor_profile' , response_container : '.tutor_container', wrapper : $('.tutor_container')};
 
 		params['loading_type']			= 'loader',
 		params['loading_target'] 		= params.wrapper,
 		params['html_error'] 			= 0;
+
+		$('.button_wrapper').show();
+		if (product_id.length == 0 ) {
+			$(params.response_container).html('');
+			$('.calendar_container').html('');
+			$('.button_wrapper').hide();
+			return false;
+		}
 
 		WCCB.ajax_options['url'] 		= wccb_config.frontend_ajax_url;
 		WCCB.ajax_options['data'] 		= 'action='+params.action+'&product_id='+params.product_id;
@@ -243,6 +250,10 @@ jQuery(function($){
 		$(this).closest('.time_row').remove();
 	});
 
-
+	$(document).on('click', '#reset_search', function(e){
+		e.preventDefault();
+		$('#start_date').val('');
+		$('#end_date').val('');
+	});
 
 });	
