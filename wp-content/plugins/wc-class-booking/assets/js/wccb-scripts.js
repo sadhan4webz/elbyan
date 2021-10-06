@@ -178,7 +178,7 @@ jQuery(function($){
 	$(document).on('change', '.gender_select', function(e){
 		var url = '?gender='+$(this).val();
 		if($('#new_booking').length){
-			url += '&new_booking='+$('#new_booking').val()+'&product_id='+$('#product_id').val();
+			url += '&new_booking='+$('#new_booking').val()+'&product_id='+$('#product_id').val()+'&user_id='+$('input[name=user_id]').val();
 		}
 		window.location.href=url;
 	});
@@ -254,6 +254,23 @@ jQuery(function($){
 		e.preventDefault();
 		$('#start_date').val('');
 		$('#end_date').val('');
+	});
+
+	$(document).on('submit', '.add_hour_form', function(e){
+		e.preventDefault();
+		let $frm      = $(this),
+			$btn      = $('.save_hour')
+			params    = { query_string : $frm.serialize() , action : 'student_add_hour' , response: $('.response_container') , loading_type : 'spinner' , loading_target : $btn , html_error : 1 },
+
+		WCCB.ajax_options['url'] 		= wccb_config.frontend_ajax_url;
+		WCCB.ajax_options['data'] 		= 'action='+params.action+'&'+params.query_string;
+		WCCB.ajax_callbacks['after_ajax_success_return'] = function( params, response ){
+												
+														WCCB.show_wpmbd_notice( response.msg, params.response, true, 0 );
+														$frm.trigger("reset");
+													};									
+		WCCB.ajax( params );
+
 	});
 
 });	

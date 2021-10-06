@@ -49,6 +49,79 @@ switch ( $action ) {
 		break;
 	
 
+	case 'student_add_hour':
+		global $wpdb;
+
+		if ( ! isset( $_POST['add_hour_nonce_field'] ) || ! wp_verify_nonce( $_POST['add_hour_nonce_field'], 'add_hour_nonce' ) 
+		) {
+			$event   = 'error';
+			$content = '';
+			$msg     = '<div class="woocommerce-notices-wrapper">
+							<div class="woocommerce-message">Sorry your nonce not verified. Please refresh the page and try again.
+							</div>
+						</div>';
+		} 
+		else {
+
+			$validation_flag     = 1;
+			if (empty($_REQUEST['user_id']) || empty($_REQUEST['product_id']) || empty($_REQUEST['hour'])) {
+
+				$validation_flag = 0;
+				$event = 'error';
+				$msg   = '<div class="woocommerce-notices-wrapper">
+							<div class="woocommerce-message">
+								<ul>';
+
+				if (empty($_REQUEST['user_id'])) {
+					$msg   .= '<li>Please select student.</li>';
+				}
+
+				if (empty($_REQUEST['product_id'])) {
+					$msg   .= '<li>Please select class.</li>';
+				}
+
+				if (empty($_REQUEST['hour'])) {
+					$msg   .= '<li>Please enter hour</li>';
+				}
+
+				$msg .= '</<ul></div></div>';
+
+			}
+		}
+
+		if ($validation_flag) {
+			//Insert hour into hour history
+			$table_name = $wpdb->prefix.'hour_history';
+			$data       = array(
+				'user_id'         => $_REQUEST['user_id'],
+				'product_id'      => $_REQUEST['product_id'],
+				'purchased_hours' => $_REQUEST['hour'],
+				'date_purchased'  => wp_date('Y-m-d H:i:s')
+			);
+
+			if($wpdb->insert($table_name , $data)) {
+				$event   = 'success';
+				$content = '';
+				$msg     = '<div class="woocommerce-notices-wrapper">
+								<div class="woocommerce-message">The hour has been added for the student. Now class can be booked.</div>
+							</div>';
+			}
+			else {
+				$event   = 'error';
+				$content = '';
+				$msg     = '<div class="woocommerce-notices-wrapper">
+								<div class="woocommerce-message">Database error during insertion.</div>
+							</div>';
+			}
+			//End hour history
+		}
+
+		$response["event"] 	 = $event;
+		$response["msg"] 	 = $msg;
+		$response['content'] = $content;
+		echo json_encode( $response, JSON_HEX_QUOT | JSON_HEX_TAG );
+		break;
+
 	// Default ajax response	
 	default:
 		$response["event"] 	= "error";

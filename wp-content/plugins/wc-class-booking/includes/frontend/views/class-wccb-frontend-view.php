@@ -100,10 +100,10 @@ class WCCB_Frontend_View {
 				<th>
 					<?php echo __( 'End Time' , WC_CLASS_BOOKING_TEXT_DOMAIN );?>
 				</th>
+				<th>&nbsp;</th>
 				<th>
 					<?php echo __('Is Unavailable?' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 				</th>
-				<th>&nbsp;</th>
 			</tr>
 			<?php
 			foreach (WCCB_Helper::get_weekdays_array() as $key => $value) {

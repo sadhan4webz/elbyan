@@ -39,6 +39,15 @@ class WCCB_Frontend_Myaccount {
 	}
 
 	public function get_myaccount_menu( $all = false ) {
+
+		$end_points = array(
+			'availability' => 'Availability Settings',
+			'bookings'     => 'My Bookings',
+			'classes'      => 'My Classes',
+			'hours'        => 'My Hours',
+			'add_hour'     => 'Add Student Hour',
+		);
+
 		$tutor_menu   = array(
 			'availability' => 'Availability Settings',
 			'bookings'     => 'My Bookings',
@@ -52,10 +61,11 @@ class WCCB_Frontend_Myaccount {
 			'classes'      => 'Student Classes',
 			'hours'        => 'Student Hours',
 			'bookings'     => 'Tutor Bookings',
+			'add_hour'     => 'Add Student Hour',
 		);
 		
-		if( $all ){
-			return array_merge( $tutor_menu, $student_menu );
+		if( $all ) {
+			return $end_points;
 		}
 		
 		$user_meta          = get_user_meta(get_current_user_id() , 'wp_capabilities' , true );
@@ -70,6 +80,8 @@ class WCCB_Frontend_Myaccount {
 				$myaccount_menu = $admin_menu;
 			}
 		}
+
+
 		return $myaccount_menu;
 	}
 
@@ -205,7 +217,7 @@ class WCCB_Frontend_Myaccount {
 				);
 
 				//Insert booking meta
-				$meta_table_name = $wpdb->prefix.'booking_hostory_meta';
+				$meta_table_name = $wpdb->prefix.'booking_history_meta';
 				$booking_meta    = array(
 					'cancelled_by'   => get_current_user_id(),
 					'cancelled_date' => wp_date('Y-m-d H:i:s'),
@@ -279,10 +291,14 @@ class WCCB_Frontend_Myaccount {
 		$results = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 
 		foreach ($results as $key => $value) {
-			$days           = WCCB_Helper::get_date_difference( $value['date_purchased'] , date('Y-m-d') );
+			$days           = WCCB_Helper::get_date_difference( $value['date_purchased'] , wp_date('Y-m-d') );
 			$remaining_hour = $value['purchased_hours'] - $value['used_hours'];
 			if ($days < WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS && $remaining_hour > 0 ) {
-				$available_hours[WCCB_Helper::get_particular_date($value['date_purchased'] , WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS)] = $remaining_hour;
+				$temp_key = WCCB_Helper::get_particular_date($value['date_purchased'] , WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS);
+				$available_hours[$temp_key] = array(
+					'hour_id'        => $value['ID'],
+					'remaining_hour' => $remaining_hour
+				);
 			}
 		}
 		
@@ -324,14 +340,18 @@ class WCCB_Frontend_Myaccount {
 				$used_flag      = 0;
 				$slot_date_time = explode( '|' , $value);
 				$temp_time      = explode( ' ' , $slot_date_time[1]);
-				$temp_date_time = $slot_date_time[0].' '.date('H:i:s',strtotime($temp_time[0].':00 '.$temp_time[1]));
+				$temp_date_time = $slot_date_time[0].' '.wp_date('H:i:s',strtotime($temp_time[0].':00 '.$temp_time[1]));
 				//echo $temp_date_time.'<br><br><br><br>';
 
 				foreach ($date_wise_available_hours as $key2 => $value2) {
-					$available_now = $value2 - count($date_wise_used_hours[$key2]);
+					$available_now = $value2['remaining_hour'] - count($date_wise_used_hours[$key2]);
 					if (strtotime($temp_date_time) < strtotime($key2) && $available_now > 0 ) {
 						$used_flag = 1;
-						$date_wise_used_hours[$key2][] = $value;
+						$date_wise_used_hours[$key2] = array(
+							'hour_id' => $value2['hour_id'],
+							'slot'   => $value
+						);
+
 						break;
 					}
 				}
@@ -348,16 +368,32 @@ class WCCB_Frontend_Myaccount {
 			if (!empty($date_wise_used_hours)) {
 				
 				foreach ($date_wise_used_hours as $key => $value) {
-					foreach ($value as $key2 => $value2) {
-
-						//Get hour ID from purchased date
-						$purchased_date = WCCB_Helper::get_particular_date($key , WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS , '-' );
-						$hour_table  = $wpdb->prefix.'hour_history';
-						$query2      = "SELECT * FROM $hour_table WHERE date_purchased='".$purchased_date."'";
-						$results2    = $wpdb->get_results( $query2, ARRAY_A ); // db call ok. no cache ok.
-						$used_hours  = $results2[0]['used_hours']+1;
-						$hour_id     = $results2[0]['ID'];
-						$wpdb->update(
+					
+					//Get database hour
+					$hour_table  = $wpdb->prefix.'hour_history';
+					$query2      = "SELECT * FROM $hour_table WHERE ID='".$value['hour_id']."'";
+					$results2    = $wpdb->get_results( $query2 ); // db call ok. no cache ok.
+					$used_hours  = $results2[0]->used_hours+1;
+					$hour_id     = $results2[0]->ID;
+					
+					///////////////////////
+					$product        = wc_get_product($field_array['product_id']);
+					$table_name     = $wpdb->prefix.'booking_history';
+					$slot_date_time = explode( '|' , $value['slot']);
+					$data = array(
+						'user_id'      => $field_array['user_id'],
+						'product_id'   => $product->get_id(),
+						'amount'       => $product->get_regular_price(),
+						'tutor_id'     => $field_array['tutor_id'],
+						'hour_id'      => $hour_id,
+						'class_date'   => $slot_date_time[0],
+						'class_time'   => $slot_date_time[1],
+						'status'       => 'Upcoming',
+						'booking_date' => wp_date('Y-m-d H:i:s')
+					);
+					
+					if ($wpdb->insert($table_name , $data)) {
+							$wpdb->update(
 						    $hour_table,
 						    array( 
 						        'used_hours' => $used_hours
@@ -366,24 +402,12 @@ class WCCB_Frontend_Myaccount {
 						        'ID'         => $hour_id
 						    )
 						);
-						///////////////////////
-
-						$table_name = $wpdb->prefix.'booking_history';
-						$slot_date_time = explode( '|' , $value2);
-						$data = array(
-							'user_id'      => $field_array['user_id'],
-							'product_id'   => $field_array['product_id'],
-							'tutor_id'     => $field_array['tutor_id'],
-							'hour_id'      => $hour_id,
-							'class_date'   => $slot_date_time[0],
-							'class_time'   => $slot_date_time[1],
-							'status'       => 'Upcoming',
-							'booking_date' => wp_date('Y-m-d H:i:s')
-						);
-
-						$wpdb->insert($table_name , $data);
 
 						do_action('class_booking_notification' , $wpdb->insert_id);
+					}
+					else {
+						$passed = false;
+						wc_add_notice( __('Databse:error during class booking', WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 					}
 				}
 			}

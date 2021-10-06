@@ -49,7 +49,7 @@ class WCCB_Notification {
 
 		$headers = array(
 			'Content-Type: text/html; charset=UTF-8',
-			'From: '.get_option( 'blogname' ).'<'.get_option( 'admin_email' ).'>'
+			'From: '.get_option( 'blogname' ).' <'.get_option( 'admin_email' ).'>'
 		);
 
 		return $headers;
