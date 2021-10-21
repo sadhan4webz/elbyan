@@ -173,7 +173,7 @@ class WCCB_Frontend_Myaccount {
 		}
 
 		global $wpdb;
-		$table_booking = $wpdb->prefix.'booking_history';
+		$table_booking   = $wpdb->prefix.'booking_history';
 		$query           = "SELECT * FROM $table_booking WHERE ID='".$booking_id."'";
 		$results         = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 		if (count($results)>0) {
@@ -181,20 +181,30 @@ class WCCB_Frontend_Myaccount {
 			$user            = get_userdata( get_current_user_id() );
 			$role_key        = $user->roles[0];
 
-			$class_time_exp  = explode(' ' , $results[0]['class_time']);
-			$class_date_time = $results[0]['class_date'].' '.$class_time_exp[0].':00 '.$class_time_exp[1];
+			$class_time_exp  = explode('-' , trim($results[0]['class_time']));
+			$class_date_time = $results[0]['class_date'].' '.$class_time_exp[0];
+			//echo 'hello'.$results[0]['class_time'].'hi'.$class_date_time;
 			$datetime1       = new DateTime(date('Y-m-d h:i a'));
 			$datetime2       = new DateTime($class_date_time);
 			$interval        = $datetime1->diff($datetime2);
 			$days            = $interval->d;
 			$hour            = $interval->h;
 
+			//Calculate hour from slot
+			$slots_time       = array(
+				array(
+					'start_time' => $class_time_exp[0],
+					'end_time'   => $class_time_exp[1]
+				)
+			);
+			$slot_hour        = WCCB_Helper::get_total_hours_from_slots( $slots_time );	
+
 			if ( ($days > 0 || $hour > WC_CLASS_BOOKING_CANCEL_CLASS_BEFORE_HOURS)  || $role_key != 'wccb_student' ) {
 				//Update hour for cancel booking
 				$hour_table  = $wpdb->prefix.'hour_history';
 				$query2      = "SELECT * FROM $hour_table WHERE ID='".$results[0]['hour_id']."'";
 				$results2    = $wpdb->get_results( $query2, ARRAY_A ); // db call ok. no cache ok.
-				$used_hours  = $results2[0]['used_hours']-1;
+				$used_hours  = $results2[0]['used_hours']-(float)$slot_hour;
 
 				$wpdb->update(
 				    $hour_table,
@@ -247,18 +257,18 @@ class WCCB_Frontend_Myaccount {
 		}
 	}
 
-	public static function get_student_total_available_hours( $student_id , $product_id = '' ) {
+	public static function get_student_total_available_hours( $student_id , $hour_id = '' ) {
 		if (empty($student_id)) {
 			return;
 		}
 		global $wpdb;
 		$table_name = $wpdb->prefix.'hour_history';
 		$total_available_hours = 0;
-		if (empty($product_id)) {
+		if (empty($hour_id)) {
 			$query   = "SELECT * FROM $table_name WHERE user_id='".$student_id."'";
 		}
 		else {
-			$query   = "SELECT * FROM $table_name WHERE user_id='".$student_id."' and product_id='".$product_id."'";
+			$query   = "SELECT * FROM $table_name WHERE ID='".$hour_id."'";
 		}
 		
 		$results = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
@@ -266,11 +276,11 @@ class WCCB_Frontend_Myaccount {
 		foreach ($results as $key => $value) {
 			$days = WCCB_Helper::get_date_difference( $value['date_purchased'] , date('Y-m-d') );
 			if ($days < WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS ) {
-				$total_available_hours += $value['purchased_hours'] - $value['used_hours'];
+				$total_available_hours += $value['purchased_hours'] - (float)$value['used_hours'];
 			}
 		}
 		
-		return $total_available_hours;
+		return (float)$total_available_hours;
 	}
 
 	public static function get_student_date_wise_available_hours( $student_id , $product_id = '' ) {
@@ -309,12 +319,35 @@ class WCCB_Frontend_Myaccount {
 		global $wpdb;
 		$passed = true;
 		$slots                     = $field_array['slot'];
+		$hour_expire_date          = $field_array['hour_expire_date'];
 		$date_wise_slot            = WCCB_Frontend::get_date_wise_slots( $slots );
-		$total_requested_slot      = count($slots);
-		$total_available_hours     = WCCB_Frontend_Myaccount::get_student_total_available_hours($field_array['user_id'] , $field_array['product_id']);
+		$total_available_hours     = WCCB_Frontend_Myaccount::get_student_total_available_hours($field_array['user_id'] , $field_array['hour_id']);
 		$date_wise_available_hours = WCCB_Frontend_Myaccount::get_student_date_wise_available_hours($field_array['user_id'] , $field_array['product_id'] );
 
-		if (!empty($date_wise_slot)) {
+		//Calculate total hours from boking slots
+		$slots_time = array();
+		foreach ($date_wise_slot as $key => $value) {
+			foreach ($value as $key2 => $value2) {
+				$slot_time  = explode('-', $value2);
+				$temp_time = array(
+					'start_time' => $slot_time[0],
+					'end_time'   => $slot_time[1]
+				);
+				array_push($slots_time, $temp_time);
+			}
+		}
+		$total_requested_hour = WCCB_Helper::get_total_hours_from_slots( $slots_time );
+
+		//Check if available hour is greater than booking hours
+		if ($passed) {
+			if ($total_requested_hour > $total_available_hours ) {
+				$passed = false;
+				wc_add_notice( __('You have added more slots than you have total available hours. Total available hours : '.$total_available_hours , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
+			}
+		}
+
+		//Check if tutor is availavle for booking hours
+		if (!empty($date_wise_slot) && $passed == true ) {
 			foreach ($date_wise_slot as $key => $value) {
 				foreach ($value as $key2 => $value2) {
 					//Check if tutor is booked for slot by other student
@@ -327,88 +360,71 @@ class WCCB_Frontend_Myaccount {
 		}
 
 		if ($passed) {
-			if ($total_requested_slot > $total_available_hours ) {
-				$passed = false;
-				wc_add_notice( __('You have added more slots than you have total available hours. Total available hours : '.$total_available_hours , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
-			}
-		}
-
-		if ($passed) {
-			$date_wise_used_hours = array();
-			$used_flag            = 0;
+			$used_flag = 0;
 			foreach ($slots  as $key => $value) {
 				$used_flag      = 0;
 				$slot_date_time = explode( '|' , $value);
-				$temp_time      = explode( ' ' , $slot_date_time[1]);
-				$temp_date_time = $slot_date_time[0].' '.wp_date('H:i:s',strtotime($temp_time[0].':00 '.$temp_time[1]));
-				//echo $temp_date_time.'<br><br><br><br>';
-
-				foreach ($date_wise_available_hours as $key2 => $value2) {
-					$available_now = $value2['remaining_hour'] - count($date_wise_used_hours[$key2]);
-					if (strtotime($temp_date_time) < strtotime($key2) && $available_now > 0 ) {
-						$used_flag = 1;
-						$date_wise_used_hours[$key2] = array(
-							'hour_id' => $value2['hour_id'],
-							'slot'   => $value
-						);
-
-						break;
-					}
-				}
+				$days = WCCB_Helper::get_date_difference( $slot_date_time[0] , $hour_expire_date ); //Slot date , Hour expire date
+				//echo $slot_date_time[0].'hi'.$hour_expire_date;
+				//echo 'hello'.$days;
+				$used_flag = $days > 0 ? 1 : 0;
 
 				if (!$used_flag) {
 					$passed = false;
-					wc_add_notice( __('You don\'t have available hours to book slot for the date : '.WCCB_Helper::display_date($temp_date_time, 'D M j, Y h:i a'), WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
+					wc_add_notice( __('You don\'t have available hours to book slot for the date : '.WCCB_Helper::display_date($slot_date_time[0]).', '.$slot_date_time[1], WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 				}
 			}
 		}
 
 		if ($passed) {
 			//Insert slots into booking history
-			if (!empty($date_wise_used_hours)) {
+			if (!empty($date_wise_slot)) {
 				
-				foreach ($date_wise_used_hours as $key => $value) {
-					
+				foreach ($date_wise_slot as $key => $value) {
+
 					//Get database hour
+					$hour_id     = $field_array['hour_id'];
 					$hour_table  = $wpdb->prefix.'hour_history';
-					$query2      = "SELECT * FROM $hour_table WHERE ID='".$value['hour_id']."'";
+					$query2      = "SELECT * FROM $hour_table WHERE ID='".$hour_id."'";
 					$results2    = $wpdb->get_results( $query2 ); // db call ok. no cache ok.
-					$used_hours  = $results2[0]->used_hours+1;
-					$hour_id     = $results2[0]->ID;
-					
+					$used_hours  = $results2[0]->used_hours+$total_requested_hour;
 					///////////////////////
-					$product        = wc_get_product($field_array['product_id']);
-					$table_name     = $wpdb->prefix.'booking_history';
-					$slot_date_time = explode( '|' , $value['slot']);
-					$data = array(
-						'user_id'      => $field_array['user_id'],
-						'product_id'   => $product->get_id(),
-						'amount'       => $product->get_regular_price(),
-						'tutor_id'     => $field_array['tutor_id'],
-						'hour_id'      => $hour_id,
-						'class_date'   => $slot_date_time[0],
-						'class_time'   => $slot_date_time[1],
-						'status'       => 'Upcoming',
-						'booking_date' => wp_date('Y-m-d H:i:s')
+
+					foreach ($value as $key2 => $value2) {
+						$product        = wc_get_product($field_array['product_id']);
+						$table_name     = $wpdb->prefix.'booking_history';
+						$data = array(
+							'user_id'      => $field_array['user_id'],
+							'product_id'   => $product->get_id(),
+							'amount'       => $product->get_regular_price(),
+							'tutor_id'     => $field_array['tutor_id'],
+							'hour_id'      => $hour_id,
+							'class_date'   => $key,
+							'class_time'   => $value2,
+							'status'       => 'Upcoming',
+							'booking_date' => wp_date('Y-m-d H:i:s')
+						);
+						
+						if ($wpdb->insert($table_name , $data)) {
+							do_action('class_booking_notification' , $wpdb->insert_id);
+						}
+						else {
+							$passed = false;
+							wc_add_notice( __('Databse:error during class booking', WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
+						}
+					}
+
+					//Decrease hours after booking
+					$wpdb->update(
+					    $hour_table,
+					    array( 
+					        'used_hours' => $used_hours
+					    ),
+					    array(
+					        'ID'         => $hour_id
+					    )
 					);
 					
-					if ($wpdb->insert($table_name , $data)) {
-							$wpdb->update(
-						    $hour_table,
-						    array( 
-						        'used_hours' => $used_hours
-						    ),
-						    array(
-						        'ID'         => $hour_id
-						    )
-						);
-
-						do_action('class_booking_notification' , $wpdb->insert_id);
-					}
-					else {
-						$passed = false;
-						wc_add_notice( __('Databse:error during class booking', WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
-					}
 				}
 			}
 			//End booking history
@@ -431,14 +447,14 @@ class WCCB_Frontend_Myaccount {
 			$user            = get_userdata( get_current_user_id() );
 			$role_key        = $user->roles[0];
 
-			$class_time_exp  = explode(' ' , $results[0]['class_time']);
-			$class_date_time = $results[0]['class_date'].' '.$class_time_exp[0].':00 '.$class_time_exp[1];
+			$class_time_exp  = explode('-' , $results[0]['class_time']);
+			$class_date_time = $results[0]['class_date'].' '.$class_time_exp[0];
 			$datetime1       = new DateTime(date('Y-m-d h:i a'));
 			$datetime2       = new DateTime($class_date_time);
 			$interval        = $datetime1->diff($datetime2);
-			$days            = $interval->h;
+			$days            = $interval->d;
 			$hour            = $interval->h;
-			if ( ($days > 0 || $hour > WC_CLASS_BOOKING_RESCHEDULE_CLASS_BEFORE_HOURS) || $role_key == 'administrator' ) {
+			if ( ($days >= 0 || $hour > WC_CLASS_BOOKING_RESCHEDULE_CLASS_BEFORE_HOURS) || $role_key == 'administrator' ) {
 
 				$slot_date_time = explode('|', $slot[0]);
 
@@ -566,7 +582,7 @@ class WCCB_Frontend_Myaccount {
 					}
 
 					if (!$error_flag) {
-						if(WCCB_Frontend_Myaccount::save_booking_class($_POST)) {
+						if(WCCB_Frontend_Myaccount::save_booking_class($_REQUEST)) {
 							wc_add_notice( __( 'The class has been booked successfully.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'success' );
 						}
 					}

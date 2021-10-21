@@ -147,6 +147,7 @@ jQuery(function($){
 		if ($elm.hasClass('slot_picked')) {
 			$elm.removeClass('slot_picked');
 			$('#'+$slot_picked_row_id).remove();
+			console.log('delete from span',$slot_picked_row_id);
 		}
 		else {
 			$slot_span_id = $slot_picked_row_id.split('slot_picked_row_');
@@ -188,6 +189,8 @@ jQuery(function($){
 		$slot_span_id = $(this).data('slot_span_id');
 		$('#'+$slot_span_id).removeClass('slot_picked');
 		$(this).closest('.slot_picked_row').remove();
+
+		console.log($('#'+$slot_span_id));
 	});
 
 	$(document).on('click', '.cancel_booking', function(e){ 
@@ -206,7 +209,10 @@ jQuery(function($){
 	});
 
 	$(document).on('change', '.get_tutor_profile', function(e){ 
-		let product_id = $(this).val();
+		let product_id  = $(this).val(),
+			hour_id     = $(this).find(':selected').data('hour_id'),
+			expire_date = $(this).find(':selected').data('expire_date'),
+			display_expire_date = $(this).find(':selected').data('display_expire_date');
 		let	params    = { product_id : product_id , action : 'get_tutor_profile' , response_container : '.tutor_container', wrapper : $('.tutor_container')};
 
 		params['loading_type']			= 'loader',
@@ -214,12 +220,20 @@ jQuery(function($){
 		params['html_error'] 			= 0;
 
 		$('.button_wrapper').show();
+
 		if (product_id.length == 0 ) {
 			$(params.response_container).html('');
 			$('.calendar_container').html('');
 			$('.button_wrapper').hide();
+			$('.expire_date_container').html('');
 			return false;
 		}
+
+		$('input[name=hour_id]').val(hour_id);
+		$('input[name=hour_expire_date]').val(expire_date);
+		$('input[name=display_expire_date]').val(display_expire_date);
+		console.log(expire_date);
+		$('.expire_date_container').html('Expire Date :'+ display_expire_date);
 
 		WCCB.ajax_options['url'] 		= wccb_config.frontend_ajax_url;
 		WCCB.ajax_options['data'] 		= 'action='+params.action+'&product_id='+params.product_id;

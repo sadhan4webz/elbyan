@@ -32,9 +32,17 @@ class WCCB_Admin_View {
 
 	public static function wccb_course_general_tab_custom_fields() {
 		global $post;
+		$slot_duration    = get_post_meta($post->ID , 'slot_duration' , ture );
 		$course_type      = get_post_meta($post->ID , 'course_type' , ture );
 		$course_quantity  = get_post_meta($post->ID , 'course_quantity' , ture );
 		?>
+		<p class="form-field">
+        	<label for="slot_duration"><?php _e( 'Slot Duration', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?></label>
+	        <select style="width: 50%;" id="slot_duration" name="slot_duration">
+	        	<option value="60" <?php selected($slot_duration , '60');?>>60 Minutes</option>
+	        	<option value="30"  <?php selected($slot_duration , '30');?>>30 Minutes</option>
+	        </select>
+    	</p>
 		<p class="form-field">
         	<label for="course_type"><?php _e( 'Course Type', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?></label>
 	        <select style="width: 50%;" id="course_type" name="course_type">

@@ -39,7 +39,7 @@ switch ( $action ) {
 	case 'get_tutor_availability_calendar':
 
 		$event   = 'success';
-		$content = WCCB_Frontend_View::get_tutor_availability_calendar( $_REQUEST['tutor_id'] , $_REQUEST['date'] , $_REQUEST['num_days'] , $_POST['slot'] );
+		$content = WCCB_Frontend_View::get_tutor_availability_calendar( $_REQUEST['product_id'] , $_REQUEST['tutor_id'] , $_REQUEST['date'] , $_REQUEST['num_days'] , $_POST['slot'] );
 		$msg     = 'Work in progress message';
 
 		$response["event"] 	 = $event;

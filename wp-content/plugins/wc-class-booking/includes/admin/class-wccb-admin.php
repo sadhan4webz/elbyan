@@ -76,6 +76,9 @@ class WCCB_Admin {
 	    $product->update_meta_data('tutor_ids', sanitize_text_field($_POST['tutor_ids']));
 
 	    // save course type
+	    $product->update_meta_data('slot_duration', sanitize_text_field($_POST['slot_duration']));
+
+	    // save course type
 	    $product->update_meta_data('course_type', sanitize_text_field($_POST['course_type']));
 
 	    // save course quantity

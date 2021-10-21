@@ -272,7 +272,7 @@ class WCCB_Frontend_Myaccount_View {
 						$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date between '".wp_date('Y-m-d', strtotime($_REQUEST['start_date']))."' and '".wp_date('Y-m-d', strtotime($_REQUEST['end_date']))."' and status!='Cancelled' order by class_date desc";
 					}
 					else {
-						$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date < '".wp_date('Y-m-d')."' and status!='Cancelled' order by class_date desc";
+						$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date < '".wp_date('Y-m-d')."' and status='Completed' order by class_date desc";
 					}
 					
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
@@ -365,7 +365,7 @@ class WCCB_Frontend_Myaccount_View {
 					</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date >= '".wp_date('Y-m-d')."' and status != 'Cancelled' order by class_date asc";
+					$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date >= '".wp_date('Y-m-d')."' and status = 'Upcoming' order by class_date asc";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {
@@ -468,7 +468,7 @@ class WCCB_Frontend_Myaccount_View {
 								<div class="slot_selected_container"></div>
 								<div class="tutor_availability_main_wrapper">
 									<?php 
-									echo WCCB_Frontend_View::get_tutor_availability_calendar( $booking[0]['tutor_id'] , wp_date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR );
+									echo WCCB_Frontend_View::get_tutor_availability_calendar( $booking[0]['product_id'] , $booking[0]['tutor_id'] , wp_date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR );
 									?>
 								</div>
 								<div class="field-group">
@@ -495,7 +495,7 @@ class WCCB_Frontend_Myaccount_View {
 
 		if ($_REQUEST['new_booking'] == 'yes' && !empty($_REQUEST['user_id'])) {
 			$show_table = false;
-			$query      = "select * from $hour_table where user_id='".$_REQUEST['user_id']."' group by product_id";
+			$query      = "select * from $hour_table where user_id='".$_REQUEST['user_id']."'";
 			$hours      = $wpdb->get_results( $query ); // db call ok. no cache ok
 			$no_hour_flag = 1;
 			?>
@@ -505,6 +505,9 @@ class WCCB_Frontend_Myaccount_View {
 					<input type="hidden" name="new_booking" id="new_booking" value="<?php echo $_REQUEST['new_booking'];?>">
 					<input type="hidden" name="action_do" value="save_booking">
 					<input type="hidden" name="user_id" value="<?php echo $_REQUEST['user_id'];?>">
+					<input type="hidden" name="hour_id" value="<?php echo $_REQUEST['hour_id'];?>">
+					<input type="hidden" name="hour_expire_date" value="<?php echo $_REQUEST['hour_expire_date'];?>">
+					<input type="hidden" name="display_expire_date" value="<?php echo $_REQUEST['display_expire_date'];?>">
 					<?php wp_nonce_field( 'save_booking', 'save_booking_nonce_field' ); ?>
 					<div class="back_link_wrapper">
 						<a href="?user_id=<?php echo $_REQUEST['user_id'];?>">
@@ -526,18 +529,27 @@ class WCCB_Frontend_Myaccount_View {
 								<?php
 								foreach ($hours as $hour) {
 									$product        = wc_get_product($hour->product_id);
-									$available_hour = WCCB_Frontend_Myaccount::get_student_total_available_hours($_REQUEST['user_id'] , $product->get_id());
+									$days           = WCCB_Helper::get_date_difference( $hour->date_purchased, date('Y-m-d') );
+									$available_hour = 0;
+									if ($days < WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS ) {
+										$available_hour = $hour->purchased_hours - (float)$hour->used_hours;
+									}
 									if ($available_hour > 0 ) {
 										$no_hour_flag = 0;
+										$expire_date  = WCCB_Helper::get_particular_date($hour->date_purchased , WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS);
 										?>
-										<option value="<?php echo $product->get_id();?>" <?php if($_REQUEST['product_id'] == $product->get_id()){?> selected="selected" <?php }?>><?php echo $product->get_name().' - (Available hours : '.$available_hour.')';?></option>
+										<option value="<?php echo $product->get_id();?>" data-hour_id="<?php echo $hour->ID;?>" data-expire_date="<?php echo $expire_date;?>" data-display_expire_date="<?php echo wp_date('F j, Y, g:i a',strtotime($expire_date));?>" <?php selected($_REQUEST['product_id'] , $product->get_id())?>><?php echo $product->get_name().' - (Available hours : '.$available_hour.')';?></option>
 										<?php
 									}
 								}
 								?>
 							</select>
 
-							<span class="expire_date_container"></span>
+							<span class="expire_date_container">
+								<?php 
+								echo !empty($_REQUEST['display_expire_date']) ? $_REQUEST['display_expire_date'] : '';
+								?>
+							</span>
 						</div>
 						<?php
 					}
@@ -566,7 +578,7 @@ class WCCB_Frontend_Myaccount_View {
 						?>
 					</div>
 					<div class="field-group button_wrapper" style="display: <?php echo !empty($_REQUEST['product_id']) ? 'block' : 'none';?>;">
-						<button type="submit" name="save_reschedule" class="woocommerce-Button button">
+						<button type="submit" name="save_booking" class="woocommerce-Button button">
 							<?php echo __('Save Booking' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 						</button>
 						
@@ -671,7 +683,7 @@ class WCCB_Frontend_Myaccount_View {
 					</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date < '".wp_date('Y-m-d')."' and status != 'Cancelled' order by class_date asc ";
+					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date < '".wp_date('Y-m-d')."' and status = 'Completed' order by class_date asc ";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {
@@ -751,7 +763,7 @@ class WCCB_Frontend_Myaccount_View {
 			  		</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date >= '".wp_date('Y-m-d')."' and status != 'Cancelled' order by class_date asc";
+					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date >= '".wp_date('Y-m-d')."' and status = 'Upcoming' order by class_date asc";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {
@@ -927,10 +939,10 @@ class WCCB_Frontend_Myaccount_View {
 								<?php echo (int)$value['purchased_hours'];?>
 							</td>
 							<td>
-								<?php echo (int)$value['used_hours'];?>
+								<?php echo (float)$value['used_hours'];?>
 							</td>
 							<td>
-								<?php echo (int)$value['expired_hours'];?>
+								<?php echo (float)$value['expired_hours'];?>
 							</td>
 							<td>
 								<?php echo wp_date('d-m-Y h:i:s', strtotime($value['date_purchased']));?>

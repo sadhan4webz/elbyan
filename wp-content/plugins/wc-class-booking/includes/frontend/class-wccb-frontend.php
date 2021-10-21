@@ -48,7 +48,11 @@ class WCCB_Frontend {
 		add_action( 'woocommerce_after_single_product_summary', array( 'WCCB_Frontend_View' , 'render_tutor_availability_container'), 25 );
 
 		add_action( 'woocommerce_after_single_product' , function(){echo '</form>';} , 10 );
+
+		//Checkout page
 		add_action( 'woocommerce_checkout_create_order_line_item', array( $this , 'create_order_line_item' ) , 10, 4 );
+		add_action( 'woocommerce_checkout_process' , array( $this , 'checkout_page_validation') );
+
 		add_action( 'woocommerce_thankyou' , array( $this , 'update_booking_and_hour_history') , 10 , 1 );
 
 
@@ -297,14 +301,55 @@ class WCCB_Frontend {
 
 	public static function date_wise_slot_availability_validation( $tutor_id , $slot_date , $slot_time ) {
 		global $wpdb;
-		$table_name    = $wpdb->prefix.'booking_history';
-		$passed         = true;
+		$passed            = true;
+		$table_name        = $wpdb->prefix.'booking_history';
+		$request_slot_time = explode( '-' , $slot_time);
+		$request_start_time = strtotime($request_slot_time[0]);
+		$request_end_time  = strtotime($request_slot_time[1]);
 
-		$query = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date='".$slot_date."' and class_time='".$slot_time."' and status = 'Upcoming'";
-		$results = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
+		$query = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date='".$slot_date."' and status = 'Upcoming'";
+		$results = $wpdb->get_results( $query ); // db call ok. no cache ok.
+
+		/*if ($slot_date == '2021-10-23') {
+			echo $query.'<br><br><pre>';
+
+			echo 'Input Array:<br>';
+			print_r($request_slot_time);
+
+			echo 'UST:'.$request_start_time.'<br>';
+			echo 'UET:'.$request_end_time.'<br>';
+		}*/
 
 		if (count($results)>0) {
-			$passed = false;
+			foreach ($results as $row ) {
+				$passed            = false;
+
+				$booked_slot_time  = explode('-' , $row->class_time);
+				$booked_start_time = strtotime($booked_slot_time[0]);
+				$booked_end_time   = strtotime($booked_slot_time[1]);
+				/*if ($slot_date == '2021-10-23') {
+					echo 'Database Array<br>';
+					print_r($booked_slot_time);
+					echo 'DST:'.$booked_start_time.'<br>';
+					echo 'DET:'.$booked_end_time.'<br>';
+				}*/
+				
+				if( $request_start_time > $booked_end_time ){
+					$passed = true;
+				}
+				if( $request_start_time == $booked_end_time ){
+					$passed = true;
+				}
+				if( $request_start_time < $booked_end_time ){
+					if( $booked_start_time >= $request_end_time ){
+						$passed = true;
+					}
+				}
+
+				if (!$passed) {
+					break;
+				}
+			}
 		}
 
 		return $passed;
@@ -319,6 +364,16 @@ class WCCB_Frontend {
 
 		if (!is_bool($product)) {
 			if($product->is_type( 'wccb_course' )) {
+				
+				//Check if user already avail FREE course
+				if (get_current_user_id()) {
+					if ($product->get_regular_price() == 0 && get_user_meta(get_current_user_id() , 'avail_free_course' , true ) == 'yes' ) {
+						$passed = false;
+						wc_add_notice( __( 'You have already avail FREE course earlier. Free trail is only available  once per user' , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error');
+						return $passed;
+					}
+				}
+
 				if (!empty($_POST['tutor_id'] )) {
 
 					if (empty($slot)) {
@@ -326,17 +381,31 @@ class WCCB_Frontend {
 						wc_add_notice( __( 'Please select slot form tutor availability' , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error');
 						return $passed;
 					}
-					
 
 					//Collecting slots date wise
-					$date_wise_slot = WCCB_Frontend::get_date_wise_slots( $slot );
+					$date_wise_slot = WCCB_Frontend::get_date_wise_slots( $slot ); 
 
-					if ( $quantity < count($slot)) {
+					$slots_time = array();
+					foreach ($date_wise_slot as $key => $value) {
+						foreach ($value as $key2 => $value2) {
+							$slot_time  = explode('-', $value2);
+							$temp_time = array(
+								'start_time' => $slot_time[0],
+								'end_time'   => $slot_time[1]
+							);
+							array_push($slots_time, $temp_time);
+						}
+					}
+
+					$used_hours = WCCB_Helper::get_total_hours_from_slots( $slots_time );
+
+					if ( $quantity < $used_hours ) {
 						$passed        = false;
 						$quantity_flag = 1;
 					}					
 
 					//Validation for tutor availability
+					
 					$availability_flag = 0;
 					if (!empty($date_wise_slot) && $passed != false ) {
 						foreach ($date_wise_slot as $key => $value) {
@@ -355,6 +424,7 @@ class WCCB_Frontend {
 						wc_add_notice( __('You have added more slots than you have available hours' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 					}
 				}
+
 			}
 		}
 
@@ -407,7 +477,7 @@ class WCCB_Frontend {
 	}
 
 	/**
-	 * Add offer product item to order
+	 * Add course product item to order
 	 */
 
 	public function create_order_line_item( $item, $cart_item_key, $values, $order ) {
@@ -452,11 +522,23 @@ class WCCB_Frontend {
 		return $product_name;
 	}
 
+	public function checkout_page_validation() {
+		// Loop over $cart items
+		foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+			$product_id = $cart_item['product_id'];
+			$product    = wc_get_product($product_id);
+			$price      = $product->get_regular_price();
+
+			if ($price == 0 && get_user_meta(get_current_user_id() , 'avail_free_course' , true ) == 'yes' ) {
+				wc_add_notice( __( 'You have already avail FREE course earlier. Free trail is only available once per user' , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error');
+				break;
+			}
+		}
+	}
+
 	public function update_booking_and_hour_history( $order_id ) {
 		if ( ! $order_id )
         return;
-
-    	
 
 	    // Allow code execution only once 
 	    if( ! get_post_meta( $order_id, '_thankyou_action_done', true )) {
@@ -472,14 +554,30 @@ class WCCB_Frontend {
 		            $product = $item->get_product();
 		            if (!is_bool($product)) {
 						if($product->get_type() == "wccb_course") {
+
+							//Update user meta if course is FREE
+							if ($product->get_regular_price() == 0 ) {
+								update_user_meta( get_current_user_id() , 'avail_free_course' , 'yes' );
+							}
+
+
 							$tutor_id  = $item->get_meta('_tutor_id');
 							$slots     = $item->get_meta('booking_slots');
 
 							if (!empty($slots)) {
-								$used_hours = 0;
+								$slots_time = array();
 								foreach ($slots as $key => $value) {
-									$used_hours += count($value);
+									foreach ($value as $key2 => $value2) {
+										$slot_time  = explode('-', $value2);
+										$temp_time = array(
+											'start_time' => $slot_time[0],
+											'end_time'   => $slot_time[1]
+										);
+										array_push($slots_time, $temp_time);
+									}
 								}
+
+								$used_hours = WCCB_Helper::get_total_hours_from_slots( $slots_time );
 							}
 							
 							//Insert hour into hour history

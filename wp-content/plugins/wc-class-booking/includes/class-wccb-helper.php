@@ -75,4 +75,45 @@ class WCCB_Helper {
 
 		return '<span class="wpiaf-help-tip wpiaf-tips" data-tip="' . $tip . '"></span>';
 	}
+
+	public static function get_time_slots($slot_duration, $start_time, $end_time , $slot_gap = 0 ) {
+	    $start     = new DateTime(date('Y-m-d '.$start_time));
+	    $end       = new DateTime(date('Y-m-d '.$end_time));
+	    $startTime = $start->format('h:i a');
+	    $endTime   = $end->format('Y-m-d H:i');
+	    $i         = 0;
+	    $slots    = [];
+	    while(strtotime($startTime) <= strtotime($endTime)){
+	        $start_time_interval = $slot_duration + $slot_gap;
+	        $start     = $startTime;
+	        $end       = date('Y-m-d , h:i a',strtotime('+'.$slot_duration.' minutes',strtotime($startTime)));
+	        $startTime = date('Y-m-d , h:i a',strtotime('+'.$start_time_interval.' minutes',strtotime($startTime)));
+	        $i++;
+	        if(strtotime($startTime) <= strtotime($endTime)){
+	            $temp_start = explode(',' , $start);
+	            $temp_end = explode(',' , $end);
+	            $slots[$i]['slot_start_time'] = end($temp_start);
+	            $slots[$i]['slot_end_time'] = end($temp_end);
+	        }
+	    }
+	    return $slots;
+	}
+
+	public static function get_total_hours_from_slots( $slots_time ) {
+		if (!is_array($slots_time)) {
+	        return;
+	    }
+	    
+	    $hours = 0;
+	    foreach ($slots_time as $key => $value) {
+	        $d1 = strtotime($value['start_time']);
+	        $d2 = strtotime($value['end_time']);
+	        $totalSecondsDiff = abs($d1-$d2); //42600225
+	        $totalHoursDiff   = $totalSecondsDiff/60/60;//11833.39
+
+	        $hours += $totalHoursDiff;
+	    }
+
+	    return $hours;
+	}
 }

@@ -225,7 +225,14 @@ class WCCB_Frontend_View {
 		global $product;
 		?>
 		<p class="<?php echo esc_attr( apply_filters( 'woocommerce_product_price_class', 'price' ) ); ?>">
-			Hourly Price : <?php echo $product->get_price_html(); ?>
+			<?php
+			if ($product->get_regular_price() == 0 ) {
+				_e('FREE' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+			}
+			else {
+				echo __('Hourly Price' , WC_CLASS_BOOKING_TEXT_DOMAIN).' : '.$product->get_price_html();
+			}
+			?>
 		</p>
 		<?php
 	}
@@ -295,11 +302,8 @@ class WCCB_Frontend_View {
 		</div>
 		<div class="tutor_availability_main_wrapper">
 			<?php
-			if (!empty($_REQUEST['tutor_id'])) {
-				echo WCCB_Frontend_View::get_tutor_availability_calendar( $_REQUEST['tutor_id'] , date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR , $_POST['slot'] );
-			}
-			else {
-				//echo __('Tutor availability will show here' , WC_CLASS_BOOKING_TEXT_DOMAIN );
+			if (!empty($_REQUEST['product_id']) && !empty($_REQUEST['tutor_id']) ) {
+				echo WCCB_Frontend_View::get_tutor_availability_calendar( $_REQUEST['product_id'], $_REQUEST['tutor_id'] , date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR , $_POST['slot'] );
 			}
 			?>
 		</div>
@@ -336,6 +340,7 @@ class WCCB_Frontend_View {
 
 		ob_start();
 		?>
+		<input type="hidden" name="product_id" id="product_id" value="<?php echo $product_id;?>">
 		<div class="tutor_profile_main_wrapper">
 			<h2 class="wccb_title"><?php echo __('Our expert '.strtolower($_REQUEST['gender']).' tutors for this course' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></h2>
 			<div class="filter_wrapper">
@@ -396,17 +401,20 @@ class WCCB_Frontend_View {
 		return ob_get_clean();
 	}
 
-	public static function get_tutor_availability_calendar( $tutor_id , $date , $num_days , $slot_picked_array = array()  ) {
-		if (empty($tutor_id) || empty($date)) {
+	public static function get_tutor_availability_calendar( $product_id , $tutor_id , $date , $num_days , $slot_picked_array = array() ) {
+		if (empty($tutor_id) || empty($date) || empty($product_id)) {
 			return;
 		}
+		$slot_picked_array = !empty($slot_picked_array) ? $slot_picked_array : array();
 		
 		$calendar_stop_date = wp_date( 'Y-m-d' , strtotime('+'.WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS.' days'));
 		$tutor_info         = get_userdata($tutor_id);
 		$availability       = get_user_meta($tutor_id , 'availability' , true );
 
-		$next_end_date     = wp_date('Y-m-d' , strtotime($date.' +'.$num_days.' days'));
-		$pervious_end_date = wp_date('Y-m-d' , strtotime($date.' -'.$num_days.' days'));
+		$next_end_date      = wp_date('Y-m-d' , strtotime($date.' +'.$num_days.' days'));
+		$pervious_end_date  = wp_date('Y-m-d' , strtotime($date.' -'.$num_days.' days'));
+		$slot_duration      = get_post_meta( $product_id , 'slot_duration' , true );
+		$slot_duration      = !empty($slot_duration) ? (int)$slot_duration : WC_CLASS_BOOKING_SLOT_DURATION;
 
 		ob_start();
 		?>
@@ -428,6 +436,7 @@ class WCCB_Frontend_View {
 							?>
 						</th>
 						<?php
+						$slot_row_count  = 0;
 						for ($i=0; $i < $num_days; $i++) {
 							$value_date   = wp_date('Y-m-d' , strtotime($date.' +'.$i.' days'));
 							$display_date = wp_date('D M j, Y' , strtotime($date.' +'.$i.' days'));
@@ -446,10 +455,31 @@ class WCCB_Frontend_View {
 								$slot_table = '<table>';
 
 								foreach ( $availability[$lower_key]['available_time'] as $key => $value) {
-									$start_time = $value['start_time'];
-									$end_time   = $value['end_time'];
+									$start_time = $value['start_time'].':00';
+									$end_time   = $value['end_time'].':00';
+									$slots      = WCCB_Helper::get_time_slots( $slot_duration , $start_time , $end_time);
+									foreach ($slots as $key2 => $value2) {
+										$am_pm       = $value2['slot_start_time'].' - '.$value2['slot_end_time'];
+										$am_pm_value = $value_date.'|'.$am_pm;
+										$rand_id     = str_replace(' ', '', $value_date.$am_pm);
+										$slot_row_count++;
+										if (WCCB_Frontend::date_wise_slot_availability_validation($tutor_id , $value_date , $am_pm )) {
+											$slot_picked = in_array($am_pm_value, $slot_picked_array) ? 'slot_picked' : '';
+											$slot_table .= '<tr>
+																<td>
+																	<span class="slot '.$slot_picked.'" data-slot_date="'.$display_date.'" data-slot_time="'.$am_pm.'" data-slot_date_time="'.$am_pm_value.'" data-slot_picked_row_id="slot_picked_row_'.$slot_row_count.'" id="slot_span_id_'.$slot_row_count.'" data-reschedule="'.$_REQUEST['reschedule'].'">'.$am_pm.'</span>
+																</td>
+															</tr>';
+										}
+										else {
+											$slot_table .= '<tr>
+																<td class="slot_booked">'.$am_pm.' (Booked) </td>
+															</tr>';
+										}
+									}
 
-									for ($j=(int)$start_time; $j <(int)$end_time ; $j++) {
+									
+									/*for ($j=(int)$start_time; $j <(int)$end_time ; $j++) {
 										$from  = $j % 12 ? $j % 12 : '12:00';
 										$from .= $j >= 12 ? ' pm' : ' am';
 
@@ -474,7 +504,7 @@ class WCCB_Frontend_View {
 															</tr>';
 										}
 										
-									}
+									}*/
 								}
 
 								$slot_table .= '</table>';
@@ -542,6 +572,8 @@ class WCCB_Frontend_View {
 		return ob_get_clean();
 	}
 
+	
+
 	public static function get_slot_picked_row_html() {
 		ob_start();
 		?>
@@ -578,7 +610,14 @@ class WCCB_Frontend_View {
 		$product = wc_get_product(get_the_ID());
 		?>
 		<div class="price-hour">
-			<?php echo $product->get_price_html(); ?> / <?php echo __('Hour' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+			<?php
+			if ($product->get_regular_price() == 0 ) {
+				_e('FREE' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+			}
+			else {
+				echo $product->get_price_html(); ?> / <?php echo __('Hour' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+			}
+			?>
 		</div>
 		<?php
 	}

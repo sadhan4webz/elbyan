@@ -107,8 +107,8 @@ class WCCB_Scheduler {
 		$results    = $wpdb->get_results( $query ); // db call ok. no cache ok.
 		if (count($results)) {
 			foreach( $results as $row ) {
-				$class_time_exp = explode(' ' , $row->class_time);
-				$class_time     = $row->class_date.' '.$class_time_exp[0].':00 '.$class_time_exp[1];
+				$class_time_exp = explode('-' , $row->class_time);
+				$class_time     = $row->class_date.' '.$class_time_exp[0];
 				$datetime1      = new DateTime(wp_date('Y-m-d h:i a'));
 				$datetime2      = new DateTime($class_time);
 				$interval       = $datetime1->diff($datetime2);
@@ -134,8 +134,8 @@ class WCCB_Scheduler {
 		$results    = $wpdb->get_results( $query ); // db call ok. no cache ok.
 		if (count($results)) {
 			foreach( $results as $row ) {
-				$class_time_exp = explode(' ' , $row->class_time);
-				$class_time     = $row->class_date.' '.$class_time_exp[3].':00 '.$class_time_exp[4];
+				$class_time_exp = explode('-' , $row->class_time);
+				$class_time     = $row->class_date.' '.$class_time_exp[0];
 				$time_diff      = strtotime(wp_date('Y-m-d H:i:s')) - strtotime(wp_date('Y-m-d H:i:s', strtotime($class_time)));
 				if ( $time_diff > 0 ) {
 
