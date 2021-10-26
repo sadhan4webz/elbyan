@@ -606,6 +606,17 @@ class WCCB_Frontend_View {
 		<?php
 	}
 
+	public static function shop_page_product_hour() {
+		$product = wc_get_product(get_the_ID());
+		if (get_post_meta($product->get_id() , 'course_type' , true ) == 'fixed' ) {
+			?>
+			<div class="product-hour">
+				<?php echo __('Hours' , WC_CLASS_BOOKING_TEXT_DOMAIN).' : '.get_post_meta($product->get_id() , 'course_quantity' , true );?>
+			</div>
+			<?php
+		}
+	}
+
 	public static function shop_page_product_price() {
 		$product = wc_get_product(get_the_ID());
 		?>
@@ -615,7 +626,7 @@ class WCCB_Frontend_View {
 				_e('FREE' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 			}
 			else {
-				echo $product->get_price_html(); ?> / <?php echo __('Hour' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+				echo __('Price' , WC_CLASS_BOOKING_TEXT_DOMAIN).' : '.$product->get_price_html(); ?> / <?php echo __('Hour' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 			}
 			?>
 		</div>

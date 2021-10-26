@@ -5,6 +5,7 @@ class WCCB_Admin_View {
 	public static function wccb_course_tab_product_tab_content() {
 		global $post;
 		$exist_tutor_ids = get_post_meta($post->ID , 'tutor_ids' , ture );
+		$exist_tutor_ids = !empty($exist_tutor_ids) ? $exist_tutor_ids : array();
 		$args   = array(
 			'role__in' => array('wccb_tutor')
 		);

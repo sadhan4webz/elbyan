@@ -48,7 +48,7 @@ class WCCB_Admin {
 	    $tabs['linked_product']['class'][] = 'hide_if_wccb_course';
 	    $tabs['attribute']['class'][]      = 'hide_if_wccb_course';
 	    $tabs['variations']['class'][]     = 'hide_if_wccb_course';
-	    $tabs['advanced']['class'][]       = 'hide_if_wccb_course';
+	    //$tabs['advanced']['class'][]       = 'hide_if_wccb_course';
 
 
 	    //echo '<pre>';

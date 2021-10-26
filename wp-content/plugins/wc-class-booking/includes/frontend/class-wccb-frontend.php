@@ -28,7 +28,8 @@ class WCCB_Frontend {
 		//Shop page
 		add_action( 'woocommerce_shop_loop_item_title' , array( 'WCCB_Frontend_View' , 'shop_page_product_title') , 10 );
 		add_action( 'woocommerce_after_shop_loop_item_title' , array( 'WCCB_Frontend_View' , 'shop_page_product_description' ) , 5 );
-		add_action( 'woocommerce_after_shop_loop_item_title' , array( 'WCCB_Frontend_view' , 'shop_page_product_price' ) , 10 );
+		add_action( 'woocommerce_after_shop_loop_item_title' , array( 'WCCB_Frontend_view' , 'shop_page_product_hour' ) , 10 );
+		add_action( 'woocommerce_after_shop_loop_item_title' , array( 'WCCB_Frontend_view' , 'shop_page_product_price' ) , 15 );
 
 
 		//Product detail page
