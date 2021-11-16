@@ -798,7 +798,7 @@ class WCCB_Frontend_Myaccount_View {
 									<?php echo wccb_user_get_display_name($tutor);?>
 								</td>
 								<td>
-									<a href="?reschedule=yes&booking_id=<?php echo $value['ID'];?>&reschedule_booking_url_nonce=<?php echo wp_create_nonce('reschedule_booking_url_nonce');?>">Reshedule</a> |
+									<a href="?reschedule=yes&booking_id=<?php echo $value['ID'];?>&reschedule_booking_url_nonce=<?php echo wp_create_nonce('reschedule_booking_url_nonce');?>">Reschedule</a> |
 									<a href="#" class="cancel_booking" data-booking_id="<?php echo $value['ID'];?>" data-cancel_booking_url_nonce="<?php echo wp_create_nonce('cancel_booking_url_nonce');?>">Cancel</a>
 								</td>
 								

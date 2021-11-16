@@ -368,7 +368,7 @@ class WCCB_Frontend_View {
 								<div class="profile_image_wrapper">
 									<?php
 									$attachment_id = get_user_meta( $user->ID , 'profile_image' , true );
-									if ($attachment_id) {
+									if (!empty($attachment_id)) {
 										echo wp_get_attachment_image($attachment_id , 'thumbnail' , array('class' => 'ct-image oxel_reviewbox__image_wrapper__image') );
 									}
 									else {

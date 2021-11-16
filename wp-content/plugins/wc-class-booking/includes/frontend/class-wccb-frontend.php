@@ -56,6 +56,12 @@ class WCCB_Frontend {
 
 		add_action( 'woocommerce_thankyou' , array( $this , 'update_booking_and_hour_history') , 10 , 1 );
 
+		//Worldpay IPN handler
+		add_action( 'valid-wpform-request', array( $this, 'worldpay_ipn_handler' ) , 100 , 1 );
+
+		// Old way, Worldpay IPN handler
+		add_action( 'valid-worldpay-request', array( $this, 'worldpay_ipn_handler_old_way' ) );
+
 
 		//Filters
 
@@ -183,18 +189,20 @@ class WCCB_Frontend {
 					if ($temp_start_time[$key2] < $temp_end_time[$key2] ) {
 						$time_flag = 1;
 
-						foreach ( $availability_times[$lower_key]['available_time'] as $key3 => $value3) {
-							if ($temp_start_time[$key2] == $value3['start_time'] && $temp_end_time[$key2] == $value3['end_time']) {
-								$time_flag = 0;
-							}
-							if ($temp_start_time[$key2] >= $value3['end_time']) {
-								$time_flag = 1;
-							}
-							else {
-								$time_flag = 0;
+						if (!empty($availability_times[$lower_key]['available_time'])) {
+							foreach ( $availability_times[$lower_key]['available_time'] as $key3 => $value3) {
+								if ($temp_start_time[$key2] == $value3['start_time'] && $temp_end_time[$key2] == $value3['end_time']) {
+									$time_flag = 0;
+								}
+								if ($temp_start_time[$key2] >= $value3['end_time']) {
+									$time_flag = 1;
+								}
+								else {
+									$time_flag = 0;
+								}
 							}
 						}
-
+						
 						if ($time_flag) {
 							$availability_times[$lower_key]['available_time'][] = array(
 								'start_time' => $temp_start_time[$key2], 
@@ -239,19 +247,22 @@ class WCCB_Frontend {
 						if ($temp_start_time[$key2] < $temp_end_time[$key2] ) {
 							$time_flag = 1;
 
-							foreach ( $availability_times[$lower_key]['available_time'] as $key3 => $value3) {
-								if ($temp_start_time[$key2] == $value3['start_time'] && $temp_end_time[$key2] == $value3['end_time']) {
-									$time_flag = 0;
-									$errors->add( 'availability_time_error' , __('Start time and end time is same for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) );
-								}
-								if ($temp_start_time[$key2] >= $value3['end_time']) {
-									$time_flag = 1;
-								}
-								else {
-									$time_flag = 0;
-									$errors->add( 'availability_time_error' , __('Start time and end time is not properly set for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) );
+							if (!empty($availability_times[$lower_key]['available_time'])) {
+								foreach ( $availability_times[$lower_key]['available_time'] as $key3 => $value3) {
+									if ($temp_start_time[$key2] == $value3['start_time'] && $temp_end_time[$key2] == $value3['end_time']) {
+										$time_flag = 0;
+										$errors->add( 'availability_time_error' , __('Start time and end time is same for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) );
+									}
+									if ($temp_start_time[$key2] >= $value3['end_time']) {
+										$time_flag = 1;
+									}
+									else {
+										$time_flag = 0;
+										$errors->add( 'availability_time_error' , __('Start time and end time is not properly set for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) );
+									}
 								}
 							}
+							
 						}
 						else {
 							$errors->add( 'availability_time_error' , __('Start time is greater than end time for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) );
@@ -287,13 +298,17 @@ class WCCB_Frontend {
 	}
 
 	public static function get_date_wise_slots( $slots ) {
-		foreach ($slots  as $key => $value) {
-			$slot_date_time = explode( '|' , $value);
-			if (empty($date_wise_slot[$slot_date_time[0]])) {
-				$date_wise_slot[$slot_date_time[0]] = array($slot_date_time[1]);
-			}
-			else {
-				array_push($date_wise_slot[$slot_date_time[0]], $slot_date_time[1]);
+		$date_wise_slot = array();
+
+		if (!empty($slots)) {
+			foreach ($slots  as $key => $value) {
+				$slot_date_time = explode( '|' , $value);
+				if (empty($date_wise_slot[$slot_date_time[0]])) {
+					$date_wise_slot[$slot_date_time[0]] = array($slot_date_time[1]);
+				}
+				else {
+					array_push($date_wise_slot[$slot_date_time[0]], $slot_date_time[1]);
+				}
 			}
 		}
 
@@ -535,6 +550,17 @@ class WCCB_Frontend {
 				break;
 			}
 		}
+	}
+
+	public function worldpay_ipn_handler($response) {
+		WCCB()->log($response);
+		$this->update_booking_and_hour_history($response['MC_order']); //Update booking and hour history from IPN
+	}
+
+	public function worldpay_ipn_handler_old_way($response) {
+		WCCB()->log('Old way');
+		WCCB()->log($response);
+		$this->update_booking_and_hour_history($response['order']); //Update booking and hour history from IPN
 	}
 
 	public function update_booking_and_hour_history( $order_id ) {
