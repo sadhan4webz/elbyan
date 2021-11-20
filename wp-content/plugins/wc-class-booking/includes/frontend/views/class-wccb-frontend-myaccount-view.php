@@ -263,6 +263,9 @@ class WCCB_Frontend_Myaccount_View {
 							<th>
 								<?php echo __('Student Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 							</th>
+							<th>
+								<?php echo __('Actions' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+							</th>
 							
 						</tr>
 			  		</thead>
@@ -307,6 +310,9 @@ class WCCB_Frontend_Myaccount_View {
 								</td>
 								<td>
 									<?php echo wccb_user_get_display_name($user);?>
+								</td>
+								<td>
+									 <a href="?show_notes=yes&booking_id=<?php echo $value['ID'];?>&notes_url_nonce=<?php echo wp_create_nonce('notes_url_nonce');?>"><?php echo __('Notes' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></a>
 								</td>
 								
 							</tr>
