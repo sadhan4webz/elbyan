@@ -213,27 +213,32 @@ jQuery(function($){
 			hour_id     = $(this).find(':selected').data('hour_id'),
 			expire_date = $(this).find(':selected').data('expire_date'),
 			display_expire_date = $(this).find(':selected').data('display_expire_date');
-		let	params    = { product_id : product_id , action : 'get_tutor_profile' , response_container : '.tutor_container', wrapper : $('.tutor_container')};
+		let	params    = { product_id : product_id , action : 'get_tutor_profile' , response_container : '.tutor_container', wrapper : $('.tutor_container')  };
+			
+			params['loading_type']			= 'loader',
+			params['loading_target'] 		= params.wrapper,
+			params['html_error'] 			= 0;
+		
 
-		params['loading_type']			= 'loader',
-		params['loading_target'] 		= params.wrapper,
-		params['html_error'] 			= 0;
-
-		$('.button_wrapper').show();
+		$(params.response_container).html('');
+		$('.slot_selected_container').html('');
+		$('.tutor_availability_main_wrapper').html('');
+		$('.expire_date_container').html('');
+		$('.button_wrapper').hide();
 
 		if (product_id.length == 0 ) {
-			$(params.response_container).html('');
-			$('.calendar_container').html('');
-			$('.button_wrapper').hide();
-			$('.expire_date_container').html('');
 			return false;
 		}
+
+		$('.button_wrapper').show();
 
 		$('input[name=hour_id]').val(hour_id);
 		$('input[name=hour_expire_date]').val(expire_date);
 		$('input[name=display_expire_date]').val(display_expire_date);
 		console.log(expire_date);
 		$('.expire_date_container').html('Expire Date :'+ display_expire_date);
+
+
 
 		WCCB.ajax_options['url'] 		= wccb_config.frontend_ajax_url;
 		WCCB.ajax_options['data'] 		= 'action='+params.action+'&product_id='+params.product_id;

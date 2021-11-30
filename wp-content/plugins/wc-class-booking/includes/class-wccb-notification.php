@@ -86,7 +86,7 @@ class WCCB_Notification {
 				$student = get_userdata($row->user_id);
 				$tutor   = get_userdata($row->tutor_id);
 				$to      = $tutor->user_email;
-				$subject = 'Your class has been successfully booked at '.get_option( 'blogname' );
+				$subject = 'One student has booked class with you at '.get_option( 'blogname' );
 				$message = WCCB_Email_Content::get_class_booking_content( 'tutor' , $row , $student , $tutor );
 				$headers = WCCB_Notification::get_email_headers();
 				 
@@ -113,7 +113,7 @@ class WCCB_Notification {
 
 				foreach ($admin_user as $admin) {
 					$to      = $admin->user_email;
-					$subject = 'Your class has been successfully booked at '.get_option( 'blogname' );
+					$subject = 'One student successfully booked class at '.get_option( 'blogname' );
 					$message = WCCB_Email_Content::get_class_booking_content( 'admin' , $row , $student , $tutor );
 					$headers = WCCB_Notification::get_email_headers();
 					 
@@ -156,7 +156,7 @@ class WCCB_Notification {
 				$tutor   = get_userdata($row->tutor_id);
 
 				$to      = $tutor->user_email;
-				$subject = 'Your class has been successfully rescheduled at '.get_option( 'blogname' );
+				$subject = 'One student has rescheduled his/her class at '.get_option( 'blogname' );
 				$message = WCCB_Email_Content::get_class_reschedule_content( 'tutor' , $row , $student , $tutor );
 				$headers = WCCB_Notification::get_email_headers();
 				 
@@ -183,7 +183,7 @@ class WCCB_Notification {
 
 				foreach ($admin_user as $admin) {
 					$to      = $admin->user_email;
-					$subject = 'Your class has been successfully booked at '.get_option( 'blogname' );
+					$subject = 'One student has rescheduled his/her class at '.get_option( 'blogname' );
 					$message = WCCB_Email_Content::get_class_reschedule_content( 'admin' , $row , $student , $tutor );
 					$headers = WCCB_Notification::get_email_headers();
 					 
@@ -216,7 +216,7 @@ class WCCB_Notification {
 
 	public function send_cancelled_class_notification_tutor( $booking_id) {
 		global $wpdb;
-		//Send student email
+		//Send tutor email
 		$table_name = $wpdb->prefix.'booking_history';
 		$query           = "SELECT * FROM $table_name WHERE ID='".$booking_id."'";
 		$results         = $wpdb->get_results( $query ); // db call ok. no cache ok.
@@ -373,8 +373,8 @@ class WCCB_Notification {
 
 		foreach ($admin_user as $admin) {
 			$to      = $admin->user_email;
-			$subject = 'Your class has been successfully booked at '.get_option( 'blogname' );
-			$message = WCCB_Email_Content::get_class_cancelled_content( 'admin' , $booking , $student , $tutor );
+			$subject = 'One Student have successfully completed one class today at '.get_option( 'blogname' );
+			$message = WCCB_Email_Content::get_class_completion_content( 'admin' , $booking , $student , $tutor );
 			$headers = WCCB_Notification::get_email_headers();
 			 
 			wp_mail( $to, $subject, $message, $headers );

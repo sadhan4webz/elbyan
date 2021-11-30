@@ -354,6 +354,7 @@ class WCCB_Frontend_Myaccount {
 					$passed = WCCB_Frontend::date_wise_slot_availability_validation( $field_array['tutor_id'] , $key , $value2 );
 					if (!$passed) {
 						wc_add_notice( __( 'The slot '.wp_date('D M j, Y',strtotime($key)).', '.$value2.' already booked. Try other slots.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
+						//unset($_REQUEST['post']);
 					}
 				}
 			}
@@ -584,6 +585,12 @@ class WCCB_Frontend_Myaccount {
 					if (!$error_flag) {
 						if(WCCB_Frontend_Myaccount::save_booking_class($_REQUEST)) {
 							wc_add_notice( __( 'The class has been booked successfully.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'success' );
+							//unset($_REQUEST['slot']);
+
+							$url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+
+							wp_redirect( $url );
+							exit;
 						}
 					}
 					

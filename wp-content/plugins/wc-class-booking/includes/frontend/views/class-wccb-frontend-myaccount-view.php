@@ -942,7 +942,7 @@ class WCCB_Frontend_Myaccount_View {
 								</a>
 							</td>
 							<td>
-								<?php echo (int)$value['purchased_hours'];?>
+								<?php echo (float)$value['purchased_hours'];?>
 							</td>
 							<td>
 								<?php echo (float)$value['used_hours'];?>

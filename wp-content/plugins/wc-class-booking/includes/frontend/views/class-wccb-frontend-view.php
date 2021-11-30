@@ -254,8 +254,14 @@ class WCCB_Frontend_View {
 					$course_type = get_post_meta( $product->get_id() , 'course_type' , true );
 					if ($course_type == 'fixed') {
 						$course_quantity = get_post_meta( $product->get_id() , 'course_quantity' , true );
+						if ($product->get_regular_price() == 0) {
+							$quantity = $course_quantity * 2;
+						}
+						else {
+							$quantity = $course_quantity * 1;
+						}
 						?>
-						<input type="hidden" name="quantity" id="quantity" value="<?php echo $course_quantity;?>">
+						<input type="hidden" name="quantity" id="quantity" value="<?php echo $quantity;?>">
 						<div class="quantity_label"><?php echo $course_quantity;?></div>
 						<?php
 					}
@@ -438,6 +444,7 @@ class WCCB_Frontend_View {
 						<?php
 						$slot_row_count  = 0;
 						for ($i=0; $i < $num_days; $i++) {
+							$lower_key  = strtolower(date('l', strtotime($date.' +'.$i.' days')));
 							$value_date   = wp_date('Y-m-d' , strtotime($date.' +'.$i.' days'));
 							$display_date = wp_date('D M j, Y' , strtotime($date.' +'.$i.' days'));
 							if (strtotime($calendar_stop_date)<strtotime($value_date)) {
@@ -448,7 +455,6 @@ class WCCB_Frontend_View {
 							<?php
 
 							//Prepare slot table for each date
-							$lower_key  = strtolower(date('l', strtotime($date.' +'.$i.' days')));
 							if (empty($availability[$lower_key]['is_unavailable'])) {
 
 								
@@ -510,6 +516,9 @@ class WCCB_Frontend_View {
 								$slot_table .= '</table>';
 
 								$slot_table_array[] = $slot_table;
+							}
+							else {
+								$slot_table_array[] ='';
 							}
 						}
 						?>
@@ -609,9 +618,13 @@ class WCCB_Frontend_View {
 	public static function shop_page_product_hour() {
 		$product = wc_get_product(get_the_ID());
 		if (get_post_meta($product->get_id() , 'course_type' , true ) == 'fixed' ) {
+			$course_quantity = get_post_meta($product->get_id() , 'course_quantity' , true );
+			if ($product->get_regular_price() == 0) {
+				$course_quantity = '30 Minutes';
+			}
 			?>
 			<div class="product-hour">
-				<?php echo __('Hours' , WC_CLASS_BOOKING_TEXT_DOMAIN).' : '.get_post_meta($product->get_id() , 'course_quantity' , true );?>
+				<?php echo __('Hours' , WC_CLASS_BOOKING_TEXT_DOMAIN).' : '.$course_quantity?>
 			</div>
 			<?php
 		}

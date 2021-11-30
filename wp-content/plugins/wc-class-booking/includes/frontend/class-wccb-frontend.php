@@ -415,6 +415,10 @@ class WCCB_Frontend {
 
 					$used_hours = WCCB_Helper::get_total_hours_from_slots( $slots_time );
 
+					if ($product->get_regular_price() == 0) {
+						$used_hours = $used_hours * 2;
+					}
+
 					if ( $quantity < $used_hours ) {
 						$passed        = false;
 						$quantity_flag = 1;
@@ -608,12 +612,13 @@ class WCCB_Frontend {
 							}
 							
 							//Insert hour into hour history
+							$course_quantity = get_post_meta( $product->get_id() , 'course_quantity' , true );
 							$table_name = $wpdb->prefix.'hour_history';
 							$data       = array(
 								'user_id'         => get_current_user_id(),
 								'product_id'      => $product->get_id(),
 								'order_id'        => $order->get_id(),
-								'purchased_hours' => $item->get_quantity(),
+								'purchased_hours' => $course_quantity,
 								'date_purchased'  => wp_date('Y-m-d H:i:s'),
 								'used_hours'      => $used_hours
 

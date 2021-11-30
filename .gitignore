@@ -4,6 +4,7 @@ wp-admin
 wp-includes
 wp-content/plugins/help-tip
 wp-content/plugins/oxygen-woocommerce.1.4.zip
+wp-content/plugins/woocommerce-gateway-worldpay
 wp-content/*.log
 wp-content/*.php
 wp-content/themes/
