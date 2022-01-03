@@ -75,6 +75,7 @@ class WCCB_Install {
 								  `purchased_hours` varchar(100) NOT NULL,
 								  `used_hours` varchar(100)  NULL DEFAULT NULL,
 								  `expired_hours` varchar(100)  NULL DEFAULT NULL,
+								  `deducted_hours` varchar(100)  NULL DEFAULT NULL,
 								  `date_purchased` datetime NOT NULL,
 								  PRIMARY KEY (ID)
 								) $collate"

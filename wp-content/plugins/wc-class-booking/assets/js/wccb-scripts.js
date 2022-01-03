@@ -62,7 +62,7 @@ jQuery(function($){
 
 	var get_tutor_availability_calendar = function( params ) {
 		
-		params['loading_type']			= 'loader',
+		params['loading_type']			= 'loader_v2',
 		params['loading_target'] 		= params.wrapper,
 		params['html_error'] 			= 0;
 
@@ -74,6 +74,10 @@ jQuery(function($){
 		WCCB.ajax_callbacks['after_ajax_success_return'] = function( params, response ){
 														$(params.response_container).html(response.content);
 														WCCB.showTip( '.wpiaf-tips', {attribute:"data-tip",fadeIn:50,fadeOut:50,delay:200,keepAlive:!0} );
+
+														//Sroll top element
+														WCCB.animate_to_target($(params.response_container));
+														
 													};
 		WCCB.ajax_callbacks['after_ajax_error_return'] = function( params, response ){
 														alert(response.msg);
@@ -287,6 +291,51 @@ jQuery(function($){
 												
 														WCCB.show_wpmbd_notice( response.msg, params.response, true, 0 );
 														$frm.trigger("reset");
+													};									
+		WCCB.ajax( params );
+
+	});
+
+	$(document).on('change', '.get_available_hour_product', function(e){
+		e.preventDefault();
+		let $elm      = $(this),
+			$frm      = $elm.closest('form'),
+			params    = { user_id : $elm.val() , action : 'get_available_hour_product' , response: $frm.find('select[name="hour_id"]') , loading_type : 'spinner' , loading_target : $elm , html_error : 1 };
+
+
+		if (params.user_id == '') {
+			params.response.html('<option value="">Select</option>');
+			return;
+		}
+
+		WCCB.ajax_options['url'] 		= wccb_config.frontend_ajax_url;
+		WCCB.ajax_options['data'] 		= 'action='+params.action+'&user_id='+params.user_id;
+		WCCB.ajax_callbacks['after_ajax_success_return'] = function( params, response ){
+														params.response.html(response.content);
+													};
+
+		WCCB.ajax_callbacks['after_ajax_error_return'] = function( params, response ){
+														alert(response.msg);
+													};
+
+		WCCB.ajax( params );
+
+	});
+
+	$(document).on('submit', 'form.deduct_hour_form', function(e){
+		e.preventDefault();
+		let $frm      = $(this),
+			$btn      = $('.deduct_hour')
+			params    = { query_string : $frm.serialize() , action : 'student_deduct_hour' , response: $('.response_container') , loading_type : 'spinner' , loading_target : $btn , html_error : 1 },
+
+		WCCB.ajax_options['url'] 		= wccb_config.frontend_ajax_url;
+		WCCB.ajax_options['data'] 		= 'action='+params.action+'&'+params.query_string;
+		WCCB.ajax_callbacks['after_ajax_success_return'] = function( params, response ){
+														if (response.reset_form == 'yes') {
+															$frm.find('select[name="hour_id"]').html('<option value="">Select</select>');
+															$frm.trigger("reset");
+														}
+														WCCB.show_wpmbd_notice( response.msg, params.response, true, 0 );
 													};									
 		WCCB.ajax( params );
 

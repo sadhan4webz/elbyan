@@ -51,8 +51,16 @@ class WCCB_Frontend_Myaccount_View {
 	}
 
 	public static function show_edit_profile_content() {
-	    $user_id = get_current_user_id();
-	    $attachment_id = get_user_meta( $user_id, 'profile_image', true );
+	    $user_id       = get_current_user_id();
+	    $attachment_id = get_user_meta( $user_id , 'profile_image', true );
+	    $mobile_no     = get_user_meta( $user_id , 'mobile_no' , true);
+
+	    ?>
+	    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+			<label for="mobile_no"><?php esc_html_e( 'Mobile no.', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?></label>
+			<input type="number" name="mobile_no" class="woocommerce-Input woocommerce-Input--phone input-text" placeholder="Enter mobile no." value="<?php echo $mobile_no;?>">
+		</p>
+	    <?php
 	    if ( $attachment_id ) {
 	    	?>
 	    	<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
@@ -275,7 +283,7 @@ class WCCB_Frontend_Myaccount_View {
 						$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date between '".wp_date('Y-m-d', strtotime($_REQUEST['start_date']))."' and '".wp_date('Y-m-d', strtotime($_REQUEST['end_date']))."' and status!='Cancelled' order by class_date desc";
 					}
 					else {
-						$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date < '".wp_date('Y-m-d')."' and status='Completed' order by class_date desc";
+						$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date <= '".wp_date('Y-m-d')."' and status='Completed' order by class_date desc";
 					}
 					
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
@@ -371,7 +379,7 @@ class WCCB_Frontend_Myaccount_View {
 					</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date >= '".wp_date('Y-m-d')."' and status = 'Upcoming' order by class_date asc";
+					$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date >= '".wp_date('Y-m-d')."' and status = 'Upcoming' order by ID desc";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {
@@ -448,6 +456,16 @@ class WCCB_Frontend_Myaccount_View {
 					if ($booking[0]['user_id'] == get_current_user_id() || array_key_exists('administrator' , get_user_meta(get_current_user_id() , 'wp_capabilities' , true ) )) {
 						?>
 						<div class="my_classes_main_wrapper">
+
+							<?php
+							$class_time_exp  = explode('-' , $booking[0]['class_time']);
+							$class_date_time = $booking[0]['class_date'].' '.$class_time_exp[0];
+							$validation_flag = WCCB_Frontend_Myaccount::validate_class_for_reschedule_and_cancel('reschedule', $class_date_time);
+
+							if (!$validation_flag) {
+								echo __('<div class="woocommerce-notices-wrapper"><div class="woocommerce-message">Your class is not eligible to reschedule now. You have to reschedule class before '.WC_CLASS_BOOKING_RESCHEDULE_CLASS_BEFORE_HOURS.' hours from starting the class.</div></div>' , WC_CLASS_BOOKING_TEXT_DOMAIN );
+							}
+							?>
 							
 							<form id="my_reschedule_form" class="woocommerce-EditAccountForm wccb_form my_reschedule_form" method="post">
 								<input type="hidden" name="booking_id" value="<?php echo $booking[0]['ID'];?>">
@@ -471,31 +489,40 @@ class WCCB_Frontend_Myaccount_View {
 									<label><?php echo __('Class Date & Time' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
 									<span><?php echo WCCB_Helper::display_date( $booking[0]['class_date']).', '.$booking[0]['class_time'];?></span>
 								</div>
-								<div class="slot_selected_container"></div>
-								<div class="tutor_availability_main_wrapper">
-									<?php 
-									echo WCCB_Frontend_View::get_tutor_availability_calendar( $booking[0]['product_id'] , $booking[0]['tutor_id'] , wp_date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR );
+								<?php
+
+								if ($validation_flag) {
 									?>
-								</div>
-								<div class="field-group">
-									<button type="submit" name="save_reschedule" class="woocommerce-Button button"><?php echo __('Save Changes' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></button>
-								</div>
+									<div class="slot_selected_container"></div>
+									<div class="tutor_availability_main_wrapper">
+										<?php 
+										echo WCCB_Frontend_View::get_tutor_availability_calendar( $booking[0]['product_id'] , $booking[0]['tutor_id'] , wp_date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR );
+										?>
+									</div>
+									<div class="field-group">
+										<button type="submit" name="save_reschedule" class="woocommerce-Button button"><?php echo __('Save Changes' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></button>
+									</div>
+									<?php
+								}
+								
+								?>
+								
 							</form>
 						</div>
 						<?php
 					}
 					else {
-						wc_add_notice( __( '<p style="color:red;">Unauthorize access</p>' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
+						echo  __( '<div class="error inline">Unauthorize access</div>' , WC_CLASS_BOOKING_TEXT_DOMAIN );
 					}
 					
 				}
 				else {
-					wc_add_notice( __( '<p style="color:red;">Booking ID not exist</p>' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
+					echo __( '<div class="error inline">Booking ID not exist</div>' , WC_CLASS_BOOKING_TEXT_DOMAIN );
 				}
 				
 			}
 			else {
-				wc_add_notice( __( '<p style="color:red;">Unauthorize access</p>' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
+				echo __( '<div class="error inline">Unauthorize access</div>' , WC_CLASS_BOOKING_TEXT_DOMAIN );
 			}
 		}
 
@@ -538,7 +565,7 @@ class WCCB_Frontend_Myaccount_View {
 									$days           = WCCB_Helper::get_date_difference( $hour->date_purchased, date('Y-m-d') );
 									$available_hour = 0;
 									if ($days < WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS ) {
-										$available_hour = $hour->purchased_hours - (float)$hour->used_hours;
+										$available_hour = WCCB_Frontend_Myaccount::get_student_total_available_hours($hour->user_id , $hour->ID);
 									}
 									if ($available_hour > 0 ) {
 										$no_hour_flag = 0;
@@ -689,7 +716,7 @@ class WCCB_Frontend_Myaccount_View {
 					</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date < '".wp_date('Y-m-d')."' and status = 'Completed' order by class_date asc ";
+					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date <= '".wp_date('Y-m-d')."' and status = 'Completed' order by class_date asc ";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {
@@ -769,7 +796,7 @@ class WCCB_Frontend_Myaccount_View {
 			  		</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date >= '".wp_date('Y-m-d')."' and status = 'Upcoming' order by class_date asc";
+					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date >= '".wp_date('Y-m-d')."' and status = 'Upcoming' order by ID desc";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {
@@ -909,6 +936,9 @@ class WCCB_Frontend_Myaccount_View {
 							<?php echo __('Used Hours' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 						</th>
 						<th>
+							<?php echo __('Deducted Hours' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+						</th>
+						<th>
 							<?php echo __('Expired Hours', WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 						</th>
 						<th>
@@ -946,6 +976,9 @@ class WCCB_Frontend_Myaccount_View {
 							</td>
 							<td>
 								<?php echo (float)$value['used_hours'];?>
+							</td>
+							<td>
+								<?php echo (float)$value['deducted_hours'];?>
 							</td>
 							<td>
 								<?php echo (float)$value['expired_hours'];?>
@@ -1033,12 +1066,70 @@ class WCCB_Frontend_Myaccount_View {
 				</div>
 				<div class="field-group">
 					<label><?php echo __('Hours', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
-					<input type="number" name="hour" id="hour" min='1'>
+					<input type="text" name="hour" id="hour" >
 				</div>
 				<p>&nbsp;</p>
 
 				<div class="field-group button_wrapper">
 					<button type="submit" name="save_hour" class="woocommerce-Button button save_hour">
+						<?php echo __('Submit' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+					</button>
+				</div>
+			</form>
+		</div>
+		<?php
+	}
+
+	public static function render_my_account_deduct_hour_content() {
+		$args   = array(
+					'role__in' => array('wccb_student')
+				);
+		$student = get_users( $args );
+		?>
+		<div class="add_hour_main_wrapper">
+
+			<div class="response_container">
+				
+			</div>
+
+			<form class="woocommerce-EditAccountForm deduct_hour_form" method="post">
+				<?php wp_nonce_field( 'deduct_hour_nonce', 'deduct_hour_nonce_field' ); ?>
+				
+				<div class="title_wrapper">
+					<h2><?php echo __('Deduct Hours for Student', WC_CLASS_BOOKING_TEXT_DOMAIN);?></h2>
+				</div>
+				<div class="field-group">
+					<label><?php echo __('Select Student', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
+					<select class="select get_available_hour_product" name="user_id">
+						<option value=""><?php echo __('Select' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
+						<?php
+			        	foreach ($student as $row) {
+			        		?>
+			        		<option value="<?php echo $row->ID;?>" <?php if($_REQUEST['user_id'] == $row->ID){ $user_id = $_REQUEST['user_id'];?> selected="selected" <?php }?>><?php echo wccb_user_get_display_name($row);?></option>
+			        		<?php
+			        	}
+			        	?>
+					</select>
+				</div>
+				<div class="field-group product_container">
+							
+					<label><?php echo __('Class Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
+					<select class="select" name="hour_id" id="hour_id">
+						<option value=""><?php echo __('Select' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
+					</select>
+
+					<span class="expire_date_container">
+						
+					</span>
+				</div>
+				<div class="field-group">
+					<label><?php echo __('Hours to deduct', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label>
+					<input type="text" name="hour" id="hour" >
+				</div>
+				<p>&nbsp;</p>
+
+				<div class="field-group button_wrapper">
+					<button type="submit" name="deduct_hour" class="woocommerce-Button button deduct_hour">
 						<?php echo __('Submit' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
 					</button>
 				</div>

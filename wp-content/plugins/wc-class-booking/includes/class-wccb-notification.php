@@ -43,6 +43,8 @@ class WCCB_Notification {
 		add_action ( 'class_completion_notification' , array( $this , 'send_class_completion_notification_tutor' ) , 10 , 3 );
 		add_action ( 'class_completion_notification' , array( $this , 'send_class_completion_notification_admin' ) , 10 , 3 );
 
+		add_action ('deduct_hour_notification' , array( $this , 'send_deduct_hour_notification_student' ) , 10 , 2 );
+
 	}
 
 	public static function get_email_headers() {
@@ -379,6 +381,18 @@ class WCCB_Notification {
 			 
 			wp_mail( $to, $subject, $message, $headers );
 		}
+	}
+
+	public function send_deduct_hour_notification_student( $hour_obj , $hour ) {
+
+		//Send student email
+		$student = get_userdata($hour_obj->user_id);
+		$to      = $student->user_email;
+		$subject = 'Your purchased hours has been deducted by admin at '.get_option( 'blogname' );
+		$message = WCCB_Email_Content::get_hour_deducted_content( $hour_obj , $student , $hour );
+		$headers = WCCB_Notification::get_email_headers();
+		 
+		wp_mail( $to, $subject, $message, $headers );
 	}
 
 }

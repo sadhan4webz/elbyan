@@ -77,7 +77,7 @@ class WCCB_Email_Content {
 						Class Time
 					</th>
 					<td>
-						<?php echo $booking->class_time?>
+						<?php echo $booking->class_time;?>
 					</td>
 				</tr>
 				<tr>
@@ -174,7 +174,7 @@ class WCCB_Email_Content {
 						Class Time
 					</th>
 					<td>
-						<?php echo $booking->class_time?>
+						<?php echo $booking->class_time;?>
 					</td>
 				</tr>
 				<tr>
@@ -271,7 +271,7 @@ class WCCB_Email_Content {
 						Class Time
 					</th>
 					<td>
-						<?php echo $booking->class_time?>
+						<?php echo $booking->class_time;?>
 					</td>
 				</tr>
 				<tr>
@@ -369,7 +369,7 @@ class WCCB_Email_Content {
 						Class Time
 					</th>
 					<td>
-						<?php echo $booking->class_time?>
+						<?php echo $booking->class_time;?>
 					</td>
 				</tr>
 				<tr>
@@ -467,7 +467,7 @@ class WCCB_Email_Content {
 						Class Time
 					</th>
 					<td>
-						<?php echo $booking->class_time?>
+						<?php echo $booking->class_time;?>
 					</td>
 				</tr>
 				<tr>
@@ -564,7 +564,70 @@ class WCCB_Email_Content {
 						Class Time
 					</th>
 					<td>
-						<?php echo $booking->class_time?>
+						<?php echo $booking->class_time;?>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						&nbsp;
+					</td>
+				</tr>
+
+				<tr>
+					<td colspan="2">
+						Regards, <br><br>
+
+						Team Elbyan
+					</td>
+				</tr>
+			</table>
+		</body>
+		</html>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function get_hour_deducted_content( $hour_obj , $student , $hour ) {
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<title><?php echo get_option( 'blogname' );?></title>
+		</head>
+		<body>
+			<table>
+				<?php
+				$welcome_text = __( 'Dear '.$student->display_name.', your purchased hours has been deducted. Below are the detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+				?>
+				<tr>
+					<td colspan="2">
+						<?php echo $welcome_text;?>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Class Name :
+					</th>
+					<td>
+						<a href="<?php echo get_permalink($hour_obj->product_id);?>"><?php echo get_the_title($hour_obj->product_id);?></a>
+						
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Deducted Hour
+					</th>
+					<td>
+						<?php echo $hour;?>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Deducted Date :
+					</th>
+					<td>
+						<?php echo WCCB_Helper::display_date(date('d-m-Y'));?>
 					</td>
 				</tr>
 				<tr>

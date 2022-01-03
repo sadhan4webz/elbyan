@@ -28,7 +28,31 @@ class WCCB_Admin {
 		add_filter( 'gettext', array( $this , 'change_backend_product_regular_price_label' ) , 100, 3 );
 		add_filter( 'woocommerce_order_item_display_meta_key', array( $this , 'change_order_item_meta_key') , 20, 3 );
 		add_filter( 'woocommerce_order_item_display_meta_value', array( $this , 'change_order_item_meta_value' ) , 20, 3 );
+
+		add_filter( 'user_contactmethods', array( $this , 'new_contact_methods') , 10, 1 );
+		add_filter( 'manage_users_columns', array( $this , 'new_modify_user_table') );
+		add_filter( 'manage_users_custom_column', array( $this , 'new_modify_user_table_row'), 10, 3 );
 	}
+
+	public function new_contact_methods( $contactmethods ) {
+	    $contactmethods['mobile_no'] = 'Mobile No.';
+	    return $contactmethods;
+	}
+
+	public function new_modify_user_table( $column ) {
+	    $column['mobile_no'] = 'Mobile No.';
+	    return $column;
+	}
+
+	public function new_modify_user_table_row( $val, $column_name, $user_id ) {
+	    switch ($column_name) {
+	        case 'mobile_no' :
+	            return get_the_author_meta( 'mobile_no', $user_id , true );
+	        default:
+	    }
+	    return $val;
+	}
+	
 
 	public function add_custom_product_type( $types ) {
 	    $types[ 'wccb_course' ] = __( 'Course' , WC_CLASS_BOOKING_TEXT_DOMAIN );

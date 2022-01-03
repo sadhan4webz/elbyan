@@ -24,10 +24,15 @@ class WCCB_Frontend_Myaccount {
 		add_action ( 'woocommerce_save_account_details', array( $this , 'save_edit_profile') , 10, 1 );
 		add_action ( 'woocommerce_edit_account_form_tag', function(){ echo 'enctype="multipart/form-data"';} );
 
+		add_action( 'woocommerce_save_account_details_errors', array( $this , 'validate_my_account_custom_field') , 10, 1 );
+
 		//Filters
 		add_filter ( 'woocommerce_account_menu_items', array( $this , 'customize_my_account_menu' ) );
 		
+		
 	}
+
+
 
 	public function add_myaccount_endpoint() {
 		if (is_array($this->get_myaccount_menu( true ))) {
@@ -46,6 +51,7 @@ class WCCB_Frontend_Myaccount {
 			'classes'      => 'My Classes',
 			'hours'        => 'My Hours',
 			'add_hour'     => 'Add Student Hour',
+			'deduct_hour'  => 'Deduct Student Hour',
 		);
 
 		$tutor_menu   = array(
@@ -62,6 +68,7 @@ class WCCB_Frontend_Myaccount {
 			'hours'        => 'Student Hours',
 			'bookings'     => 'Tutor Bookings',
 			'add_hour'     => 'Add Student Hour',
+			'deduct_hour'  => 'Deduct Student Hour',
 		);
 		
 		if( $all ) {
@@ -178,28 +185,21 @@ class WCCB_Frontend_Myaccount {
 		$results         = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 		if (count($results)>0) {
 
-			$user            = get_userdata( get_current_user_id() );
-			$role_key        = $user->roles[0];
-
 			$class_time_exp  = explode('-' , trim($results[0]['class_time']));
 			$class_date_time = $results[0]['class_date'].' '.$class_time_exp[0];
-			//echo 'hello'.$results[0]['class_time'].'hi'.$class_date_time;
-			$datetime1       = new DateTime(date('Y-m-d h:i a'));
-			$datetime2       = new DateTime($class_date_time);
-			$interval        = $datetime1->diff($datetime2);
-			$days            = $interval->d;
-			$hour            = $interval->h;
+			$validation_flag  = WCCB_Frontend_Myaccount::validate_class_for_reschedule_and_cancel('cancel' , $class_date_time);
 
-			//Calculate hour from slot
-			$slots_time       = array(
-				array(
-					'start_time' => $class_time_exp[0],
-					'end_time'   => $class_time_exp[1]
-				)
-			);
-			$slot_hour        = WCCB_Helper::get_total_hours_from_slots( $slots_time );	
+			if ($validation_flag) {
 
-			if ( ($days > 0 || $hour > WC_CLASS_BOOKING_CANCEL_CLASS_BEFORE_HOURS)  || $role_key != 'wccb_student' ) {
+				//Calculate hour from slot
+				$slots_time       = array(
+					array(
+						'start_time' => $class_time_exp[0],
+						'end_time'   => $class_time_exp[1]
+					)
+				);
+				$slot_hour        = WCCB_Helper::get_total_hours_from_slots( $slots_time );
+
 				//Update hour for cancel booking
 				$hour_table  = $wpdb->prefix.'hour_history';
 				$query2      = "SELECT * FROM $hour_table WHERE ID='".$results[0]['hour_id']."'";
@@ -276,7 +276,7 @@ class WCCB_Frontend_Myaccount {
 		foreach ($results as $key => $value) {
 			$days = WCCB_Helper::get_date_difference( $value['date_purchased'] , date('Y-m-d') );
 			if ($days < WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS ) {
-				$total_available_hours += $value['purchased_hours'] - (float)$value['used_hours'];
+				$total_available_hours += $value['purchased_hours'] - ((float)$value['used_hours'] + (float)$value['deducted_hours']);
 			}
 		}
 		
@@ -434,6 +434,37 @@ class WCCB_Frontend_Myaccount {
 		return $passed;
 	}
 
+	public static function validate_class_for_reschedule_and_cancel( $type , $class_date_time) {
+		$validation_flag = false;
+
+		if (!empty($class_date_time)) {
+
+			$hour_from       = ($type == 'reschedule') ? WC_CLASS_BOOKING_RESCHEDULE_CLASS_BEFORE_HOURS : WC_CLASS_BOOKING_CANCEL_CLASS_BEFORE_HOURS;
+			$user            = get_userdata( get_current_user_id() );
+			$role_key        = $user->roles[0];
+			$datetime1       = new DateTime(date('Y-m-d h:i a'));
+			$datetime2       = new DateTime($class_date_time);
+			$interval        = $datetime1->diff($datetime2);
+			$days            = $interval->d;
+			$hour            = $interval->h;
+
+			if ( $days > 0 ) {
+				$validation_flag = true;
+			}
+			else if ( $days == 0 ) {
+				if ($hour > $hour_from) {
+					$validation_flag = true;
+				}
+			}
+
+			if ($role_key == 'administrator') {
+				$validation_flag = true;
+			}
+		}
+
+		return $validation_flag;
+	}
+
 	public static function reschedule_booking_class( $booking_id , $slot ) {
 		if (empty($booking_id) || empty($slot)) {
 			return;
@@ -445,17 +476,13 @@ class WCCB_Frontend_Myaccount {
 		$results         = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 		if (count($results)>0) {
 
-			$user            = get_userdata( get_current_user_id() );
-			$role_key        = $user->roles[0];
+			
 
 			$class_time_exp  = explode('-' , $results[0]['class_time']);
 			$class_date_time = $results[0]['class_date'].' '.$class_time_exp[0];
-			$datetime1       = new DateTime(date('Y-m-d h:i a'));
-			$datetime2       = new DateTime($class_date_time);
-			$interval        = $datetime1->diff($datetime2);
-			$days            = $interval->d;
-			$hour            = $interval->h;
-			if ( ($days >= 0 || $hour > WC_CLASS_BOOKING_RESCHEDULE_CLASS_BEFORE_HOURS) || $role_key == 'administrator' ) {
+			$validation_flag = WCCB_Frontend_Myaccount::validate_class_for_reschedule_and_cancel('reschedule', $class_date_time);
+
+			if ($validation_flag) {
 
 				$slot_date_time = explode('|', $slot[0]);
 
@@ -641,23 +668,43 @@ class WCCB_Frontend_Myaccount {
 		}
 	}
 
-	public function save_edit_profile( $user_id ) {
-		if ( !empty( $_FILES['profile_image']['name'] ) ) {
+	public function validate_my_account_custom_field( $args ) {
+		if (empty($_POST['mobile_no'])) {
+			$args->add( 'error', __( 'Mobile no. can\'t be empty', WC_CLASS_BOOKING_TEXT_DOMAIN ),'');
+		}
+
+	    if ( !empty( $_POST['mobile_no'] ) ) // Your custom field
+	    {
+	        if(strlen($_POST['mobile_no']) > 14 ) // condition to be adapted
+	        $args->add( 'error', __( 'Mobile no. should not be more than 14 digit', WC_CLASS_BOOKING_TEXT_DOMAIN ),'');
+	    }
+
+	    if ( !empty( $_FILES['profile_image']['name'] ) ) {
 			// Allowed image types
 			$allowed_image_types = array('image/jpeg','image/png');
 			// Check conditions
-	    	if(in_array($_FILES['profile_image']['type'], $allowed_image_types) ) {
-	    		$attachment_id = media_handle_upload( 'profile_image', 0 );
-		        if ( is_wp_error( $attachment_id ) ) {
-		            wc_add_notice( $attachment_id->get_error_message() , 'error' );
-		        } 
-		        else {
-		            update_user_meta( $user_id, 'profile_image', $attachment_id );
-		        }
+	    	if(!in_array($_FILES['profile_image']['type'], $allowed_image_types) ) {
+	    		$args->add( 'error', __( 'The image type you are trying to upload is not allowed', WC_CLASS_BOOKING_TEXT_DOMAIN ),'');
 	    	}
-	    	else {
-	    		wc_add_notice( __( 'The image type you are trying to upload is not allowed' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'success' );
-	    	}
+	    }
+	}
+
+	public function save_edit_profile( $user_id ) {
+
+		if (!empty($_POST['mobile_no'])) {
+			update_user_meta( $user_id , 'mobile_no' , $_POST['mobile_no']);
+		}
+
+		
+		if ( !empty( $_FILES['profile_image']['name'] ) ) {
+
+			$attachment_id = media_handle_upload( 'profile_image', 0 );
+	        if ( is_wp_error( $attachment_id ) ) {
+	            wc_add_notice( $attachment_id->get_error_message() , 'error' );
+	        } 
+	        else {
+	            update_user_meta( $user_id, 'profile_image', $attachment_id );
+	        }
 	   	}
 	}
 }

@@ -103,4 +103,22 @@ class WC_Class_Booking {
 		fwrite($myfile, $txt);
 		fclose($myfile);
 	}
+
+	public static function hour_deducted_log($variable) {
+		$upload_dir = wp_upload_dir();
+		$base_dir 	= $upload_dir['basedir'];
+		$base_url 	= $upload_dir['baseurl'];
+		$upload_dir = $base_dir . "/wccb-log/hour_deducted_log/";
+		if (! is_dir($upload_dir)) {
+			mkdir( $upload_dir, 0755 );
+		}
+		
+		$log_file = $upload_dir.date_i18n('d-m-Y').'-log.txt';
+		$myfile = fopen($log_file, "a") or die("Unable to open file!");
+		ob_start();
+		echo $variable.PHP_EOL;
+		$txt = ob_get_clean();
+		fwrite($myfile, $txt);
+		fclose($myfile);
+	}
 }

@@ -57,7 +57,7 @@ class WCCB_Settings {
 			'wccb-general-js',
 			WC_CLASS_BOOKING_PLUGIN_URL .'/assets/js/wccb-general.js',
 			array( 'jquery' ),
-			1,
+			time(),
 			1
 		);
 
@@ -65,7 +65,7 @@ class WCCB_Settings {
 			'wccb-script-js',
 			WC_CLASS_BOOKING_PLUGIN_URL .'/assets/js/wccb-scripts.js',
 			array( 'jquery' ),
-			1,
+			time(),
 			1
 		);
 

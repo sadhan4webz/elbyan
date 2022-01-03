@@ -53,6 +53,7 @@ class WCCB_Frontend {
 		//Checkout page
 		add_action( 'woocommerce_checkout_create_order_line_item', array( $this , 'create_order_line_item' ) , 10, 4 );
 		add_action( 'woocommerce_checkout_process' , array( $this , 'checkout_page_validation') );
+		add_action( 'woocommerce_checkout_terms_and_conditions' , array( 'WCCB_Frontend_View' , 'display_refund_policy_checkbox') );
 
 		add_action( 'woocommerce_thankyou' , array( $this , 'update_booking_and_hour_history') , 10 , 1 );
 
@@ -218,6 +219,12 @@ class WCCB_Frontend {
 	}
 
 	public function validate_register_field( $username , $email , $errors ) {
+		if (empty($_POST['mobile_no'])) {
+			$errors->add( 'mobile_no_error' , __('Mobile no. is required field' , WC_CLASS_BOOKING_TEXT_DOMAIN) );
+		}
+		if (!empty($_POST['mobile_no']) && strlen($_POST['mobile_no']) > 14  ) {
+			$errors->add( 'mobile_no_error' , __('Mobile no. should not be more than 14 digit' , WC_CLASS_BOOKING_TEXT_DOMAIN) );
+		}
 		if (empty($_POST['first_name'])) {
 			$errors->add( 'first_name_error' , __('First name is required field' , WC_CLASS_BOOKING_TEXT_DOMAIN) );
 		}
@@ -274,6 +281,9 @@ class WCCB_Frontend {
 	}
 
 	public function save_register_fields( $customer_id ) {
+		if (!empty($_POST['mobile_no'])) {
+			update_user_meta( $customer_id , 'mobile_no', $_POST['mobile_no']);
+		}
 		if (!empty($_POST['first_name'])) {
 			update_user_meta( $customer_id , 'first_name', $_POST['first_name']);
 		}
@@ -554,6 +564,10 @@ class WCCB_Frontend {
 				break;
 			}
 		}
+
+		if (!isset($_POST['refund_policy'])) {
+			wc_add_notice( __( 'Please read and accept the refund and return policy to proceed with your order.' , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error');
+		}
 	}
 
 	public function worldpay_ipn_handler($response) {
@@ -612,7 +626,14 @@ class WCCB_Frontend {
 							}
 							
 							//Insert hour into hour history
-							$course_quantity = get_post_meta( $product->get_id() , 'course_quantity' , true );
+							$course_type = get_post_meta( $product->get_id() , 'course_type' , true );
+							if ($course_type == 'fixed') {
+								$course_quantity = get_post_meta( $product->get_id() , 'course_quantity' , true );
+							}
+							else {
+								$course_quantity = $item->get_quantity();
+							}
+							
 							$table_name = $wpdb->prefix.'hour_history';
 							$data       = array(
 								'user_id'         => get_current_user_id(),

@@ -206,7 +206,10 @@ var WCCB = WCCB || {};
 			return;
 		var header_ht 		= $('header.site-header').height();
 		var wp_adminbar_ht 	= $('#wpadminbar').length > 0 ? $('#wpadminbar').height() : 0;
-		$( 'html,body' ).animate({ scrollTop: $target.offset().top - ( header_ht + wp_adminbar_ht ) }, 1000);
+		//$( 'html,body' ).animate({ scrollTop: $target.offset().top - ( header_ht + wp_adminbar_ht ) }, 1000);
+		var height = parseInt($target.offset().top) - (parseInt(header_ht) + parseInt(wp_adminbar_ht));
+
+		$( 'html,body' ).animate({ scrollTop: $target.offset().top  }, 1000);
 	}
 	
 	WCCB.show_spinner = function( params ){
@@ -245,6 +248,14 @@ var WCCB = WCCB || {};
 		params.target.prev('.wccb-ajax-spinner').hide();
 		params.target.prev('.wccb-ajax-spinner').remove();	
 	}
+
+	WCCB.show_loader_v2 = function( params ) {
+		$('body').prepend('<span class="se-pre-con"></span>');
+	}
+
+	WCCB.hide_loader_v2 = function( params ) {
+		$('body').find('.se-pre-con').remove();
+	}
 	
 	WCCB.reset = function( params ){
 		
@@ -260,6 +271,8 @@ var WCCB = WCCB || {};
 								WCCB.show_spinner({target:params.loading_target});
 							else if( params.loading_type == 'loader' )	
 								WCCB.show_loader({target:params.loading_target});
+							else if( params.loading_type == 'loader_v2')
+								WCCB.show_loader_v2();
 						}
 					},
 		after_ajax : function( params ){
@@ -270,6 +283,8 @@ var WCCB = WCCB || {};
 								WCCB.hide_spinner({target:params.loading_target});
 							else if( params.loading_type == 'loader' )	
 								WCCB.hide_loader({target:params.loading_target});
+							else if( params.loading_type == 'loader_v2')
+								WCCB.hide_loader_v2();
 						}
 					},
 		after_ajax_success_return 	: function( params, response ){

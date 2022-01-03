@@ -38,17 +38,21 @@ class WCCB_Frontend_View {
 	public static function render_register_form_fields( $user_id = 0 ) {
 		?>
 		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-			<label for="reg_username"><?php esc_html_e( 'First Name', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
+			<label for="reg_phone"><?php esc_html_e( 'Mobile No.', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
+			<input type="number" class="woocommerce-Input woocommerce-Input--text input-text" name="mobile_no" id="mobile_no" autocomplete="mobile_no" value="<?php echo ( ! empty( $_POST['mobile_no'] ) ) ? esc_attr( wp_unslash( $_POST['mobile_no'] ) ) : ''; ?>" placeholder="Enter mobile no." /><?php // @codingStandardsIgnoreLine ?>
+		</p>
+		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+			<label for="reg_first_name"><?php esc_html_e( 'First Name', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
 			<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="first_name" id="first_name" autocomplete="first_name" value="<?php echo ( ! empty( $_POST['first_name'] ) ) ? esc_attr( wp_unslash( $_POST['first_name'] ) ) : ''; ?>" /><?php // @codingStandardsIgnoreLine ?>
 		</p>
 
 		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-			<label for="reg_username"><?php esc_html_e( 'Last Name', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
+			<label for="reg_last_name"><?php esc_html_e( 'Last Name', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
 			<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="last_name" id="last_name" autocomplete="last_name" value="<?php echo ( ! empty( $_POST['last_name'] ) ) ? esc_attr( wp_unslash( $_POST['last_name'] ) ) : ''; ?>" /><?php // @codingStandardsIgnoreLine ?>
 		</p>
 
 		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-			<label for="reg_username"><?php esc_html_e( 'Gender', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
+			<label for="reg_gender"><?php esc_html_e( 'Gender', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
 			<select name="gender" id="gender" class="select">
 				<option value=""><?php echo __('Select' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
 				<option value="Male" <?php selected($_POST['gender'],'Male');?>><?php echo __('Male', WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
@@ -56,7 +60,7 @@ class WCCB_Frontend_View {
 			</select>
 		</p>
 		<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-			<label for="reg_username"><?php esc_html_e( 'Registration Type', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
+			<label for="reg_user_role"><?php esc_html_e( 'Registration Type', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>&nbsp;<span class="required">*</span></label>
 			<select name="user_role" id="user_role" class="select">
 				<option value="">Select</option>
 				<?php
@@ -666,6 +670,18 @@ class WCCB_Frontend_View {
 		);
 
 		return $button;
+	}
+
+	public static function display_refund_policy_checkbox() {
+		?>
+		<p class="form-row validate-required">
+			<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
+			<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="refund_policy" <?php checked( apply_filters( 'woocommerce_refund_policy_is_checked_default', isset( $_POST['refund_policy'] ) ), true ); // WPCS: input var ok, csrf ok. ?> id="refund_policy" value="yes" />
+				<span class="woocommerce-refund-policy-checkbox-text"><?php echo sprintf(__('I have read and agree to the website %s' , WC_CLASS_BOOKING_TEXT_DOMAIN) , '<a href="/refund-and-returns-policy" target="_blank">refund and return policy</a>');?></span>&nbsp;<span class="required">*</span>
+			</label>
+			<input type="hidden" name="refund_policy-field" value="1" />
+		</p>
+		<?php
 	}
 }
 ?>
