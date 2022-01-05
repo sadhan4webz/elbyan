@@ -571,7 +571,7 @@ class WCCB_Frontend_Myaccount_View {
 										$no_hour_flag = 0;
 										$expire_date  = WCCB_Helper::get_particular_date($hour->date_purchased , WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS);
 										?>
-										<option value="<?php echo $product->get_id();?>" data-hour_id="<?php echo $hour->ID;?>" data-expire_date="<?php echo $expire_date;?>" data-display_expire_date="<?php echo wp_date('F j, Y, g:i a',strtotime($expire_date));?>" <?php selected($_REQUEST['product_id'] , $product->get_id())?>><?php echo $product->get_name().' - (Available hours : '.$available_hour.')';?></option>
+										<option value="<?php echo $product->get_id();?>" data-hour_id="<?php echo $hour->ID;?>" data-expire_date="<?php echo $expire_date;?>" data-display_expire_date="<?php echo wp_date('F j, Y, g:i a',strtotime($expire_date));?>" <?php selected($_REQUEST['hour_id'] , $hour->ID)?>><?php echo $product->get_name().' - (Available hours : '.$available_hour.')';?></option>
 										<?php
 									}
 								}

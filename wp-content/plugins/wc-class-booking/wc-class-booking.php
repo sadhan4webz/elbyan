@@ -30,8 +30,8 @@ define( 'WC_CLASS_BOOKING_SLOT_DURATION' , 60 );
 define( 'WC_CLASS_BOOKING_SLOT_GAP_DUARTION' , 15 );
 define( 'WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS' , 98 );
 define( 'WC_CLASS_BOOKING_SEND_CLASS_REMINDER_BEFORE', 10 ); //value in minute
-define( 'WC_CLASS_BOOKING_RESCHEDULE_CLASS_BEFORE_HOURS', 12 ); //value in hours
-define( 'WC_CLASS_BOOKING_CANCEL_CLASS_BEFORE_HOURS', 12 ); //value in hours
+define( 'WC_CLASS_BOOKING_RESCHEDULE_CLASS_BEFORE_HOURS', 4 ); //value in hours
+define( 'WC_CLASS_BOOKING_CANCEL_CLASS_BEFORE_HOURS', 4 ); //value in hours
 define( 'WC_CLASS_BOOKING_TIMEZONE_MSG', 'Timezone : '.get_option('timezone_string')); //Timezone string for website
 
 require_once dirname( __FILE__ ) . '/includes/class-wc-class-booking-dependency-checker.php';

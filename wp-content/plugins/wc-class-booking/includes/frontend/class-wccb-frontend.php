@@ -317,7 +317,9 @@ class WCCB_Frontend {
 					$date_wise_slot[$slot_date_time[0]] = array($slot_date_time[1]);
 				}
 				else {
-					array_push($date_wise_slot[$slot_date_time[0]], $slot_date_time[1]);
+					if (!in_array($slot_date_time[1], $date_wise_slot[$slot_date_time[0]])) {
+						array_push($date_wise_slot[$slot_date_time[0]], $slot_date_time[1]);
+					}
 				}
 			}
 		}
@@ -385,7 +387,7 @@ class WCCB_Frontend {
 
 		global $wpdb;
 		$product        = wc_get_product($product_id);
-		$slot           = $_POST['slot'];
+		$slot           = WCCB_Helper::get_unique_array($_POST['slot']);
 		$date_wise_slot = array();
 
 		if (!is_bool($product)) {
@@ -468,7 +470,7 @@ class WCCB_Frontend {
 		if (!is_bool($temp_product)) {
 			if($temp_product->is_type( 'wccb_course' )) {
 				$cart_item_data['tutor_id']         = !empty($_POST['tutor_id']) ? $_POST['tutor_id'] : get_post_meta($temp_product->get_id() , 'tutor_ids' , true );
-				$cart_item_data['booking_slots']    = WCCB_Frontend::get_date_wise_slots($_POST['slot']);
+				$cart_item_data['booking_slots']    = WCCB_Frontend::get_date_wise_slots(WCCB_Helper::get_unique_array($_POST['slot']));
 			}
 		}
 
@@ -495,8 +497,9 @@ class WCCB_Frontend {
 						$num_slots += count($value);
 					}
 
+					$text   = _n( 'Slot Booked', 'Slots Booked', $num_slots, WC_CLASS_BOOKING_TEXT_DOMAIN );
 					$item_data[] = array(
-						'key' => __( 'Number of slots', WC_CLASS_BOOKING_TEXT_DOMAIN ),
+						'key' => $text,
 						'value' => wc_clean($num_slots)
 					);
 				}
@@ -545,7 +548,8 @@ class WCCB_Frontend {
 				foreach ($slots as $key => $value) {
 					$num_slots += count($value);
 				}
-				$product_name .= sprintf('<p>%s: %s</p>', __( 'Number of slots' , WC_CLASS_BOOKING_TEXT_DOMAIN ), $num_slots);
+				$text   = _n( 'Slot Booked', 'Slots Booked', $num_slots, WC_CLASS_BOOKING_TEXT_DOMAIN );
+				$product_name .= sprintf('<p>%s: %s</p>', $text , $num_slots);
 			}
 		}
 

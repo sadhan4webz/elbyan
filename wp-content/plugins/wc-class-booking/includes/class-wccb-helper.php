@@ -116,4 +116,12 @@ class WCCB_Helper {
 
 	    return $hours;
 	}
+
+	public static function get_unique_array( $arr = array() ) {
+		if (empty($arr)) {
+			return;
+		}
+		
+		return array_values(array_unique($arr));
+	}
 }

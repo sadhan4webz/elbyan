@@ -296,11 +296,12 @@ class WCCB_Frontend_View {
 		?>
 		<div class="slot_selected_container">
 			<?php
-			if (!empty($_REQUEST['slot'])) {
+			$slots = WCCB_Helper::get_unique_array($_REQUEST['slot']);
+			if (!empty($slots)) {
 				$unique_random_id = $_REQUEST['unique_random_id'];
 				$find             = array('{slot_picked_row_id}' , '{slot_date_time_hidden}' , '{slot_date}' , '{slot_time}' , '{slot_span_id}' , '{unique_random_id}' );
 
-				foreach ($_REQUEST['slot'] as $key => $value) {
+				foreach ($slots as $key => $value) {
 					$date_time    = explode('|', $value );
 					$html         = WCCB_Frontend_View::get_slot_picked_row_html();
 					$replace      = array('slot_picked_row_'.$unique_random_id[$key] , $value , wp_date('D M j, Y', strtotime($date_time[0])) , $date_time[1] , 'slot_span_id_'.$unique_random_id[$key] , $unique_random_id[$key] );
@@ -313,7 +314,7 @@ class WCCB_Frontend_View {
 		<div class="tutor_availability_main_wrapper">
 			<?php
 			if (!empty($_REQUEST['product_id']) && !empty($_REQUEST['tutor_id']) ) {
-				echo WCCB_Frontend_View::get_tutor_availability_calendar( $_REQUEST['product_id'], $_REQUEST['tutor_id'] , date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR , $_POST['slot'] );
+				echo WCCB_Frontend_View::get_tutor_availability_calendar( $_REQUEST['product_id'], $_REQUEST['tutor_id'] , date('Y-m-d') , WC_CLASS_BOOKING_NUM_DAYS_CALENDAR , $slots );
 			}
 			?>
 		</div>
@@ -469,6 +470,12 @@ class WCCB_Frontend_View {
 									$end_time   = $value['end_time'].':00';
 									$slots      = WCCB_Helper::get_time_slots( $slot_duration , $start_time , $end_time);
 									foreach ($slots as $key2 => $value2) {
+										$time_diff      = strtotime(wp_date('Y-m-d H:i:s', strtotime($value_date.' '.$value2['slot_start_time']))) - strtotime(wp_date('Y-m-d H:i:s'));
+
+										if ($time_diff < 0 ) {
+											continue;
+										}
+
 										$am_pm       = $value2['slot_start_time'].' - '.$value2['slot_end_time'];
 										$am_pm_value = $value_date.'|'.$am_pm;
 										$rand_id     = str_replace(' ', '', $value_date.$am_pm);

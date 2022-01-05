@@ -146,7 +146,8 @@ class WCCB_Admin {
 			foreach ($booking_slots as $key => $value) {
 				$num_slots += count($value);
 			}
-	        echo '<p><b>Number of slots :</b> '.$num_slots.'</p>';
+			$text   = _n( 'Slot Booked', 'Slots Booked', $num_slots, WC_CLASS_BOOKING_TEXT_DOMAIN );
+	        echo '<p><b>'.$text.' :</b> '.$num_slots.'</p>';
 	    }
 	}
 

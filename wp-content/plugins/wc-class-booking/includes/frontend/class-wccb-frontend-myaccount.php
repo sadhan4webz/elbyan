@@ -318,7 +318,7 @@ class WCCB_Frontend_Myaccount {
 	public static function save_booking_class( $field_array ) {
 		global $wpdb;
 		$passed = true;
-		$slots                     = $field_array['slot'];
+		$slots                     = WCCB_Helper::get_unique_array($field_array['slot']);
 		$hour_expire_date          = $field_array['hour_expire_date'];
 		$date_wise_slot            = WCCB_Frontend::get_date_wise_slots( $slots );
 		$total_available_hours     = WCCB_Frontend_Myaccount::get_student_total_available_hours($field_array['user_id'] , $field_array['hour_id']);
@@ -447,6 +447,8 @@ class WCCB_Frontend_Myaccount {
 			$interval        = $datetime1->diff($datetime2);
 			$days            = $interval->d;
 			$hour            = $interval->h;
+
+			//echo 'Days :'.$days.'<br>Hour:'.$hour.'<br> Hour from:'.$hour_from;
 
 			if ( $days > 0 ) {
 				$validation_flag = true;
@@ -647,7 +649,8 @@ class WCCB_Frontend_Myaccount {
 					if (!empty($_REQUEST['booking_id'])) {
 						if ( isset( $_POST['save_reschedule_nonce_field'] ) && wp_verify_nonce( $_POST['save_reschedule_nonce_field'], 'save_reschedule' ) 
 						) {
-							if(WCCB_Frontend_Myaccount::reschedule_booking_class($_REQUEST['booking_id'] , $_POST['slot'])) {
+							$slots = WCCB_Helper::get_unique_array($_POST['slot']);
+							if(WCCB_Frontend_Myaccount::reschedule_booking_class($_REQUEST['booking_id'] , $slots )) {
 								wc_add_notice( __( 'The class has been reschedule successfully.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'success' );
 							}
 						}

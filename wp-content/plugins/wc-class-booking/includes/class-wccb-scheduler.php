@@ -135,7 +135,7 @@ class WCCB_Scheduler {
 		if (count($results)) {
 			foreach( $results as $row ) {
 				$class_time_exp = explode('-' , $row->class_time);
-				$class_time     = $row->class_date.' '.$class_time_exp[0];
+				$class_time     = $row->class_date.' '.$class_time_exp[1];
 				$time_diff      = strtotime(wp_date('Y-m-d H:i:s')) - strtotime(wp_date('Y-m-d H:i:s', strtotime($class_time)));
 				if ( $time_diff > 0 ) {
 
