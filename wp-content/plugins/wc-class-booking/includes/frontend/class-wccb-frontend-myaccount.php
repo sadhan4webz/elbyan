@@ -133,23 +133,25 @@ class WCCB_Frontend_Myaccount {
 						if ($temp_start_time[$key2] < $temp_end_time[$key2] ) {
 
 							$time_flag = 1;
-							foreach ( $availability_times[$lower_key]['available_time'] as $key3 => $value3) {
-								if ($temp_start_time[$key2] == $value3['start_time'] && $temp_end_time[$key2] == $value3['end_time']) {
-									$time_flag = 0;
-									$validation_flag = 0;
-									wc_add_notice( __('Start time and end time is same for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error' );
-								}
-								
-								if ($temp_start_time[$key2] >= $value3['end_time']) {
-									$time_flag = 1;
-								}
-								else {
-									$time_flag = 0;
-									$validation_flag = 0;
-									wc_add_notice( __('Start time and end time ordering is not properly set for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error' );
+							if (!empty($availability_times[$lower_key]['available_time'])) {
+								foreach ( $availability_times[$lower_key]['available_time'] as $key3 => $value3) {
+									if ($temp_start_time[$key2] == $value3['start_time'] && $temp_end_time[$key2] == $value3['end_time']) {
+										$time_flag = 0;
+										$validation_flag = 0;
+										wc_add_notice( __('Start time and end time is same for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error' );
+									}
+									
+									if ($temp_start_time[$key2] >= $value3['end_time']) {
+										$time_flag = 1;
+									}
+									else {
+										$time_flag = 0;
+										$validation_flag = 0;
+										wc_add_notice( __('Start time and end time ordering is not properly set for '.$lower_key , WC_CLASS_BOOKING_TEXT_DOMAIN) , 'error' );
+									}
 								}
 							}
-
+							
 							if ($time_flag) {
 								$availability_times[$lower_key]['available_time'][] = array(
 									'start_time' => $temp_start_time[$key2], 
@@ -319,6 +321,8 @@ class WCCB_Frontend_Myaccount {
 		global $wpdb;
 		$passed = true;
 		$slots                     = WCCB_Helper::get_unique_array($field_array['slot']);
+
+		
 		$hour_expire_date          = $field_array['hour_expire_date'];
 		$date_wise_slot            = WCCB_Frontend::get_date_wise_slots( $slots );
 		$total_available_hours     = WCCB_Frontend_Myaccount::get_student_total_available_hours($field_array['user_id'] , $field_array['hour_id']);
@@ -380,17 +384,16 @@ class WCCB_Frontend_Myaccount {
 		if ($passed) {
 			//Insert slots into booking history
 			if (!empty($date_wise_slot)) {
+
+				//Get hour from database
+				$hour_id     = $field_array['hour_id'];
+				$hour_table  = $wpdb->prefix.'hour_history';
+				$query2      = "SELECT * FROM $hour_table WHERE ID='".$hour_id."'";
+				$results2    = $wpdb->get_results( $query2 ); // db call ok. no cache ok.
+				$used_hours  = $results2[0]->used_hours+$total_requested_hour;
+				///////////////////////
 				
 				foreach ($date_wise_slot as $key => $value) {
-
-					//Get database hour
-					$hour_id     = $field_array['hour_id'];
-					$hour_table  = $wpdb->prefix.'hour_history';
-					$query2      = "SELECT * FROM $hour_table WHERE ID='".$hour_id."'";
-					$results2    = $wpdb->get_results( $query2 ); // db call ok. no cache ok.
-					$used_hours  = $results2[0]->used_hours+$total_requested_hour;
-					///////////////////////
-
 					foreach ($value as $key2 => $value2) {
 						$product        = wc_get_product($field_array['product_id']);
 						$table_name     = $wpdb->prefix.'booking_history';
@@ -414,19 +417,19 @@ class WCCB_Frontend_Myaccount {
 							wc_add_notice( __('Databse:error during class booking', WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 						}
 					}
-
-					//Decrease hours after booking
-					$wpdb->update(
-					    $hour_table,
-					    array( 
-					        'used_hours' => $used_hours
-					    ),
-					    array(
-					        'ID'         => $hour_id
-					    )
-					);
 					
 				}
+
+				//Decrease hours after booking
+				$wpdb->update(
+				    $hour_table,
+				    array( 
+				        'used_hours' => $used_hours
+				    ),
+				    array(
+				        'ID'         => $hour_id
+				    )
+				);
 			}
 			//End booking history
 		}
