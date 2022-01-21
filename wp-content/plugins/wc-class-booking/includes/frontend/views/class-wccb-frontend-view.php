@@ -27,10 +27,12 @@ class WCCB_Frontend_View {
 				
     		), $atts
 		);
-		$login_link_label = !get_current_user_id() ? __('Login' , WC_CLASS_BOOKING_TEXT_DOMAIN) : __('My Account' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+		$login_link_label = !get_current_user_id() ? __('Login/Register' , WC_CLASS_BOOKING_TEXT_DOMAIN) : __('My Account' , WC_CLASS_BOOKING_TEXT_DOMAIN);
 		?>
 		<a href="<?php echo WCCB_Frontend::get_price_page_link();?>" class="header-btn"><?php echo __('Quran Classes' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></a>
+		<a href="<?php echo WCCB_Frontend::get_price_page_link();?>" class="header-btn"><?php echo __('Purchase Hours' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></a>
 		<a href="<?php echo WCCB_Frontend::get_myaccount_page_link();?>" class="header-btn"><?php echo $login_link_label;?></a>
+
 		<?php
 		return ob_get_clean();
 	}
