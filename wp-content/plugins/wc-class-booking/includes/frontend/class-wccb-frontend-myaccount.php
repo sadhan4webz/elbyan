@@ -28,6 +28,7 @@ class WCCB_Frontend_Myaccount {
 
 		//Filters
 		add_filter ( 'woocommerce_account_menu_items', array( $this , 'customize_my_account_menu' ) );
+		add_filter( 'woocommerce_get_endpoint_url', array( $this , 'add_my_account_menu_external_url') , 10, 4 );
 		
 		
 	}
@@ -60,7 +61,8 @@ class WCCB_Frontend_Myaccount {
 		);
 		$student_menu = array(
 			'classes'      => 'My Classes',
-			'hours'        => 'My Hours'
+			'hours'        => 'My Hours',
+			'purchase_hours' => 'Purchase Hours'
 		);
 
 		$admin_menu = array(
@@ -75,7 +77,7 @@ class WCCB_Frontend_Myaccount {
 			return $end_points;
 		}
 		
-		$user_meta          = get_user_meta(get_current_user_id() , 'wp_capabilities' , true );
+		$user_meta = get_user_meta(get_current_user_id() , 'wp_capabilities' , true );
 		if (!empty($user_meta)) {
 			if (array_key_exists('wccb_tutor' , $user_meta)) {
 				$myaccount_menu =  $tutor_menu;
@@ -90,6 +92,14 @@ class WCCB_Frontend_Myaccount {
 
 
 		return $myaccount_menu;
+	}
+
+	public function add_my_account_menu_external_url( $url, $endpoint, $value, $permalink ) {
+		if ( $endpoint == 'purchase_hours' ) {
+			$url = WCCB_Frontend::get_price_page_link();
+		}
+
+		return $url;
 	}
 
 	public function customize_my_account_menu( $links ) {
