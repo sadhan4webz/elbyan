@@ -16,34 +16,41 @@ class WCCB_Notification {
 	private function register_hooks() {
 
 		//Actions
-		add_action ( 'class_booking_notification' , array( $this , 'send_class_booking_notification_student' ) , 10 , 1 );
-		add_action ( 'class_booking_notification' , array( $this , 'send_class_booking_notification_tutor' ) , 10 , 1 );
-		add_action ( 'class_booking_notification' , array( $this , 'send_class_booking_notification_admin' ) , 10 , 1 );
+		add_action ( 'class_booking_notification' , array( $this , 'send_class_booking_email_student' ) , 10 , 1 );
+		add_action ( 'class_booking_notification' , array( $this , 'send_class_booking_email_tutor' ) , 10 , 1 );
+		add_action ( 'class_booking_notification' , array( $this , 'send_class_booking_email_admin' ) , 10 , 1 );
 
-		add_action ( 'reschedule_class_notification' , array( $this , 'send_reschedule_class_notification_student' ) , 10 , 1 );
-		add_action ( 'reschedule_class_notification' , array( $this , 'send_reschedule_class_notification_tutor' ) , 10 , 1 );
-		add_action ( 'reschedule_class_notification' , array( $this , 'send_reschedule_class_notification_admin' ) , 10 , 1 );
-
-
-		add_action ( 'cancelled_class_notification' , array( $this , 'send_cancelled_class_notification_student' ) , 10 , 1 );
-		add_action ( 'cancelled_class_notification' , array( $this , 'send_cancelled_class_notification_tutor' ) , 10 , 1 );
-		add_action ( 'cancelled_class_notification' , array( $this , 'send_cancelled_class_notification_admin' ) , 10 , 1 );
+		add_action ( 'reschedule_class_notification' , array( $this , 'send_reschedule_class_email_student' ) , 10 , 1 );
+		add_action ( 'reschedule_class_notification' , array( $this , 'send_reschedule_class_email_tutor' ) , 10 , 1 );
+		add_action ( 'reschedule_class_notification' , array( $this , 'send_reschedule_class_email_admin' ) , 10 , 1 );
 
 
-
-		add_action ( 'upcoming_class_notification' , array( $this , 'send_upcoming_class_notification_student' ) , 10 , 3 );
-		add_action ( 'upcoming_class_notification' , array( $this , 'send_upcoming_class_notification_tutor' ) , 10 , 3 );
-
-		add_action ( 'upcoming_class_reminder' , array( $this , 'send_upcoming_class_reminder_student' ) , 10 , 3 );
-		add_action ( 'upcoming_class_reminder' , array( $this , 'send_upcoming_class_reminder_tutor' ) , 10 , 3 );
+		add_action ( 'cancelled_class_notification' , array( $this , 'send_cancelled_class_email_student' ) , 10 , 1 );
+		add_action ( 'cancelled_class_notification' , array( $this , 'send_cancelled_class_email_tutor' ) , 10 , 1 );
+		add_action ( 'cancelled_class_notification' , array( $this , 'send_cancelled_class_email_admin' ) , 10 , 1 );
 
 
 
-		add_action ( 'class_completion_notification' , array( $this , 'send_class_completion_notification_student' ) , 10 , 3 );
-		add_action ( 'class_completion_notification' , array( $this , 'send_class_completion_notification_tutor' ) , 10 , 3 );
-		add_action ( 'class_completion_notification' , array( $this , 'send_class_completion_notification_admin' ) , 10 , 3 );
+		add_action ( 'upcoming_class_notification' , array( $this , 'send_upcoming_class_email_student' ) , 10 , 3 );
+		add_action ( 'upcoming_class_notification' , array( $this , 'send_upcoming_class_email_tutor' ) , 10 , 3 );
 
-		add_action ('deduct_hour_notification' , array( $this , 'send_deduct_hour_notification_student' ) , 10 , 2 );
+
+		add_action ( 'upcoming_class_reminder' , array( $this , 'send_upcoming_class_reminder_email_student' ) , 10 , 3 );
+		add_action ( 'upcoming_class_reminder' , array( $this , 'send_upcoming_class_reminder_email_tutor' ) , 10 , 3 );
+
+
+		add_action ( 'class_date_time_passed_notification' , array( $this , 'send_class_date_time_passed_email_tutor' ) , 10 , 3 );
+
+
+		//add_action ( 'class_completion_notification' , array( $this , 'send_class_completion_email_student' ) , 10 , 3 );
+		//add_action ( 'class_completion_notification' , array( $this , 'send_class_completion_email_tutor' ) , 10 , 3 );
+		//add_action ( 'class_completion_notification' , array( $this , 'send_class_completion_email_admin' ) , 10 , 3 );
+
+		add_action ( 'class_status_notification' , array( $this , 'send_class_status_email_student' ) , 10 , 3 );
+		add_action ( 'class_status_notification' , array( $this , 'send_class_status_email_tutor' ) , 10 , 3 );
+		add_action ( 'class_status_notification' , array( $this , 'send_class_status_email_admin' ) , 10 , 3 );
+
+		add_action ( 'deduct_hour_notification' , array( $this , 'send_deduct_hour_email_student' ) , 10 , 2 );
 
 	}
 
@@ -57,7 +64,7 @@ class WCCB_Notification {
 		return $headers;
 	}
 
-	public function send_class_booking_notification_student( $booking_id) {
+	public function send_class_booking_email_student( $booking_id) {
 		global $wpdb;
 		//Send student email
 		$table_name = $wpdb->prefix.'booking_history';
@@ -77,7 +84,7 @@ class WCCB_Notification {
 		}
 	}
 
-	public function send_class_booking_notification_tutor( $booking_id) {
+	public function send_class_booking_email_tutor( $booking_id) {
 		global $wpdb;
 		//Send tutor email
 		$table_name = $wpdb->prefix.'booking_history';
@@ -97,7 +104,7 @@ class WCCB_Notification {
 		}
 	}
 
-	public function send_class_booking_notification_admin( $booking_id) {
+	public function send_class_booking_email_admin( $booking_id) {
 		global $wpdb;
 		//Send admin email
 		$table_name = $wpdb->prefix.'booking_history';
@@ -125,7 +132,7 @@ class WCCB_Notification {
 		}
 	}
 
-	public function send_reschedule_class_notification_student( $booking_id) {
+	public function send_reschedule_class_email_student( $booking_id) {
 		global $wpdb;
 		//Send student email
 		$table_name = $wpdb->prefix.'booking_history';
@@ -146,7 +153,7 @@ class WCCB_Notification {
 		}
 	}
 
-	public function send_reschedule_class_notification_tutor( $booking_id) {
+	public function send_reschedule_class_email_tutor( $booking_id) {
 		global $wpdb;
 		//Send tutor email
 		$table_name = $wpdb->prefix.'booking_history';
@@ -167,7 +174,7 @@ class WCCB_Notification {
 		}
 	}
 
-	public function send_reschedule_class_notification_admin( $booking_id) {
+	public function send_reschedule_class_email_admin( $booking_id) {
 		global $wpdb;
 		//Send admin email
 		$table_name = $wpdb->prefix.'booking_history';
@@ -195,7 +202,7 @@ class WCCB_Notification {
 		}
 	}
 
-	public function send_cancelled_class_notification_student( $booking_id) {
+	public function send_cancelled_class_email_student( $booking_id) {
 		global $wpdb;
 		//Send student email
 		$table_name = $wpdb->prefix.'booking_history';
@@ -216,7 +223,7 @@ class WCCB_Notification {
 		}
 	}
 
-	public function send_cancelled_class_notification_tutor( $booking_id) {
+	public function send_cancelled_class_email_tutor( $booking_id) {
 		global $wpdb;
 		//Send tutor email
 		$table_name = $wpdb->prefix.'booking_history';
@@ -237,7 +244,7 @@ class WCCB_Notification {
 		}
 	}
 
-	public function send_cancelled_class_notification_admin( $booking_id) {
+	public function send_cancelled_class_email_admin( $booking_id) {
 		global $wpdb;
 		//Send admin email
 		$table_name = $wpdb->prefix.'booking_history';
@@ -265,7 +272,7 @@ class WCCB_Notification {
 		}
 	}
 
-	public function send_upcoming_class_notification_student( $booking , $student , $tutor ) {
+	public function send_upcoming_class_email_student( $booking , $student , $tutor ) {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix.'booking_history_meta';
@@ -292,7 +299,7 @@ class WCCB_Notification {
 		}
 	}
 
-	public function send_upcoming_class_notification_tutor( $booking , $student , $tutor ) {
+	public function send_upcoming_class_email_tutor( $booking , $student , $tutor ) {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix.'booking_history_meta';
@@ -320,7 +327,7 @@ class WCCB_Notification {
 		}
 	}
 
-	public function send_upcoming_class_reminder_student( $booking , $student , $tutor ) {
+	public function send_upcoming_class_reminder_email_student( $booking , $student , $tutor ) {
 
 		//Send student email
 		$to      = $student->user_email;
@@ -331,7 +338,7 @@ class WCCB_Notification {
 		wp_mail( $to, $subject, $message, $headers );
 	}
 
-	public function send_upcoming_class_reminder_tutor( $booking , $student , $tutor ) {
+	public function send_upcoming_class_reminder_email_tutor( $booking , $student , $tutor ) {
 
 		//Send tutor email
 		$to      = $tutor->user_email;
@@ -342,48 +349,199 @@ class WCCB_Notification {
 		wp_mail( $to, $subject, $message, $headers );
 	}
 
-	public function send_class_completion_notification_student( $booking , $student , $tutor ) {
-
-		//Send student email
-		$to      = $student->user_email;
-		$subject = 'You have successfully completed your class today at '.get_option( 'blogname' );
-		$message = WCCB_Email_Content::get_class_completion_content( 'student' , $booking , $student , $tutor );
-		$headers = WCCB_Notification::get_email_headers();
-		 
-		wp_mail( $to, $subject, $message, $headers );
-	}
-
-	public function send_class_completion_notification_tutor( $booking , $student , $tutor ) {
+	public function send_class_date_time_passed_email_tutor( $booking , $student , $tutor ) {
 
 		//Send tutor email
 		$to      = $tutor->user_email;
-		$subject = 'You have successfully completed your class today at '.get_option( 'blogname' );
-		$message = WCCB_Email_Content::get_class_completion_content( 'tutor' , $booking , $student , $tutor );
+		$subject = 'Our system indicates that your lesson has passed the time';
+		$message = WCCB_Email_Content::get_class_date_time_passed_content( 'tutor' , $booking , $student , $tutor );
 		$headers = WCCB_Notification::get_email_headers();
 		 
 		wp_mail( $to, $subject, $message, $headers );
 	}
 
-	public function send_class_completion_notification_admin( $booking , $student , $tutor ) {
-		$student = get_userdata($booking->user_id);
-		$tutor   = get_userdata($booking->tutor_id);
+	public function send_class_status_email_student( $booking , $student , $tutor ) {
+		global $wpdb;
 
-		$args   = array(
-			'role__in' => array('administrator')
-		);
-		$admin_user = get_users( $args );
+		$meta_key   = strtolower(str_replace(' ', '_', $booking->delivery->status )).'_notification_email_student';
+		$table_name = $wpdb->prefix.'booking_history_meta';
+		$query      = "SELECT * FROM $table_name WHERE booking_id='".$booking->ID."' and meta_key='".$meta_key."'";
+		$results    = $wpdb->get_results( $query );
 
-		foreach ($admin_user as $admin) {
-			$to      = $admin->user_email;
-			$subject = 'One Student have successfully completed one class today at '.get_option( 'blogname' );
-			$message = WCCB_Email_Content::get_class_completion_content( 'admin' , $booking , $student , $tutor );
+		// Allow code execution only once 
+	    if( count($results) == 0 ) {
+
+	    	$to      = $student->user_email;
+			$subject = 'Tutor has updated the delivery status of your class at '.get_option( 'blogname' );
+			$message = WCCB_Email_Content::get_class_status_content( 'student' , $booking , $student , $tutor );
 			$headers = WCCB_Notification::get_email_headers();
 			 
 			wp_mail( $to, $subject, $message, $headers );
+
+	    	$data = array(
+				'booking_id'   => $booking->ID,
+				'meta_key'     => $meta_key,
+				'meta_value'   => 'yes'
+			);
+
+			$wpdb->insert($table_name , $data);
+	    }
+	}
+
+	public function send_class_status_email_tutor( $booking , $student , $tutor ) {
+		global $wpdb;
+
+		$meta_key   = strtolower(str_replace(' ', '_', $booking->delivery->status )).'_notification_email_tutor';
+		$table_name = $wpdb->prefix.'booking_history_meta';
+		$query      = "SELECT * FROM $table_name WHERE booking_id='".$booking->ID."' and meta_key='".$meta_key."'";
+		$results    = $wpdb->get_results( $query );
+
+		// Allow code execution only once 
+	    if( count($results) == 0 ) {
+
+	    	$to      = $tutor->user_email;
+			$subject = 'You have updated the delivery status of your class at '.get_option( 'blogname' );
+			$message = WCCB_Email_Content::get_class_status_content( 'tutor' , $booking , $student , $tutor );
+			$headers = WCCB_Notification::get_email_headers();
+			 
+			wp_mail( $to, $subject, $message, $headers );
+
+	    	$data = array(
+				'booking_id'   => $booking->ID,
+				'meta_key'     => $meta_key,
+				'meta_value'   => 'yes'
+			);
+
+			$wpdb->insert($table_name , $data);
+	    }
+	}
+
+	public function send_class_status_email_admin( $booking , $student , $tutor ) {
+		global $wpdb;
+
+		$meta_key   = strtolower(str_replace(' ', '_', $booking->delivery->status )).'_notification_email_admin';
+		$table_name = $wpdb->prefix.'booking_history_meta';
+		$query      = "SELECT * FROM $table_name WHERE booking_id='".$booking->ID."' and meta_key='".$meta_key."'";
+		$results    = $wpdb->get_results( $query );
+
+		// Allow code execution only once 
+	    if( count($results) == 0 ) {
+
+	    	$to      = get_option('admin_email');
+			$subject = 'Tutor has updated the delivery status of one class at '.get_option( 'blogname' );
+			$message = WCCB_Email_Content::get_class_status_content( 'admin' , $booking , $student , $tutor );
+			$headers = WCCB_Notification::get_email_headers();
+			 
+			wp_mail( $to, $subject, $message, $headers );
+
+	    	$data = array(
+				'booking_id'   => $booking->ID,
+				'meta_key'     => $meta_key,
+				'meta_value'   => 'yes'
+			);
+
+			$wpdb->insert($table_name , $data);
+	    }
+	}
+
+
+	public function send_class_completion_email_student( $booking , $student , $tutor ) {
+
+		global $wpdb;
+
+		$table_name = $wpdb->prefix.'booking_history_meta';
+		$query      = "SELECT * FROM $table_name WHERE booking_id='".$booking->ID."' and meta_key='_completion_notification_student_done'";
+		$results    = $wpdb->get_results( $query );
+
+		// Allow code execution only once 
+	    if( count($results) == 0 ) {
+
+			//Send student email
+			$to      = $student->user_email;
+			$subject = 'Our system indicates that you have successfully completed a lesson , please contact your tutor if this has not happend';
+			$message = WCCB_Email_Content::get_class_completion_content( 'student' , $booking , $student , $tutor );
+			$headers = WCCB_Notification::get_email_headers();
+			 
+			wp_mail( $to, $subject, $message, $headers );
+
+			$data = array(
+				'booking_id'   => $booking->ID,
+				'meta_key'     => '_completion_notification_student_done',
+				'meta_value'   => 'yes'
+			);
+
+			$wpdb->insert($table_name , $data);
 		}
 	}
 
-	public function send_deduct_hour_notification_student( $hour_obj , $hour ) {
+	public function send_class_completion_email_tutor( $booking , $student , $tutor ) {
+
+		global $wpdb;
+		
+		$table_name = $wpdb->prefix.'booking_history_meta';
+		$query      = "SELECT * FROM $table_name WHERE booking_id='".$booking->ID."' and meta_key='_completion_notification_tutor_done'";
+		$results    = $wpdb->get_results( $query );
+
+		// Allow code execution only once 
+	    if( count($results) == 0 ) {
+
+			//Send tutor email
+			$to      = $tutor->user_email;
+			$subject = 'You have successfully completed a lesson at '.get_option( 'blogname' );
+			$message = WCCB_Email_Content::get_class_completion_content( 'tutor' , $booking , $student , $tutor );
+			$headers = WCCB_Notification::get_email_headers();
+			 
+			wp_mail( $to, $subject, $message, $headers );
+
+			$data = array(
+				'booking_id'   => $booking->ID,
+				'meta_key'     => '_completion_notification_tutor_done',
+				'meta_value'   => 'yes'
+			);
+
+			$wpdb->insert($table_name , $data);
+		}
+	}
+
+	public function send_class_completion_email_admin( $booking , $student , $tutor ) {
+
+		global $wpdb;
+		
+		$table_name = $wpdb->prefix.'booking_history_meta';
+		$query      = "SELECT * FROM $table_name WHERE booking_id='".$booking->ID."' and meta_key='_completion_notification_admin_done'";
+		$results    = $wpdb->get_results( $query );
+
+		// Allow code execution only once 
+	    if( count($results) == 0 ) {
+
+			$student = get_userdata($booking->user_id);
+			$tutor   = get_userdata($booking->tutor_id);
+
+			$args   = array(
+				'role__in' => array('administrator')
+			);
+			$admin_user = get_users( $args );
+
+			foreach ($admin_user as $admin) {
+				$to      = $admin->user_email;
+				$subject = 'One Student have successfully completed a lesson at '.get_option( 'blogname' );
+				$message = WCCB_Email_Content::get_class_completion_content( 'admin' , $booking , $student , $tutor );
+				$headers = WCCB_Notification::get_email_headers();
+				 
+				wp_mail( $to, $subject, $message, $headers );
+			}
+
+			$data = array(
+				'booking_id'   => $booking->ID,
+				'meta_key'     => '_completion_notification_admin_done',
+				'meta_value'   => 'yes'
+			);
+
+			$wpdb->insert($table_name , $data);
+		}
+	}
+
+	public function send_deduct_hour_email_student( $hour_obj , $hour ) {
 
 		//Send student email
 		$student = get_userdata($hour_obj->user_id);

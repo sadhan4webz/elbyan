@@ -93,6 +93,7 @@ class WCCB_Install {
 								  `class_time` varchar(100) NOT NULL,
 								  `booking_date` datetime NOT NULL,
 								  `status` varchar(100) NOT NULL,
+								  `delivery_status` varchar(100) NOT NULL DEFAULT 'Pending',
 								  PRIMARY KEY (ID)
 								) $collate"
 			),

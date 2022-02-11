@@ -341,4 +341,22 @@ jQuery(function($){
 
 	});
 
+	$(document).on('click', 'button.change_class_status_btn', function(e){
+
+		e.preventDefault();
+		let $btn        = $(this),
+			$booking_id = $btn.data('booking_id'),
+			$delivery_status = $('select[name="delivery_status_'+$booking_id+'"]').val(),
+			params      = { action : 'change_class_status' , booking_id : $booking_id , delivery_status : $delivery_status , response: $('#message_container_'+$booking_id) , loading_type : 'spinner' , loading_target : $btn , html_error : 1 };
+
+		WCCB.ajax_options['url'] 		= wccb_config.frontend_ajax_url;
+		WCCB.ajax_options['data'] 		= 'action='+params.action+'&booking_id='+$booking_id+'&delivery_status='+$delivery_status;
+		WCCB.ajax_callbacks['after_ajax_success_return'] = function( params, response ){
+														$('#delivery_status_column_'+params.booking_id).html(params.delivery_status);
+														WCCB.show_wpmbd_notice( response.msg, params.response, true, 0 );
+													};									
+		WCCB.ajax( params );
+
+	});
+
 });	

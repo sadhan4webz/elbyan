@@ -265,6 +265,60 @@ switch ( $action ) {
 		echo json_encode( $response, JSON_HEX_QUOT | JSON_HEX_TAG );
 		break;
 
+	case 'change_class_status':
+		$validation_flag = true;
+		if (empty($_REQUEST['booking_id'])) {
+			$validation_flag = false;
+			$event   = 'error';
+			$content = '';
+			$msg     = '<div class="woocommerce-notices-wrapper">
+							<div class="woocommerce-message">Booking ID is blank</div>
+						</div>';
+		}
+
+		if ($validation_flag) {
+			global $wpdb;
+			$table_name     = $wpdb->prefix.'booking_history';
+
+			$updated = $wpdb->update(
+			    $table_name,
+			    array( 
+			        'delivery_status' => $_REQUEST['delivery_status']
+			    ),
+			    array(
+			        'ID'         => $_REQUEST['booking_id']
+			    )
+			);
+
+			if($updated) {
+				$row       = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table_name WHERE ID = %d", $_REQUEST['booking_id'] ) );
+				$user  = get_userdata($row->user_id);
+				$tutor = get_userdata($row->tutor_id);
+				//hook for notification of class
+				do_action( 'class_status_notification' , $row , $user , $tutor ); //Parameter booking object , user object , tutor object
+				
+
+				$event   = 'success';
+				$content = '';
+				$msg     = '<div class="woocommerce-notices-wrapper">
+								<div class="woocommerce-message">The class status has been updated.</div>
+							</div>';
+			}
+			else {
+				$event   = 'error';
+				$content = '';
+				$msg     = '<div class="woocommerce-notices-wrapper">
+								<div class="woocommerce-message">Database error during insertion.</div>
+							</div>';
+			}
+		}
+		
+		$response["event"] 	 = $event;
+		$response["msg"] 	 = $msg;
+		$response['content'] = $content;
+		echo json_encode( $response, JSON_HEX_QUOT | JSON_HEX_TAG );
+		break;
+
 	// Default ajax response	
 	default:
 		$response["event"] 	= "error";

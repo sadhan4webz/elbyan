@@ -43,7 +43,7 @@ class WC_Class_Booking {
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-settings.php';
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-scheduler.php';
 		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-email-content.php';
-		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-notification.php';
+		include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-notification-email.php';
 
 		//include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-email-class-notification.php';
 		//include_once WC_CLASS_BOOKING_PLUGIN_DIR . '/includes/class-wccb-email-handler.php';

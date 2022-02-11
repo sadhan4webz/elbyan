@@ -490,6 +490,209 @@ class WCCB_Email_Content {
 		return ob_get_clean();
 	}
 
+	public static function get_class_date_time_passed_content( $type , $booking , $student , $tutor ) {
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<title><?php echo get_option( 'blogname' );?></title>
+		</head>
+		<body>
+			<table>
+				<?php
+				if ($type == 'student') {
+					$welcome_text = __( 'Dear '.$student->display_name.', you have successfully completed your class today. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+				}
+				if ($type == 'tutor') {
+					$welcome_text = __( 'Dear '.$tutor->display_name.', your class shows that date and time has passed. You can update status by login into your account. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+				}
+				if ($type == 'admin') {
+					$welcome_text = __( 'Dear Admin, one student has completed his/her class today. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+				}
+				?>
+				<tr>
+					<td colspan="2">
+						<?php echo $welcome_text;?>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Class Name :
+					</th>
+					<td>
+						<a href="<?php echo get_permalink($booking->product_id);?>"><?php echo get_the_title($booking->product_id);?></a>
+						
+					</td>
+				</tr>
+				<?php
+				if ($type == 'student' || $type == 'admin') {
+					?>
+					<tr>
+						<th>
+							Tutor Name :
+						</th>
+						<td>
+							<?php echo $tutor->display_name;?>
+						</td>
+					</tr>
+					<?php
+				}
+				if ($type == 'tutor' || $type == 'admin') {
+					?>
+					<tr>
+						<th>
+							Student Name :
+						</th>
+						<td>
+							<?php echo $student->display_name;?>
+						</td>
+					</tr>
+					<?php
+				}
+				?>
+				<tr>
+					<th>
+						Class Date :
+					</th>
+					<td>
+						<?php echo WCCB_Helper::display_date($booking->class_date);?>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Class Time
+					</th>
+					<td>
+						<?php echo $booking->class_time;?>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						&nbsp;
+					</td>
+				</tr>
+
+				<tr>
+					<td colspan="2">
+						Regards, <br><br>
+
+						Team Elbyan
+					</td>
+				</tr>
+			</table>
+		</body>
+		</html>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function get_class_status_content( $type , $booking , $student , $tutor ) {
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<title><?php echo get_option( 'blogname' );?></title>
+		</head>
+		<body>
+			<table>
+				<?php
+				if ($type == 'student') {
+					$welcome_text = __( 'Dear '.$student->display_name.', tutor has updated the delivery status of your past class. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+				}
+				if ($type == 'tutor') {
+					$welcome_text = __( 'Dear '.$tutor->display_name.', you have successfully updated the delivery status of your past class. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+				}
+				if ($type == 'admin') {
+					$welcome_text = __( 'Dear Admin, tutor has updated the delivery status of past class. Below are the class detail' , WC_CLASS_BOOKING_TEXT_DOMAIN);
+				}
+				?>
+				<tr>
+					<td colspan="2">
+						<?php echo $welcome_text;?>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Class Name :
+					</th>
+					<td>
+						<a href="<?php echo get_permalink($booking->product_id);?>"><?php echo get_the_title($booking->product_id);?></a>
+						
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Delivery Status :
+					</th>
+					<td>
+						<?php echo $booking->delivery_status;?>
+						
+					</td>
+				</tr>
+				<?php
+				if ($type == 'student' || $type == 'admin') {
+					?>
+					<tr>
+						<th>
+							Tutor Name :
+						</th>
+						<td>
+							<?php echo $tutor->display_name;?>
+						</td>
+					</tr>
+					<?php
+				}
+				if ($type == 'tutor' || $type == 'admin') {
+					?>
+					<tr>
+						<th>
+							Student Name :
+						</th>
+						<td>
+							<?php echo $student->display_name;?>
+						</td>
+					</tr>
+					<?php
+				}
+				?>
+				<tr>
+					<th>
+						Class Date :
+					</th>
+					<td>
+						<?php echo WCCB_Helper::display_date($booking->class_date);?>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Class Time
+					</th>
+					<td>
+						<?php echo $booking->class_time;?>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						&nbsp;
+					</td>
+				</tr>
+
+				<tr>
+					<td colspan="2">
+						Regards, <br><br>
+
+						Team Elbyan
+					</td>
+				</tr>
+			</table>
+		</body>
+		</html>
+		<?php
+		return ob_get_clean();
+	}
+
 	public static function get_class_completion_content( $type , $booking , $student , $tutor ) {
 		ob_start();
 		?>

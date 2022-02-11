@@ -230,6 +230,9 @@ class WCCB_Frontend_Myaccount_View {
 		$table_name      = $wpdb->prefix.'booking_history';
 		$table_name_meta = $wpdb->prefix.'booking_history_meta';
 		$tutor = get_userdata($tutor_id);
+
+		wp_enqueue_script( 'thickbox' );
+ 
 		?>
 		<div class="booking_list_wrapper">
 			<div id="tabs">
@@ -270,6 +273,9 @@ class WCCB_Frontend_Myaccount_View {
 							</th>
 							<th>
 								<?php echo __('Student Name' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+							</th>
+							<th>
+								<?php echo __('Delivery Status' , WC_CLASS_BOOKING_TEXT_DOMAIN );?>
 							</th>
 							<th>
 								<?php echo __('Actions' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
@@ -319,8 +325,60 @@ class WCCB_Frontend_Myaccount_View {
 								<td>
 									<?php echo wccb_user_get_display_name($user);?>
 								</td>
+								<td id="delivery_status_column_<?php echo $value['ID'];?>">
+									<?php echo $value['delivery_status'];?>
+								</td>
 								<td>
-									 <a href="?show_notes=yes&booking_id=<?php echo $value['ID'];?>&notes_url_nonce=<?php echo wp_create_nonce('notes_url_nonce');?>"><?php echo __('Notes' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></a>
+									<?php
+									if (current_user_can( 'manage_options' )) {
+										?>
+										<a href="#TB_inline?&width=550&height=350&inlineId=change_class_status_thikbox_<?php echo $value['ID'];?>" title="<?php echo __( 'Change Class Status', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>" class="change_class_status_link thickbox"    >
+									 	<?php echo __('Change Status' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+									 	</a> |
+
+									 	<!-- Thinkbox HTML -->
+										<div class="change_class_status_thikbox" id="change_class_status_thikbox_<?php echo $value['ID'];?>" style="display:none">
+											<div class="change_class_status_wrapper">
+
+												<div id="message_container_<?php echo $value['ID'];?>">
+													
+												</div>
+												
+												<div class="field-group">
+													<label><?php echo __('Class Name', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label> :
+													<span class="class_name"><?php echo get_the_title( $value['product_id'] );?></span>
+												</div>
+												<div class="field-group">
+													<label><?php echo __('Stuent Name', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label> :
+													<span class="student_name"><?php echo wccb_user_get_display_name($user);?></span>
+												</div>
+												<div class="field-group">
+													<label><?php echo __('Class Date & Time', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label> :
+													<span class="class_date_time"><?php echo WCCB_Helper::display_date($value['class_date']).', '.$value['class_time'];?></span>
+												</div>
+												<div class="field-group">
+													<label><?php echo __('Class Status', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label> :
+													<select class="select" name="delivery_status_<?php echo $value['ID'];?>">
+														<option value="Pending" <?php selected('Pending',$value['delivery_status']);?>><?php echo __('Pending' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
+														<option value="Student did not attend" <?php selected('Student did not attend',$value['delivery_status']);?>><?php echo __('Stuent did not attend' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
+														<option value="Delivered" <?php selected('Delivered',$value['delivery_status']);?>><?php echo __('Delivered' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
+													</select>
+												</div>
+
+												<div class="field-group button_wrapper">
+													<button type="submit" name="change_class_status_btn" class="woocommerce-Button button change_class_status_btn" data-booking_id="<?php echo $value['ID'];?>">
+														<?php echo __('Submit' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
+													</button>
+												</div>
+												
+											</div>
+										</div>
+										<!-- Thikbox HTML end -->
+									 	<?php
+									}
+									?>
+									<a href="?show_notes=yes&booking_id=<?php echo $value['ID'];?>&notes_url_nonce=<?php echo wp_create_nonce('notes_url_nonce');?>"><?php echo __('Notes' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></a>
+									 
 								</td>
 								
 							</tr>

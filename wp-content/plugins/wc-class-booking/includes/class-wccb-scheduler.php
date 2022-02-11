@@ -153,7 +153,8 @@ class WCCB_Scheduler {
 					$user  = get_userdata($row->user_id);
 					$tutor = get_userdata($row->tutor_id);
 					//hook for notification of class
-					do_action( 'class_completion_notification' , $row , $user , $tutor ); //Parameter booking object , user object
+					//do_action( 'class_completion_notification' , $row , $user , $tutor ); //Parameter booking object , user object
+					do_action( 'class_date_time_passed_notification' , $row , $user , $tutor ); //Parameter booking object , user object
 				}
 			}
 		}
