@@ -447,12 +447,17 @@ class WCCB_Frontend {
 								if (!$passed) {
 									$availability_flag = 1;
 									wc_add_notice( __( 'The slot '.wp_date('D M j, Y',strtotime($key)).', '.$value2.' already booked. Try other slots.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
+									break;
 								}
+							}
+							if (!$passed) {
+								break;
 							}
 						}
 					}
 
 					if ($quantity_flag) {
+						$passed = false;
 						wc_add_notice( __('You have added more slots than you have available hours' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 					}
 				}

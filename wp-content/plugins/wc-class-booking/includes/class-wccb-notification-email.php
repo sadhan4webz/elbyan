@@ -46,9 +46,9 @@ class WCCB_Notification {
 		//add_action ( 'class_completion_notification' , array( $this , 'send_class_completion_email_tutor' ) , 10 , 3 );
 		//add_action ( 'class_completion_notification' , array( $this , 'send_class_completion_email_admin' ) , 10 , 3 );
 
-		add_action ( 'class_status_notification' , array( $this , 'send_class_status_email_student' ) , 10 , 3 );
-		add_action ( 'class_status_notification' , array( $this , 'send_class_status_email_tutor' ) , 10 , 3 );
-		add_action ( 'class_status_notification' , array( $this , 'send_class_status_email_admin' ) , 10 , 3 );
+		//add_action ( 'class_status_notification' , array( $this , 'send_class_status_email_student' ) , 10 , 3 );
+		//add_action ( 'class_status_notification' , array( $this , 'send_class_status_email_tutor' ) , 10 , 3 );
+		//add_action ( 'class_status_notification' , array( $this , 'send_class_status_email_admin' ) , 10 , 3 );
 
 		add_action ( 'deduct_hour_notification' , array( $this , 'send_deduct_hour_email_student' ) , 10 , 2 );
 

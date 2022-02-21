@@ -328,15 +328,15 @@ class WCCB_Frontend_Myaccount {
 	}
 
 	public static function save_booking_class( $field_array ) {
+		//Slot format in POST - 2022-02-24|07:00 am -  07:30 am
 		global $wpdb;
 		$passed = true;
-		$slots                     = WCCB_Helper::get_unique_array($field_array['slot']);
+		$slots                     = WCCB_Helper::get_unique_array($field_array['slot']); 
 
-		
 		$hour_expire_date          = $field_array['hour_expire_date'];
 		$date_wise_slot            = WCCB_Frontend::get_date_wise_slots( $slots );
 		$total_available_hours     = WCCB_Frontend_Myaccount::get_student_total_available_hours($field_array['user_id'] , $field_array['hour_id']);
-		$date_wise_available_hours = WCCB_Frontend_Myaccount::get_student_date_wise_available_hours($field_array['user_id'] , $field_array['product_id'] );
+		$date_wise_available_hours = WCCB_Frontend_Myaccount::get_student_date_wise_available_hours($field_array['user_id'] , $field_array['product_id'] ); //Not in used
 
 		//Calculate total hours from boking slots
 		$slots_time = array();
@@ -364,15 +364,21 @@ class WCCB_Frontend_Myaccount {
 		if (!empty($date_wise_slot) && $passed == true ) {
 			foreach ($date_wise_slot as $key => $value) {
 				foreach ($value as $key2 => $value2) {
-					//Check if tutor is booked for slot by other student
+					//Check if tutor is booked for slot by other student $key = 2022-02-24 , $value2 = 08:30 am - 09:00 am
 					$passed = WCCB_Frontend::date_wise_slot_availability_validation( $field_array['tutor_id'] , $key , $value2 );
+					//echo 'hi'.$key.'jj'.$value2.$passed.'<br>';
 					if (!$passed) {
 						wc_add_notice( __( 'The slot '.wp_date('D M j, Y',strtotime($key)).', '.$value2.' already booked. Try other slots.' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
 						//unset($_REQUEST['post']);
+						break;
 					}
+				}
+				if (!$passed) {
+					break;
 				}
 			}
 		}
+
 
 		if ($passed) {
 			$used_flag = 0;
@@ -387,6 +393,7 @@ class WCCB_Frontend_Myaccount {
 				if (!$used_flag) {
 					$passed = false;
 					wc_add_notice( __('You don\'t have available hours to book slot for the date : '.WCCB_Helper::display_date($slot_date_time[0]).', '.$slot_date_time[1], WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error');
+					break;
 				}
 			}
 		}
@@ -394,7 +401,6 @@ class WCCB_Frontend_Myaccount {
 		if ($passed) {
 			//Insert slots into booking history
 			if (!empty($date_wise_slot)) {
-
 				//Get hour from database
 				$hour_id     = $field_array['hour_id'];
 				$hour_table  = $wpdb->prefix.'hour_history';
@@ -490,8 +496,6 @@ class WCCB_Frontend_Myaccount {
 		$query           = "SELECT * FROM $table_name WHERE ID='".$booking_id."'";
 		$results         = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 		if (count($results)>0) {
-
-			
 
 			$class_time_exp  = explode('-' , $results[0]['class_time']);
 			$class_date_time = $results[0]['class_date'].' '.$class_time_exp[0];

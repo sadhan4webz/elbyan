@@ -330,7 +330,7 @@ class WCCB_Frontend_Myaccount_View {
 								</td>
 								<td>
 									<?php
-									if (current_user_can( 'manage_options' )) {
+									if (current_user_can( 'manage_options' ) || 1==1) {
 										?>
 										<a href="#TB_inline?&width=550&height=350&inlineId=change_class_status_thikbox_<?php echo $value['ID'];?>" title="<?php echo __( 'Change Class Status', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>" class="change_class_status_link thickbox"    >
 									 	<?php echo __('Change Status' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
@@ -360,7 +360,7 @@ class WCCB_Frontend_Myaccount_View {
 													<label><?php echo __('Class Status', WC_CLASS_BOOKING_TEXT_DOMAIN);?></label> :
 													<select class="select" name="delivery_status_<?php echo $value['ID'];?>">
 														<option value="Pending" <?php selected('Pending',$value['delivery_status']);?>><?php echo __('Pending' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
-														<option value="Student did not attend" <?php selected('Student did not attend',$value['delivery_status']);?>><?php echo __('Stuent did not attend' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
+														<option value="Student did not attend" <?php selected('Student did not attend',$value['delivery_status']);?>><?php echo __('Student did not attend' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
 														<option value="Delivered" <?php selected('Delivered',$value['delivery_status']);?>><?php echo __('Delivered' , WC_CLASS_BOOKING_TEXT_DOMAIN);?></option>
 													</select>
 												</div>
