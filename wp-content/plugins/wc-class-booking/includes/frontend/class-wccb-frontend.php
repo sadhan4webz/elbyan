@@ -327,6 +327,33 @@ class WCCB_Frontend {
 		return $date_wise_slot;
 	}
 
+	public static function check_duplicate_class_entry( $tutor_id , $class_date , $class_time ) {
+		if (empty($tutor_id) || empty($class_date) || empty($class_time)) {
+			return false;
+		}
+
+		global $wpdb;
+		$table_name = $wpdb->prefix.'booking_history';
+		$query = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date='".$class_date."' and class_time = '".$class_time."'";
+		$wpdb->get_results($query); 
+
+		return $wpdb->num_rows > 0 ? false : true;
+	}
+
+	public static function check_duplicate_hour_entry( $order_id ) {
+		if (empty($order_id)) {
+			return false;
+		}
+
+		global $wpdb;
+
+		$table_name = $wpdb->prefix.'hour_history';
+		$query = "SELECT * FROM $table_name WHERE order_id='".$order_id."'";
+		$wpdb->get_results($query); 
+
+		return $wpdb->num_rows > 0 ? false : true;
+	}
+
 	public static function date_wise_slot_availability_validation( $tutor_id , $slot_date , $slot_time ) {
 		global $wpdb;
 		$passed            = true;
@@ -609,6 +636,18 @@ class WCCB_Frontend {
 		            if (!is_bool($product)) {
 						if($product->get_type() == "wccb_course") {
 
+							//Log update
+							$log_text  = 'Class booking in thank you page start ## ';
+							$log_text  = 'Order ID '.$order->get_id().' ## ';
+							$log_text .= 'Booking Start Time : '. wp_date('d-m-Y h:i a').' ## ';
+
+							WC_CLASS_Booking::class_booking_log($log_text);
+							//Log end 
+
+							// Flag the action as done (to avoid repetitions on reload for example)
+					        $order->update_meta_data( '_thankyou_action_done', 'processing' );
+					        $order->save();
+
 							//Update user meta if course is FREE
 							if ($product->get_regular_price() == 0 ) {
 								update_user_meta( get_current_user_id() , 'avail_free_course' , 'yes' );
@@ -616,7 +655,8 @@ class WCCB_Frontend {
 
 
 							$tutor_id  = $item->get_meta('_tutor_id');
-							$slots     = $item->get_meta('booking_slots');
+							$slots     = $item->get_meta('booking_slots'); // key = date , value = array of time slot i.e 10 am - 11 am
+							$booking_ids = array();
 
 							if (!empty($slots)) {
 								$slots_time = array();
@@ -635,28 +675,31 @@ class WCCB_Frontend {
 							}
 							
 							//Insert hour into hour history
-							$course_type = get_post_meta( $product->get_id() , 'course_type' , true );
-							if ($course_type == 'fixed') {
-								$course_quantity = get_post_meta( $product->get_id() , 'course_quantity' , true );
-							}
-							else {
-								$course_quantity = $item->get_quantity();
+							if (self::check_duplicate_hour_entry($order->get_id())) {
+								$course_type = get_post_meta( $product->get_id() , 'course_type' , true );
+								if ($course_type == 'fixed') {
+									$course_quantity = get_post_meta( $product->get_id() , 'course_quantity' , true );
+								}
+								else {
+									$course_quantity = $item->get_quantity();
+								}
+								
+								$table_name = $wpdb->prefix.'hour_history';
+								$data       = array(
+									'user_id'         => get_current_user_id(),
+									'product_id'      => $product->get_id(),
+									'order_id'        => $order->get_id(),
+									'purchased_hours' => $course_quantity,
+									'date_purchased'  => wp_date('Y-m-d H:i:s'),
+									'used_hours'      => $used_hours
+
+								);
+
+								
+								$wpdb->insert($table_name , $data);
+								$hour_id  = $wpdb->insert_id;
 							}
 							
-							$table_name = $wpdb->prefix.'hour_history';
-							$data       = array(
-								'user_id'         => get_current_user_id(),
-								'product_id'      => $product->get_id(),
-								'order_id'        => $order->get_id(),
-								'purchased_hours' => $course_quantity,
-								'date_purchased'  => wp_date('Y-m-d H:i:s'),
-								'used_hours'      => $used_hours
-
-							);
-
-							
-							$wpdb->insert($table_name , $data);
-							$hour_id  = $wpdb->insert_id;
 							//End hour history
 
 							//Insert slots into booking history
@@ -664,33 +707,51 @@ class WCCB_Frontend {
 								$table_name = $wpdb->prefix.'booking_history';
 								foreach ($slots as $key => $value) {
 									foreach ($value as $key2 => $value2) {
-										$data = array(
-											'user_id'      => get_current_user_id(),
-											'product_id'   => $item->get_product_id(),
-											'amount'       => $product->get_regular_price(),
-											'tutor_id'     => $tutor_id,
-											'hour_id'      => $hour_id,
-											'class_date'   => $key,
-											'class_time'   => $value2,
-											'status'       => 'Upcoming',
-											'booking_date' => wp_date('Y-m-d H:i:s')
-										);
+										if (self::check_duplicate_class_entry( $tutor_id , $key , $value2)) {
+											$data = array(
+												'user_id'      => get_current_user_id(),
+												'product_id'   => $item->get_product_id(),
+												'amount'       => $product->get_regular_price(),
+												'tutor_id'     => $tutor_id,
+												'hour_id'      => $hour_id,
+												'class_date'   => $key,
+												'class_time'   => $value2,
+												'status'       => 'Upcoming',
+												'booking_date' => wp_date('Y-m-d H:i:s')
+											);
 
-										$wpdb->insert($table_name , $data);
+											$wpdb->insert($table_name , $data);
 
-										do_action('class_booking_notification' , $wpdb->insert_id);
+											array_push($booking_ids, $wpdb->insert_id); //Store new booking ids
+											//do_action('class_booking_notification' , $wpdb->insert_id);
+										}
 									}
 								}
 							}
 							//End booking history
+
+							//Log update
+							$log_text  = 'Class booking in thank you page end ## ';
+							$log_text  = 'Order ID '.$order->get_id().' ## ';
+							$log_text .= 'Booking End Time : '. wp_date('d-m-Y h:i a').' ## ';
+
+							WC_CLASS_Booking::class_booking_log($log_text);
+							//Log end 
+
+							// Flag the action as done (to avoid repetitions on reload for example)
+					        $order->update_meta_data( '_thankyou_action_done', 'completed' );
+					        $order->save();
+
+					        $log_text = 'class_booking_notification_once hook called';
+				            WC_CLASS_Booking::class_booking_log($log_text);
+				            do_action( 'class_booking_notification_once' , $booking_ids , get_current_user_id() , $tutor_id );
+
+							break; //Break foreach loop after insert classes and hour
 						}
 					}
+
 		        }
 	        }
-
-	        // Flag the action as done (to avoid repetitions on reload for example)
-	        $order->update_meta_data( '_thankyou_action_done', true );
-	        $order->save();
 	    }
 	}
 }

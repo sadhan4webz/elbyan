@@ -408,25 +408,29 @@ class WCCB_Frontend_Myaccount {
 				$results2    = $wpdb->get_results( $query2 ); // db call ok. no cache ok.
 				$used_hours  = $results2[0]->used_hours+$total_requested_hour;
 				///////////////////////
-				
+
+				$booking_ids    = array();
+				$product        = wc_get_product($field_array['product_id']);
+				$table_name     = $wpdb->prefix.'booking_history';
 				foreach ($date_wise_slot as $key => $value) {
 					foreach ($value as $key2 => $value2) {
-						$product        = wc_get_product($field_array['product_id']);
-						$table_name     = $wpdb->prefix.'booking_history';
+						
 						$data = array(
 							'user_id'      => $field_array['user_id'],
 							'product_id'   => $product->get_id(),
 							'amount'       => $product->get_regular_price(),
 							'tutor_id'     => $field_array['tutor_id'],
 							'hour_id'      => $hour_id,
-							'class_date'   => $key,
-							'class_time'   => $value2,
+							'class_date'   => $key, // i.e 2022-02-26
+							'class_time'   => $value2, // i.e 10 am - 11 am
 							'status'       => 'Upcoming',
 							'booking_date' => wp_date('Y-m-d H:i:s')
 						);
 						
 						if ($wpdb->insert($table_name , $data)) {
-							do_action('class_booking_notification' , $wpdb->insert_id);
+							array_push($booking_ids, $wpdb->insert_id); //Store new booking ids
+							//do_action('class_booking_notification' , $wpdb->insert_id);
+							
 						}
 						else {
 							$passed = false;
@@ -446,6 +450,8 @@ class WCCB_Frontend_Myaccount {
 				        'ID'         => $hour_id
 				    )
 				);
+
+				do_action( 'class_booking_notification_once' , $booking_ids , $field_array['user_id'] , $field_array['tutor_id'] );
 			}
 			//End booking history
 		}
