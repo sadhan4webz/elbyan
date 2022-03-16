@@ -607,20 +607,34 @@ class WCCB_Frontend {
 	}
 
 	public function worldpay_ipn_handler($response) {
-		WCCB()->log($response);
-		$this->update_booking_and_hour_history($response['MC_order']); //Update booking and hour history from IPN
+
+		WC_CLASS_Booking::log('World Pay IPN listener');
+		WC_CLASS_Booking::log(print_r($response,true));
+
+		$order 	 = new WC_Order( (int) $worldpay_return_values['MC_order'] );
+		$order->add_order_note( __( 'WorldPay IPN. - WCCB', WC_CLASS_BOOKING_TEXT_DOMAIN ) );
+		if ( $response['MC_transactionNumber'] == '1' ) {
+			$order->add_order_note( __( 'WorldPay payment complete by IPN. - WCCB', WC_CLASS_BOOKING_TEXT_DOMAIN ) );
+			$this->update_booking_and_hour_history($response['MC_order']); //Update booking and hour history from IPN
+		}
 	}
 
 	public function worldpay_ipn_handler_old_way($response) {
-		WCCB()->log('Old way');
-		WCCB()->log($response);
-		$this->update_booking_and_hour_history($response['order']); //Update booking and hour history from IPN
+		WC_CLASS_Booking::log('IPN listener old way');
+		WC_CLASS_Booking::log(print_r($response,true));
+
+		$order 	 = new WC_Order( (int) $response['order'] );
+		$order->add_order_note( __( 'WorldPay IPN old way. - WCCB', WC_CLASS_BOOKING_TEXT_DOMAIN ) );
+		if ( $response['MC_transactionNumber'] == '1' ) {
+			$order->add_order_note( __( 'WorldPay payment complete by IPN old way. - WCCB', WC_CLASS_BOOKING_TEXT_DOMAIN ) );
+			$this->update_booking_and_hour_history($response['order']); //Update booking and hour history from IPN
+		}
 	}
 
 	public function update_booking_and_hour_history( $order_id ) {
 		if ( ! $order_id )
         return;
-
+    	WC_CLASS_Booking::log('Inside update booking and hour history - '.$order_id);
 	    // Allow code execution only once 
 	    if( ! get_post_meta( $order_id, '_thankyou_action_done', true )) {
 	    	global $wpdb;
@@ -638,7 +652,7 @@ class WCCB_Frontend {
 
 							//Log update
 							$log_text  = 'Class booking in thank you page start ## ';
-							$log_text  = 'Order ID '.$order->get_id().' ## ';
+							$log_text .= 'Order ID '.$order->get_id().' ## ';
 							$log_text .= 'Booking Start Time : '. wp_date('d-m-Y h:i a').' ## ';
 
 							WC_CLASS_Booking::class_booking_log($log_text);
@@ -676,6 +690,15 @@ class WCCB_Frontend {
 							
 							//Insert hour into hour history
 							if (self::check_duplicate_hour_entry($order->get_id())) {
+
+								//Log update
+								$log_text  = 'Hour entry start ## ';
+								$log_text .= 'Order ID '.$order->get_id().' ## ';
+								$log_text .= 'Entry Start Time : '. wp_date('d-m-Y h:i a').' ## ';
+
+								WC_CLASS_Booking::class_booking_log($log_text);
+								//Log end
+
 								$course_type = get_post_meta( $product->get_id() , 'course_type' , true );
 								if ($course_type == 'fixed') {
 									$course_quantity = get_post_meta( $product->get_id() , 'course_quantity' , true );
@@ -698,6 +721,14 @@ class WCCB_Frontend {
 								
 								$wpdb->insert($table_name , $data);
 								$hour_id  = $wpdb->insert_id;
+
+								//Log update
+								$log_text  = 'Hour entry end ## ';
+								$log_text .= 'Order ID '.$order->get_id().' ## ';
+								$log_text .= 'Entry End Time : '. wp_date('d-m-Y h:i a').' ## ';
+
+								WC_CLASS_Booking::class_booking_log($log_text);
+								//Log end
 							}
 							
 							//End hour history
@@ -732,7 +763,7 @@ class WCCB_Frontend {
 
 							//Log update
 							$log_text  = 'Class booking in thank you page end ## ';
-							$log_text  = 'Order ID '.$order->get_id().' ## ';
+							$log_text .= 'Order ID '.$order->get_id().' ## ';
 							$log_text .= 'Booking End Time : '. wp_date('d-m-Y h:i a').' ## ';
 
 							WC_CLASS_Booking::class_booking_log($log_text);
