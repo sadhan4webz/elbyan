@@ -664,7 +664,7 @@ class WCCB_Frontend {
 
 							//Update user meta if course is FREE
 							if ($product->get_regular_price() == 0 ) {
-								update_user_meta( get_current_user_id() , 'avail_free_course' , 'yes' );
+								update_user_meta( $order->get_customer_id() , 'avail_free_course' , 'yes' );
 							}
 
 
@@ -709,7 +709,7 @@ class WCCB_Frontend {
 								
 								$table_name = $wpdb->prefix.'hour_history';
 								$data       = array(
-									'user_id'         => get_current_user_id(),
+									'user_id'         => $order->get_customer_id(),
 									'product_id'      => $product->get_id(),
 									'order_id'        => $order->get_id(),
 									'purchased_hours' => $course_quantity,
@@ -740,7 +740,7 @@ class WCCB_Frontend {
 									foreach ($value as $key2 => $value2) {
 										if (self::check_duplicate_class_entry( $tutor_id , $key , $value2)) {
 											$data = array(
-												'user_id'      => get_current_user_id(),
+												'user_id'      => $order->get_customer_id(),
 												'product_id'   => $item->get_product_id(),
 												'amount'       => $product->get_regular_price(),
 												'tutor_id'     => $tutor_id,
