@@ -437,7 +437,7 @@ class WCCB_Frontend_Myaccount_View {
 					</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date >= '".wp_date('Y-m-d')."' and status = 'Upcoming' order by ID desc";
+					$query         = "SELECT * FROM $table_name WHERE tutor_id='".$tutor_id."' and class_date >= '".wp_date('Y-m-d')."' and status = 'Upcoming' order by class_date asc";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {
@@ -774,7 +774,7 @@ class WCCB_Frontend_Myaccount_View {
 					</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date <= '".wp_date('Y-m-d')."' and status = 'Completed' order by class_date asc ";
+					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date <= '".wp_date('Y-m-d')."' and status = 'Completed' order by class_date desc ";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {
@@ -854,7 +854,7 @@ class WCCB_Frontend_Myaccount_View {
 			  		</thead>
 					
 					<?php
-					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date >= '".wp_date('Y-m-d')."' and status = 'Upcoming' order by ID desc";
+					$query         = "SELECT * FROM $table_name WHERE user_id='".$user_id."' and class_date >= '".wp_date('Y-m-d')."' and status = 'Upcoming' order by class_date asc";
 					$results       = $wpdb->get_results( $query, ARRAY_A ); // db call ok. no cache ok.
 					if (count($results)>0) {
 						foreach ($results as $key => $value) {

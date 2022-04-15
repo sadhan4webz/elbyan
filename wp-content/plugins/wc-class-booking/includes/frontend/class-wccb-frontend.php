@@ -55,13 +55,15 @@ class WCCB_Frontend {
 		add_action( 'woocommerce_checkout_process' , array( $this , 'checkout_page_validation') );
 		add_action( 'woocommerce_checkout_terms_and_conditions' , array( 'WCCB_Frontend_View' , 'display_refund_policy_checkbox') );
 
-		add_action( 'woocommerce_thankyou' , array( $this , 'update_booking_and_hour_history') , 10 , 1 );
+		//add_action( 'woocommerce_thankyou' , array( $this , 'update_booking_and_hour_history') , 10 , 1 );
+		add_action( 'woocommerce_payment_complete' , array( $this , 'update_booking_and_hour_history') , 10 , 1 ); //This will be usefull for IPN
 
 		//Worldpay IPN handler
-		add_action( 'valid-wpform-request', array( $this, 'worldpay_ipn_handler' ) , 100 , 1 );
+		//add_action( 'valid-wpform-request', array( $this, 'worldpay_ipn_handler' ) , 10 , 1 );
 
 		// Old way, Worldpay IPN handler
-		add_action( 'valid-worldpay-request', array( $this, 'worldpay_ipn_handler_old_way' ) );
+		//add_action( 'valid-worldpay-request', array( $this, 'worldpay_ipn_handler_old_way' ) , 10 , 1 );
+		
 
 
 		//Filters
@@ -608,10 +610,10 @@ class WCCB_Frontend {
 
 	public function worldpay_ipn_handler($response) {
 
-		WC_CLASS_Booking::log('World Pay IPN listener');
-		WC_CLASS_Booking::log(print_r($response,true));
+		WC_Class_Booking::log('World Pay IPN listener');
+		WC_Class_Booking::log(print_r($response,true));
 
-		$order 	 = new WC_Order( (int) $worldpay_return_values['MC_order'] );
+		$order 	 = new WC_Order( (int) $response['MC_order'] );
 		$order->add_order_note( __( 'WorldPay IPN. - WCCB', WC_CLASS_BOOKING_TEXT_DOMAIN ) );
 		if ( $response['MC_transactionNumber'] == '1' ) {
 			$order->add_order_note( __( 'WorldPay payment complete by IPN. - WCCB', WC_CLASS_BOOKING_TEXT_DOMAIN ) );
@@ -620,8 +622,8 @@ class WCCB_Frontend {
 	}
 
 	public function worldpay_ipn_handler_old_way($response) {
-		WC_CLASS_Booking::log('IPN listener old way');
-		WC_CLASS_Booking::log(print_r($response,true));
+		WC_Class_Booking::log('IPN listener old way');
+		WC_Class_Booking::log(print_r($response,true));
 
 		$order 	 = new WC_Order( (int) $response['order'] );
 		$order->add_order_note( __( 'WorldPay IPN old way. - WCCB', WC_CLASS_BOOKING_TEXT_DOMAIN ) );
@@ -634,7 +636,7 @@ class WCCB_Frontend {
 	public function update_booking_and_hour_history( $order_id ) {
 		if ( ! $order_id )
         return;
-    	WC_CLASS_Booking::log('Inside update booking and hour history - '.$order_id);
+    	WC_Class_Booking::class_booking_log('Inside update booking and hour history - '.$order_id);
 	    // Allow code execution only once 
 	    if( ! get_post_meta( $order_id, '_thankyou_action_done', true )) {
 	    	global $wpdb;
@@ -655,7 +657,7 @@ class WCCB_Frontend {
 							$log_text .= 'Order ID '.$order->get_id().' ## ';
 							$log_text .= 'Booking Start Time : '. wp_date('d-m-Y h:i a').' ## ';
 
-							WC_CLASS_Booking::class_booking_log($log_text);
+							WC_Class_Booking::class_booking_log($log_text);
 							//Log end 
 
 							// Flag the action as done (to avoid repetitions on reload for example)
@@ -696,7 +698,7 @@ class WCCB_Frontend {
 								$log_text .= 'Order ID '.$order->get_id().' ## ';
 								$log_text .= 'Entry Start Time : '. wp_date('d-m-Y h:i a').' ## ';
 
-								WC_CLASS_Booking::class_booking_log($log_text);
+								WC_Class_Booking::class_booking_log($log_text);
 								//Log end
 
 								$course_type = get_post_meta( $product->get_id() , 'course_type' , true );
@@ -727,7 +729,7 @@ class WCCB_Frontend {
 								$log_text .= 'Order ID '.$order->get_id().' ## ';
 								$log_text .= 'Entry End Time : '. wp_date('d-m-Y h:i a').' ## ';
 
-								WC_CLASS_Booking::class_booking_log($log_text);
+								WC_Class_Booking::class_booking_log($log_text);
 								//Log end
 							}
 							
@@ -766,7 +768,7 @@ class WCCB_Frontend {
 							$log_text .= 'Order ID '.$order->get_id().' ## ';
 							$log_text .= 'Booking End Time : '. wp_date('d-m-Y h:i a').' ## ';
 
-							WC_CLASS_Booking::class_booking_log($log_text);
+							WC_Class_Booking::class_booking_log($log_text);
 							//Log end 
 
 							// Flag the action as done (to avoid repetitions on reload for example)
@@ -774,15 +776,26 @@ class WCCB_Frontend {
 					        $order->save();
 
 					        $log_text = 'class_booking_notification_once hook called';
-				            WC_CLASS_Booking::class_booking_log($log_text);
-				            do_action( 'class_booking_notification_once' , $booking_ids , get_current_user_id() , $tutor_id );
+				            WC_Class_Booking::class_booking_log($log_text);
+				            do_action( 'class_booking_notification_once' , $booking_ids , $order->get_customer_id() , $tutor_id );
 
 							break; //Break foreach loop after insert classes and hour
 						}
+						else {
+							WC_Class_Booking::class_booking_log('Inside else block product type wccb_product - '.$order_id);
+						}
 					}
-
+					else {
+						WC_Class_Booking::class_booking_log('Inside else block product is null - '.$order_id);
+					}
 		        }
 	        }
+	        else {
+	        	WC_Class_Booking::class_booking_log('Inside else block order is paid - '.$order_id);
+	        }
+	    }
+	    else {
+	    	WC_Class_Booking::class_booking_log('Inside else block _thankyou_action_done - '.$order_id);
 	    }
 	}
 }

@@ -76,11 +76,15 @@ class WCCB_Notification {
 		$subject = 'Your class has been successfully booked at '.get_option( 'blogname' );
 		$message = WCCB_Email_Content::get_class_booking_content_once( 'student' , $booking_ids , $student , $tutor );
 		$headers = WCCB_Notification::get_email_headers();
-		 
-		wp_mail( $to, $subject, $message, $headers );
+		if (!empty($booking_ids)) {
+		 	wp_mail( $to, $subject, $message, $headers );
+		}
 	}
 
 	public function send_class_booking_email_once_tutor( $booking_ids , $user_id , $tutor_id ) {
+		if (empty($tutor_id)) {
+			return;
+		}
 		$student = get_userdata($user_id);
 		$tutor   = get_userdata($tutor_id);
 		$to      = $tutor->user_email;
@@ -99,7 +103,9 @@ class WCCB_Notification {
 		$message = WCCB_Email_Content::get_class_booking_content_once( 'admin' , $booking_ids , $student , $tutor );
 		$headers = WCCB_Notification::get_email_headers();
 		 
-		wp_mail( $to, $subject, $message, $headers );
+		if (!empty($booking_ids)) {
+		 	wp_mail( $to, $subject, $message, $headers );
+		}
 	}
 
 	public function send_class_booking_email_student( $booking_id) {

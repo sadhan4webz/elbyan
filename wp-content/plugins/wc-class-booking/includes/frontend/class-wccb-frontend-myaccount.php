@@ -629,7 +629,7 @@ class WCCB_Frontend_Myaccount {
 						$error_flag = 1;
 						wc_add_notice( __( 'Please select tutor for booking slot' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 					}
-					if (count($_REQUEST['slot']) == 0) {
+					if (empty($_REQUEST['slot'])) {
 						$error_flag = 1;
 						wc_add_notice( __( 'Please select available slot to book class' , WC_CLASS_BOOKING_TEXT_DOMAIN ) , 'error' );
 					}
