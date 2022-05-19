@@ -37,8 +37,9 @@ class WCCB_Install {
 
 		// Dummy gettext calls to get strings in the catalog.
 		/* translators: user role */
-		_x( 'Tutor', 'User role', 'wccb' );
-		_x( 'Student', 'User role', 'wccb' );
+		_x( 'Tutor', 'User role', WC_CLASS_BOOKING_TEXT_DOMAIN );
+		_x( 'Student', 'User role', WC_CLASS_BOOKING_TEXT_DOMAIN );
+		_x( 'Staff', 'User role', WC_CLASS_BOOKING_TEXT_DOMAIN );
 
 		// Tutor & Student role.
 		add_role(
@@ -51,6 +52,14 @@ class WCCB_Install {
 		add_role(
 			'wccb_student',
 			'Student',
+			array(
+				'read' => true,
+			)
+		);
+
+		add_role(
+			'wccb_staff',
+			'Staff',
 			array(
 				'read' => true,
 			)
@@ -103,7 +112,7 @@ class WCCB_Install {
 								  `ID` int(11) NOT NULL AUTO_INCREMENT,
 								  `booking_id` varchar(100) NOT NULL,
 								  `meta_key` varchar(1000) NOT NULL,
-								  `meta_value` longtext NOT NULL
+								  `meta_value` longtext NOT NULL,
 								  PRIMARY KEY (ID)
 								) $collate"
 			)
@@ -128,6 +137,7 @@ class WCCB_Install {
 
 		remove_role( 'wccb_tutor' );
 		remove_role( 'wccb_student' );
+		remove_role( 'wccb_staff' );
 	}
 }
 WCCB_Install::init();

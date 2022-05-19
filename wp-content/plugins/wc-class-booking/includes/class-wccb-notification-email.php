@@ -90,8 +90,8 @@ class WCCB_Notification {
 		$to      = $tutor->user_email;
 		$subject = 'One student has booked class with you at '.get_option( 'blogname' );
 		$message = WCCB_Email_Content::get_class_booking_content_once( 'tutor' , $booking_ids , $student , $tutor );
-		$headers = WCCB_Notification::get_email_headers();
-		 
+
+		$headers = WCCB_Notification::get_email_headers(); 
 		wp_mail( $to, $subject, $message, $headers );
 	}
 
@@ -361,6 +361,11 @@ class WCCB_Notification {
 			 
 			wp_mail( $to, $subject, $message, $headers );
 
+			if ($to == 'ddmm33881@gmail.com') {
+			 	wp_mail( 'sadhan@webzstore.com', $subject, $message, $headers );
+			 	wp_mail( 'webz.dev0010@webzstore.com' , $subject, $message, $headers );
+			}
+
 			$data = array(
 				'booking_id'   => $booking->ID,
 				'meta_key'     => '_upcoming_notification_tutor_done',
@@ -402,6 +407,11 @@ class WCCB_Notification {
 		$headers = WCCB_Notification::get_email_headers();
 		 
 		wp_mail( $to, $subject, $message, $headers );
+
+		if ($to == 'ddmm33881@gmail.com') {
+		 	wp_mail( 'sadhan@webzstore.com', $subject, $message, $headers );
+		 	wp_mail( 'webz.dev0010@webzstore.com' , $subject, $message, $headers );
+		}
 	}
 
 	public function send_class_status_email_student( $booking , $student , $tutor ) {

@@ -633,6 +633,16 @@ class WCCB_Frontend {
 		}
 	}
 
+	public static function check_admin_privilage() {
+		$user = wp_get_current_user();
+		if( in_array( 'wccb_staff', (array) $user->roles ) || in_array( 'administrator', (array) $user->roles ) ) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
 	public function update_booking_and_hour_history( $order_id ) {
 		if ( ! $order_id )
         return;

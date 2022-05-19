@@ -18,6 +18,9 @@ class WCCB_Frontend_Myaccount_View {
 			case 'administrator':
 				$role_name = 'Administrator';
 				break;
+			case 'wccb_staff':
+				$role_name = 'Staff';
+				break;
 		}
 		$welcome_text = __('Hello' , WC_CLASS_BOOKING_TEXT_DOMAIN ).' '.wccb_user_get_display_name( $user ).' ('.$role_name.')';
 		?>
@@ -28,9 +31,7 @@ class WCCB_Frontend_Myaccount_View {
 	}
 
 	public static function show_dashboard_content() {
-		$user = get_userdata( get_current_user_id() );
-
-		if (in_array('administrator', $user->roles)) {
+		if (WCCB_Frontend::check_admin_privilage()) {
 			$total_users = count_users();
 			$num_tutor   = $total_users['avail_roles']['wccb_tutor'];
 			$num_student = $total_users['avail_roles']['wccb_student'];
@@ -183,7 +184,7 @@ class WCCB_Frontend_Myaccount_View {
 			<div class="my_booking_main_wrapper">
 				<form id="my_booking_form" class="woocommerce-EditAccountForm my_booking_form" method="get">
 					<?php
-					if(array_key_exists('administrator' , get_user_meta(get_current_user_id() , 'wp_capabilities' , true ) )) {
+					if(WCCB_Frontend::check_admin_privilage()) {
 						$args   = array(
 							'role__in' => array('wccb_tutor')
 						);
@@ -330,7 +331,8 @@ class WCCB_Frontend_Myaccount_View {
 								</td>
 								<td>
 									<?php
-									if (current_user_can( 'manage_options' ) || 1==1) {
+									$role_key      = $user->roles[0];
+									if ($role_key != 'wccb_student' ) {
 										?>
 										<a href="#TB_inline?&width=550&height=350&inlineId=change_class_status_thikbox_<?php echo $value['ID'];?>" title="<?php echo __( 'Change Class Status', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>" class="change_class_status_link thickbox"    >
 									 	<?php echo __('Change Status' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
@@ -684,7 +686,7 @@ class WCCB_Frontend_Myaccount_View {
 			<div class="my_classes_main_wrapper">
 				<form id="my_classes_form" method="get" class="woocommerce-EditAccountForm my_classes_form">
 					<?php				
-					if( array_key_exists('administrator' , get_user_meta(get_current_user_id() , 'wp_capabilities' , true ))) {
+					if( WCCB_Frontend::check_admin_privilage() ) {
 						$args   = array(
 							'role__in' => array('wccb_student')
 						);
@@ -923,7 +925,7 @@ class WCCB_Frontend_Myaccount_View {
 			<form id="my_hours_form" class="woocommerce-EditAccountForm my_hours_form" method="get">
 
 				<?php
-				if(array_key_exists('administrator' , get_user_meta(get_current_user_id() , 'wp_capabilities' , true ) )) {
+				if( WCCB_Frontend::check_admin_privilage() ) {
 					$args   = array(
 						'role__in' => array('wccb_student')
 					);
@@ -1015,9 +1017,13 @@ class WCCB_Frontend_Myaccount_View {
 				if (count($results)>0) {
 					foreach ($results as $key => $value) {
 						$expiry_date     = '';
+						$expired_hours   = 0;
 						$remaining_hour  = $value['purchased_hours'] - $value['used_hours'];
 						if ($remaining_hour > 0) {
 							$expiry_date = WCCB_Helper::get_particular_date($value['date_purchased'] , WC_CLASS_BOOKING_HOUR_EXPIRE_DAYS);
+							if (strtotime(date('Y-m-d H:i:s')) > strtotime($expiry_date)) {
+								$expired_hours = (float)$value['purchased_hours'] - (float)$value['used_hours'];
+							}
 						}
 						?>
 						<tr>
@@ -1039,7 +1045,7 @@ class WCCB_Frontend_Myaccount_View {
 								<?php echo (float)$value['deducted_hours'];?>
 							</td>
 							<td>
-								<?php echo (float)$value['expired_hours'];?>
+								<?php echo (float)$expired_hours;?>
 							</td>
 							<td>
 								<?php echo wp_date('d-m-Y h:i:s', strtotime($value['date_purchased']));?>
