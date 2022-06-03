@@ -101,6 +101,7 @@ class WCCB_Scheduler {
 	public static function check_class_reminder() {
 		global $wpdb;
 		$table_name = $wpdb->prefix.'booking_history';
+		$meta_table_name = $wpdb->prefix.'booking_history_meta';
 		$query      = "select * from $table_name where class_date='".wp_date('Y-m-d')."' and status = 'Upcoming'";
 
 
@@ -118,6 +119,7 @@ class WCCB_Scheduler {
 				$total_minute   = ($hour * 60 + $minute);
 
 				if ( $days == 0 && $total_minute < WC_CLASS_BOOKING_SEND_CLASS_REMINDER_BEFORE ) {
+
 					$user  = get_userdata($row->user_id);
 					$tutor = get_userdata($row->tutor_id);
 					//hook for notification of class

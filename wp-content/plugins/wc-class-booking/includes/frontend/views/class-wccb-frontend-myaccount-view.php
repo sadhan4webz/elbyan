@@ -331,8 +331,7 @@ class WCCB_Frontend_Myaccount_View {
 								</td>
 								<td>
 									<?php
-									$role_key      = $user->roles[0];
-									if ($role_key != 'wccb_student' ) {
+									if (WCCB_Frontend::check_admin_privilage() || !empty($tutor_id)) {
 										?>
 										<a href="#TB_inline?&width=550&height=350&inlineId=change_class_status_thikbox_<?php echo $value['ID'];?>" title="<?php echo __( 'Change Class Status', WC_CLASS_BOOKING_TEXT_DOMAIN ); ?>" class="change_class_status_link thickbox"    >
 									 	<?php echo __('Change Status' , WC_CLASS_BOOKING_TEXT_DOMAIN);?>
